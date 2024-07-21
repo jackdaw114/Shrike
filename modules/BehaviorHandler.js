@@ -1,6 +1,7 @@
 export class BehaviorHandler{
     constructor(canvas,eventObject ){
         this.eventObject = eventObject;        
+        console.log(this.eventObject)
     }
 
     // transformation object code
@@ -33,8 +34,7 @@ export class BehaviorHandler{
                 hitbox.onFrame(this.eventObject)  // collision detection ?
             }
             for(const transformationObject of Layer.params.transformation_array){
-                console.log(transformationObject.onFrame)
-                transformationObject.onFrame(this.eventObject)  
+                transformationObject.onFrame(this.eventObject) 
             }
         } 
 

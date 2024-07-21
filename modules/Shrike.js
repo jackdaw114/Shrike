@@ -71,7 +71,7 @@ export class ShrikeObject{
                     object_array:
                     damaged:
                 }
-        type: GEOMETRY | COLLIDER
+        type: RENDER | COLLIDER
             subtype: rectangle
             {
                 width:
@@ -108,9 +108,8 @@ export class Shrike{
       
     _shrikeInit(){
         //list of all objects that have to be updated every frame
-
         this.shrikeRenderer = new Renderer(this.shrikeCanvas,this.center);
-        this.shrikeBehaviorHandler = new BehaviorHandler(this.shrikeCanvas);
+        this.shrikeBehaviorHandler = new BehaviorHandler(this.shrikeCanvas,this.eventObject);
     }
    
 

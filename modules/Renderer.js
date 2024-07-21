@@ -3,8 +3,8 @@ export default class Renderer{
         this.context = canvas.getContext("2d") 
         this.center = center
         this.context.translate(center.x,center.y)
-        this.context.save();
     }
+    
     _layerDamage(){
         //  TODO: optimization for base layer redrawing 
     }
@@ -26,9 +26,9 @@ export default class Renderer{
             // for each obj in a layer render object 
             for (const object of Layer.params.object_array){
                 // call _transformationStack here
+                this.context.save() 
                 let t_matrix = object.transformation.params;
                 t_matrix = t_matrix.matrix
-                 
                 this.context.transform(t_matrix[0],t_matrix[1],t_matrix[3],t_matrix[4],t_matrix[6],t_matrix[7])
                 if(object.type == 'render'){
                     this.context.fillStyle = object.params.color
@@ -37,8 +37,9 @@ export default class Renderer{
                         this._drawRect(object.params)  
                     }
                     this.context.fillStyle = '#000000'
-                
                 }
+                this.context.restore(); 
+
             }
         }
     }

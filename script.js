@@ -30,7 +30,7 @@ const transformation  = new ShrikeObject('transformation','',new SMatrix())
 
 const GameEngine = new Shrike(canvas,1,CANVAS_WIDTH,CANVAS_HEIGHT);
 
-const GameObject = new ShrikeObject('render','rectangle',{width:100,height:100,color:'#f000f3'})
+const GameObject = new ShrikeObject('render','rectangle',{width:101,height:10,color:'#ff4013'})
 
 const behaviorLayer = new ShrikeObject('layer','behavior',{
     hitbox_array : [],
@@ -50,7 +50,10 @@ const baseLayer  = new ShrikeObject('layer','base',
 
 
 transformation.onFrame = function(e){
-    console.log(e.mouse_x)
+    this.params.matrix = [1,0,0,0,1,0,e.mouse_x,e.mouse_y,1] 
+    if(e.keydown['a']){
+        this.params.matrix = [1,0,0,0,1,0,0,0,1] 
+    }
 }
 
 behaviorLayer.params.transformation_array = [transformation]
