@@ -129,15 +129,17 @@ transformation objects have hook functions available for users
 
 
 # TODO 
-### Modules currently implemented 
+### currently implemented 
 - Core 
 - 2d canvas api based renderer
 - Event manager
 - Behavior manager
 - 3x3 matrix library (incomplete)
 
-### Modules to be implemented
+### to be implemented
 - Collision detection system
+- some sort of lsp documentation?
+- documentation abt params
 - 2d webgl based renderer
 - Physics Engine
 - 3d webgl based renderer
