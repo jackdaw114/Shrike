@@ -128,7 +128,7 @@ transformation objects have hook functions available for users
 (im not happy with this so i wont explain)
 
 
-# 
+# TODO 
 ### Modules currently implemented 
 - Core 
 - 2d canvas api based renderer
