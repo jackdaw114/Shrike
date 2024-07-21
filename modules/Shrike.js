@@ -31,18 +31,24 @@ export class BehaviorParams{
     // create a prototype like class here for Debuging ig?
 }
 
+
+
 export class ShrikeObject{
-    constructor(type,subtype,params)
+    constructor(type,subtype)
     {
         this.type = type;
         this.subtype = subtype;
-        this.params = params; // for texture this will be source | for transformation it will be a matrix | for behavior objects it will be  | for layers it will be an object array | for base type layer it will be the differnet kinds of layers in a json object
+        this.params = {}; // for texture this will be source | for transformation it will be a matrix | for behavior objects it will be  | for layers it will be an object array | for base type layer it will be the differnet kinds of layers in a json object
     } 
     addLink(shrikeObject){
         this.link = shrikeObject; // link of a base layer should be another 'base layer subtype'
     }
 
-     
+    attachParams(data){
+        // do some type checking
+        this.params = data
+    }
+
     bindTransformation(shrikeObject){
         // check if object is of type transformation
         this.transformation = shrikeObject; 
@@ -58,13 +64,10 @@ export class ShrikeObject{
                     geometryLayer:
                     behaviorLayer: 
                     actionSpec: (bitwise)
-                    // NOTE: make it so that the linked structure is the reverse at the end(child points to parent)
                 }
             subtype: behavior
                 {
-                    object_array:  // NOTE: objects of specified subtype only
-                    last_child:
-                    
+                    object_array:                      
                 }
             subtype: geometry
                 {
@@ -130,46 +133,3 @@ export class Shrike{
     }
 }
 
-
-//layer Structure:-
-//                        ┌──────────┐                
-//                        │base layer│                
-//                        └────┬─────┘                
-//                             │                      
-//             ┌───────────────┴──────────────┐       
-//             │                              │       
-//      ┌──────┴───────┐              ┌───────┴──────┐
-//      │geometry layer│              │behavior layer│
-//      └──────────────┘              └──────────────┘
-//             ▼                              ▼       
-//      ┌──────────────┐              ┌──────────────┐
-//      │geometry layer│              │behavior layer│
-//      └──────┬───────┘              └───────┬──────┘
-//             │                              │       
-//             └───────────────┬──────────────┘       
-//                             │                      
-//                             │                      
-//                             │                      
-//                             ▼                      
-//                        ┌──────────┐                
-//                        │base layer│                
-//                        └────┬─────┘                
-//                             │                      
-//             ┌───────────────┴──────────────┐       
-//             │                              │       
-//      ┌──────┴───────┐              ┌───────┴──────┐
-//      │geometry layer│              │behavior layer│
-//      └──────────────┘              └──────────────┘
-//             ▼                              ▼       
-//      ┌──────────────┐              ┌──────────────┐
-//      │geometry layer│              │behavior layer│
-//      └──────┬───────┘              └───────┬──────┘
-//             │                              │       
-//             └───────────────┬──────────────┘       
-//                             │                      
-//                             │                      
-//                             │                      
-//                             ▼                      
-//                        ┌──────────┐                
-//                        │base layer│                
-//                        └──────────┘                

@@ -21,7 +21,7 @@ the constructor manages initialization of required data
 
 everything within the engine is instantiated using ShrikeObject class (normalization purposes)
 
-#### Layers
+## Layers
 there are 3 types of layers base, geometry and behavior
 
 the base layer is to be used later internally for optimization purposes
@@ -76,13 +76,13 @@ on that note here is my idea of the layer structure
                         └──────────┘                
 
 
-#### Game Objects
+## Game Objects
 hold geometric data of game objects (determined by render module)
 
 #### Hitboxes
 its the same as a game object, only reason it is used is so that it can be handled seperately(collision detection module)
 
-#### Transformations
+## Transformations
 transformations : translation, scale, rotation
 these transformations can be linked together to have multiple axis control 
 translations are attached to GameObjects and decide their positions in space
@@ -92,11 +92,40 @@ translations are attached to GameObjects and decide their positions in space
 const Layer | Object | Transformation = new ShrikeObject(type,subtype)
 ```
 
+## Some Concepts
+To provide more granular control in module design, objects within the game engine are equipped with only essential functionality.
+
+Eg. 
+render/hitbox objects need to be linked to transformations so that their transformations are determined by all the modules
+transformations can be linked to multiple geometry objects hence having control over their positions (transformations can also be linked to transforamations (providing axis control (idk what its called)))
 
 
 
+## Working of Core module
+has class definintions for ShrikeObject and Shrike
 
+### Main funcitons:
+#### Shrike:
+- constructor (described above)
+- shrikeRun() (to run the game loop)
 
+#### ShrikeObject:
+- constructor (described above)
+- addLink(shrikeObject) (creates links for each object) 
+- bindTransformation(shrikeObject) (links transformations to object) 
+- attachParam(json) (shrikeObject type and subtype dependent)
+    
+## Working of Behavior module
+the Behavior module is given the Top most base layer
+a layer link is used to obtain a link to a behavior layer in the current base layer
+all behavior layers are linked to each other in their respective base layers
+
+the behavior layer holds a transformation object list 
+transformation objects have hook functions available for users
+- onFrame 
+
+## Working of Render module
+(im not happy with this so i wont explain)
 
 
 ### Modules currently implemented 
