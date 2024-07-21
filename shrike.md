@@ -113,7 +113,7 @@ has class definintions for ShrikeObject and Shrike
 - constructor (described above)
 - addLink(shrikeObject) (creates links for each object) 
 - bindTransformation(shrikeObject) (links transformations to object) 
-- attachParam(json) (shrikeObject type and subtype dependent)
+- attachParams(json) (shrikeObject type and subtype dependent)
     
 ## Working of Behavior module
 the Behavior module is given the Top most base layer
@@ -128,6 +128,7 @@ transformation objects have hook functions available for users
 (im not happy with this so i wont explain)
 
 
+# 
 ### Modules currently implemented 
 - Core 
 - 2d canvas api based renderer
