@@ -1,6 +1,6 @@
 import EventHandler from './modules/EventHandler.js'
 import Renderer from './modules/Renderer.js'
-import { ShrikeObject } from './modules/Shrike.js';
+import { ShrikeObject, Shrike } from './modules/Shrike.js';
 import SMatrix from './modules/SMatrix.js';
 
 //let test_ele = document.getElementById('test_1')
@@ -28,22 +28,40 @@ renderer._drawRect({width:100,height:20},{})
 const transformation  = new ShrikeObject('transformation','',new SMatrix())
 
 
+const GameEngine = new Shrike(canvas,1,CANVAS_WIDTH,CANVAS_HEIGHT);
 
-const object_arr = [{
-    type:'geometry',
-    subtype:'rectangle',
-    params:{
-        width: 100,
-        height: 100,
-        color: '#434313'
-    },
-    transformation:transformation,
-}]
+const GameObject = new ShrikeObject('render','rectangle',{width:100,height:100,color:'#f000f3'})
 
-renderer._renderLayer({
-    params:{
-        object_array:object_arr
-    },
-    
+const behaviorLayer = new ShrikeObject('layer','behavior',{
+    hitbox_array : [],
+    transformation_array : []
 })
+
+const geometryLayer = new ShrikeObject('layer','geometry',{
+    object_array:[GameObject],
+})
+
+
+const baseLayer  = new ShrikeObject('layer','base',
+    {
+        behaviorLayer: behaviorLayer,
+        geometryLayer:geometryLayer
+    })
+
+
+transformation.onFrame = function(e){
+    console.log(e.mouse_x)
+}
+
+behaviorLayer.params.transformation_array = [transformation]
+
+
+
+
+GameObject.transformation = transformation
+
+GameEngine.activeLayer = baseLayer
+
+
+GameEngine.shrikeRun();
 

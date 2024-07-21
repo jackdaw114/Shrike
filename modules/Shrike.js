@@ -1,7 +1,7 @@
 import SMatrix from './SMatrix.js';
 import Renderer from './Renderer.js';
 import EventHandler from './EventHandler.js';
-import BehaviorHandler from './BehaviorHandler.js'
+import {BehaviorHandler} from './BehaviorHandler.js'
 
 //export class ShrikeLayer{  // use ShrikeObject instead of this (better)
 //    constructor(type,options){
@@ -97,18 +97,19 @@ export class Shrike{
         this.sync_objects=[]; // 
 // behavior layers and graphics layers ?? (can be done without)
         this.game_speed = game_speed
-        this.activeLayer = new ShrikeObject('layer','base',null);
+        this.activeLayer = null;
         this._shrikeLoop = this._shrikeLoop.bind(this);
         this.center = {
             x: width/2,
             y: height/2,
         }
+        this._shrikeInit();
     }
       
     _shrikeInit(){
         //list of all objects that have to be updated every frame
 
-        this.shrikeRenderer = new Renderer(this.shrikeCanvas);
+        this.shrikeRenderer = new Renderer(this.shrikeCanvas,this.center);
         this.shrikeBehaviorHandler = new BehaviorHandler(this.shrikeCanvas);
     }
    
