@@ -15,8 +15,8 @@ const canvas = document.getElementById('canvas1')
 
 const layer_list =[]
 
-const CANVAS_WIDTH = canvas.width = 600;
-const CANVAS_HEIGHT = canvas.height = 300;
+const CANVAS_WIDTH = canvas.width = document.body.clientWidth;
+const CANVAS_HEIGHT = canvas.height = document.body.clientHeight;
 
 
 
@@ -52,7 +52,7 @@ const baseLayer  = new ShrikeObject('layer','base',
 transformation.onFrame = function(e){
     this.params.matrix = [1,0,0,0,1,0,e.mouse_x,e.mouse_y,1] 
     if(e.keydown['a']){
-        this.params.matrix = [1,0,0,0,1,0,0,0,1] 
+    this.params.matrix = [1,0,0,0,1,0,e.mouse_x,e.mouse_y,1] 
     }
 }
 

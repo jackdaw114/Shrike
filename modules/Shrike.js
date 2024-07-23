@@ -2,6 +2,8 @@ import SMatrix from './SMatrix.js';
 import Renderer from './Renderer.js';
 import EventHandler from './EventHandler.js';
 import {BehaviorHandler} from './BehaviorHandler.js'
+import {CollisionHandler} from './CollisionHandler.js'
+
 
 //export class ShrikeLayer{  // use ShrikeObject instead of this (better)
 //    constructor(type,options){
@@ -34,11 +36,11 @@ export class BehaviorParams{
 
 
 export class ShrikeObject{
-    constructor(type,subtype)
+    constructor(type,subtype,params)
     {
         this.type = type;
         this.subtype = subtype;
-        this.params = {}; // for texture this will be source | for transformation it will be a matrix | for behavior objects it will be  | for layers it will be an object array | for base type layer it will be the differnet kinds of layers in a json object
+        this.params = params; // for texture this will be source | for transformation it will be a matrix | for behavior objects it will be  | for layers it will be an object array | for base type layer it will be the differnet kinds of layers in a json object
     } 
     addLink(shrikeObject){
         this.link = shrikeObject; // link of a base layer should be another 'base layer subtype'
@@ -67,7 +69,8 @@ export class ShrikeObject{
                 }
             subtype: behavior
                 {
-                    object_array:                      
+                    object_array:  // NOTE: objects of specified subtype only
+                    
                 }
             subtype: geometry
                 {
@@ -113,6 +116,7 @@ export class Shrike{
         //list of all objects that have to be updated every frame
         this.shrikeRenderer = new Renderer(this.shrikeCanvas,this.center);
         this.shrikeBehaviorHandler = new BehaviorHandler(this.shrikeCanvas,this.eventObject);
+        this.shrikeCollisionHandler = new CollisionHandler() // AVRON: see what data u want here 
     }
    
 
@@ -124,7 +128,7 @@ export class Shrike{
     _shrikeLoop = () => { 
         this.shrikeBehaviorHandler.loopFunction(this.activeLayer); //add a kind of event status here ig ? // active behavior layer?
         this.shrikeRenderer.loopFunction(this.activeLayer);   
-
+        this.shrikeCollisionHandler.loopFunction(this.activeLayer);
         requestAnimationFrame(this._shrikeLoop);
     }
           

@@ -26,7 +26,7 @@ export class BehaviorHandler{
         if(Layer.subtype == 'base'){
             
             this._processLayer(Layer.params.behaviorLayer) // prolly later we have some different method of handling base layers
-
+            
         } 
 
         else if(Layer.subtype == 'behavior'){
