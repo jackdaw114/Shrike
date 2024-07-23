@@ -1,38 +1,94 @@
-import SMatrix from './SMatrix.js';
+import ShrikeMatrix from './SMatrix.js' ;
 import Renderer from './Renderer.js';
 import EventHandler from './EventHandler.js';
 import {BehaviorHandler} from './BehaviorHandler.js'
 import {CollisionHandler} from './CollisionHandler.js'
 
 
-//export class ShrikeLayer{  // use ShrikeObject instead of this (better)
-//    constructor(type,options){
-//        this.type = type;
-//        this.options = options;
-//        this.object_list = [];
-//        this.bound = null;
-//    }
-//    _calculateBound(){
-//
-//    }
-//    pushObjects(shrike_objects){
-//        for(const shrike_object of shrike_objects){
-//            this.object_list.push(shrike_object);
-//        }
-//    } 
-//
-//}
-
-export class BehaviorParams{
-    constructor(onClick,onKeyPress,perFrame){
-        this.onClick = onClick;
-        this.onKeyPress = onKeyPress;
-        this.perFrame = perFrame;
+export class ShrikeRenderObject{
+    constructor(type,params){
+        this.type = type;
+        this.params = params;
+        this.transformationLink = null;
     }
-
-    // create a prototype like class here for Debuging ig?
+    bindTransformation(shrikeTransform){
+        if(shrikeTransform instanceof ShrikeTransform){
+            this.transformationLink = shrikeTransform;
+        }
+        else{
+            console.error("object to be linked is not an instance of ShrikeTransform class")
+        }
+    }
 }
 
+export class ShrikeTransform{
+    constructor(){
+        this.matrix = new ShrikeMatrix();
+        this.link = null;
+    }
+    addLink(shrikeTransform){
+        if(shrikeTransform instanceof ShrikeTransform){
+            this.link = shrikeTransform;
+        }
+        else{
+            console.error("object to be linked is not an instance of ShrikeTransform class")
+        }
+    }
+}
+
+export class ShrikeHitbox{
+    constructor(type){
+        this.type = type;
+        this.transformationLink = null;
+    }
+    bindTransformation(shrikeTransform){
+        if(shrikeTransform instanceof ShrikeTransform){
+            this.transformationLink = shrikeTransform;
+        }
+        else{
+            console.error("object to be linked is not an instance of ShrikeTransform class")
+        }
+    }
+}
+
+export class ShrikeLayer{
+    constructor(type){
+        this.type = type;
+        this.array = [];            
+    }
+    push(shrikeObject){
+        switch (this.type){
+            case 'render':
+                if(shrikeObject instanceof ShrikeRenderObject){
+                    this.array.push(shrikeObject)
+                }
+                else{
+                    console.error("object provided to ShrikeLayer is not an instance ShriekRenderObject class")
+                }
+                break;
+            case 'collision':
+                if(shrikeObject instanceof ShrikeHitbox){
+                    this.array.push(shrikeObject)
+                }
+                else{
+                    console.error("object provided to ShrikeLayer is not an instance of ShrikeHitbox class")
+                }
+                break;
+        }
+        
+    }
+}
+
+export class ShrikeBaseLayer{
+    constructor(link){
+        this.geometryLayer;
+        this.behaviorLayer;
+        this.access;
+        if(link){
+            this.link = link;
+        }
+    }
+}
 
 
 export class ShrikeObject{
@@ -40,67 +96,16 @@ export class ShrikeObject{
     {
         this.type = type;
         this.subtype = subtype;
-        this.params = params; // for texture this will be source | for transformation it will be a matrix | for behavior objects it will be  | for layers it will be an object array | for base type layer it will be the differnet kinds of layers in a json object
+        this.params = params; 
     } 
-    addLink(shrikeObject){
-        this.link = shrikeObject; // link of a base layer should be another 'base layer subtype'
-    }
-
-    attachParams(data){
-        // do some type checking
-        this.params = data
-    }
-
-    bindTransformation(shrikeObject){
-        // check if object is of type transformation
-        this.transformation = shrikeObject; 
-    }
-    // perFrame() onClick() onKeyPress()
 }
-
-/*
-    param specifications:-
-        type: LAYER
-            subtype: base
-                {
-                    geometryLayer:
-                    behaviorLayer: 
-                    actionSpec: (bitwise)
-                }
-            subtype: behavior
-                {
-                    object_array:  // NOTE: objects of specified subtype only
-                    
-                }
-            subtype: geometry
-                {
-                    object_array:
-                    damaged:
-                }
-        type: RENDER | COLLIDER
-            subtype: rectangle
-            {
-                width:
-                height:
-                color:
-            }
-            subtype: circle
-            {
-                r:
-            }
-        
-        
-
-*/
 
 export class Shrike{
     constructor(canvas,game_speed,width, height){
         this.CANVAS_WIDTH = canvas.width =width;
         this.CANVAS_HEIGHT = canvas.height = height;
         this.shrikeCanvas = canvas; 
-        this.eventObject = new EventHandler(canvas);
-        this.layers = []; //active layer stack 
-        this.sync_objects=[]; // 
+        //this.sync_objects=[]; Note: if im ever gonna do async stuff
 // behavior layers and graphics layers ?? (can be done without)
         this.game_speed = game_speed
         this.activeLayer = null;
@@ -114,6 +119,7 @@ export class Shrike{
       
     _shrikeInit(){
         //list of all objects that have to be updated every frame
+        this.eventObject = new EventHandler(this.shrikeCanvas);
         this.shrikeRenderer = new Renderer(this.shrikeCanvas,this.center);
         this.shrikeBehaviorHandler = new BehaviorHandler(this.shrikeCanvas,this.eventObject);
         this.shrikeCollisionHandler = new CollisionHandler() // AVRON: see what data u want here 
@@ -133,7 +139,9 @@ export class Shrike{
     }
           
     shrikeRun(){
+        // pre game loop functions here
         this._shrikeLoop();
+        //any cleanup maybe idk never used javascript
     }
 }
 

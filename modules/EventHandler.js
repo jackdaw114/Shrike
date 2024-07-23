@@ -1,4 +1,4 @@
-export class EventSyncStack{
+export class EventSyncStack{ // this is for if we have to do stuff synchronously
     constructor(type){
         this.type = type;
         this.stack = 0;
