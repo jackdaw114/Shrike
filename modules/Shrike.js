@@ -105,8 +105,6 @@ export class Shrike{
         this.CANVAS_WIDTH = canvas.width =width;
         this.CANVAS_HEIGHT = canvas.height = height;
         this.shrikeCanvas = canvas; 
-        //this.sync_objects=[]; Note: if im ever gonna do async stuff
-// behavior layers and graphics layers ?? (can be done without)
         this.game_speed = game_speed
         this.activeLayer = null;
         this._shrikeLoop = this._shrikeLoop.bind(this);
@@ -118,7 +116,6 @@ export class Shrike{
     }
       
     _shrikeInit(){
-        //list of all objects that have to be updated every frame
         this.eventObject = new EventHandler(this.shrikeCanvas);
         this.shrikeRenderer = new Renderer(this.shrikeCanvas,this.center);
         this.shrikeBehaviorHandler = new BehaviorHandler(this.shrikeCanvas,this.eventObject);
