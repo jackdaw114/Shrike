@@ -17,7 +17,11 @@ export class EventSyncStack{ // this is for if we have to do stuff synchronously
 
 export default class EventHandler{
     // im keeping 2 special events keypress and onclick
-    constructor(canvas,onKeyPressFunction,onClickFunction){
+    /**
+     *
+     *
+     */
+    constructor(canvas,ticker,onKeyPressFunction,onClickFunction){
         this.canvas = canvas;
         this.mouse_x=0;
         this.mouse_y=0;
@@ -69,7 +73,7 @@ export default class EventHandler{
 
     handleMouseMove(event){
         event.preventDefault();
-        const rect = this.canvas.getBoundingClientRect();
+        const rect = this.canvas.getBoundingClientRect(); // handle all this stuff differently maybe dont need to check every move wether widow has changed
         const scaleX = this.canvas.width / rect.width;
         const scaleY = this.canvas.height / rect.height;
         const scrollX = window.scrollX;
@@ -129,15 +133,4 @@ export default class EventHandler{
     eventStatus(){
         return this.handled_status;
     }    
-            
-    
-// bind canvas events 
-// provide custom event bind for objects 
-
-    
-          
-
 }
-
-
-

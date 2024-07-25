@@ -1,7 +1,6 @@
 export class BehaviorHandler{
     constructor(canvas,eventObject ){
         this.eventObject = eventObject;        
-        console.log(this.eventObject)
     }
 
     // transformation object code
@@ -23,18 +22,15 @@ export class BehaviorHandler{
    // assign click to a certian layer and then certian object in layer 
     //use layer stack   
     _processLayer(Layer){
-        if(Layer.subtype == 'base'){
+        if(Layer.type == 'gate'){
             
-            this._processLayer(Layer.params.behaviorLayer) // prolly later we have some different method of handling base layers
+            this._processLayer(Layer.behaviorLayer) // prolly later we have some different method of handling base layers
             
         } 
 
-        else if(Layer.subtype == 'behavior'){
-            for(const hitbox of Layer.params.hitbox_array ){
+        else{
+            for(const hitbox of Layer.array ){
                 hitbox.onFrame(this.eventObject)  // collision detection ?
-            }
-            for(const transformationObject of Layer.params.transformation_array){
-                transformationObject.onFrame(this.eventObject) 
             }
         } 
 
@@ -43,8 +39,8 @@ export class BehaviorHandler{
         }
     }
 
-    loopFunction(activeBehaviorLayer){
-        this._processLayer(activeBehaviorLayer);
+    loopFunction(activeLayer){
+        this._processLayer(activeLayer);
     }
 }
 

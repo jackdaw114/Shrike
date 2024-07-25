@@ -1,9 +1,10 @@
-import ShrikeMatrix from './SMatrix.js' ;
 import Renderer from './Renderer.js';
 import EventHandler from './EventHandler.js';
 import {BehaviorHandler} from './BehaviorHandler.js'
 import {CollisionHandler} from './CollisionHandler.js'
 
+
+const fixedRate =100;
 
 export class ShrikeRenderObject{
     constructor(type,params){
@@ -23,8 +24,11 @@ export class ShrikeRenderObject{
 
 export class ShrikeTransform{
     constructor(){
-        this.matrix = new ShrikeMatrix();
+        this.matrix = [1,0,0,0,1,0,0,0,1];
         this.link = null;
+    }
+    getMatrix(){
+        return this.matrix
     }
     addLink(shrikeTransform){
         if(shrikeTransform instanceof ShrikeTransform){
@@ -37,8 +41,9 @@ export class ShrikeTransform{
 }
 
 export class ShrikeHitbox{
-    constructor(type){
+    constructor(type,params){
         this.type = type;
+        this.params = params;
         this.transformationLink = null;
     }
     bindTransformation(shrikeTransform){
@@ -79,15 +84,17 @@ export class ShrikeLayer{
     }
 }
 
-export class ShrikeBaseLayer{
-    constructor(link){
-        this.geometryLayer;
-        this.behaviorLayer;
-        this.access;
+export class ShrikeGate{
+    constructor(geometryLayer,behaviorLayer,link){
+        this.type = 'gate';
+        this.geometryLayer = geometryLayer;
+        this.behaviorLayer = behaviorLayer;
+        this.access; 
         if(link){
             this.link = link;
         }
     }
+
 }
 
 
@@ -101,11 +108,19 @@ export class ShrikeObject{
 }
 
 export class Shrike{
-    constructor(canvas,game_speed,width, height){
+    /**
+     *  default tickrate is 100ms
+     *  
+     * @param {HTMLCanvasElement} canvas - canvas element to draw on
+     * @param {Number} gameSpeed - modifies the time scaling of the engine
+     * @param {Number} width - hint for what the width of the canvas should be
+     * @param {Number} height - hint for what the height of the canvas should be
+     */
+    constructor(canvas,gameSpeed,width, height){
         this.CANVAS_WIDTH = canvas.width =width;
         this.CANVAS_HEIGHT = canvas.height = height;
         this.shrikeCanvas = canvas; 
-        this.game_speed = game_speed
+        this.gameSpeed = gameSpeed
         this.activeLayer = null;
         this._shrikeLoop = this._shrikeLoop.bind(this);
         this.center = {
@@ -113,8 +128,11 @@ export class Shrike{
             y: height/2,
         }
         this._shrikeInit();
+        this.moduleList = [];
     }
-      
+    
+    
+
     _shrikeInit(){
         this.eventObject = new EventHandler(this.shrikeCanvas);
         this.shrikeRenderer = new Renderer(this.shrikeCanvas,this.center);

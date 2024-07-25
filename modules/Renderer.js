@@ -1,8 +1,13 @@
 export default class Renderer{
     constructor(canvas, center){
+        this.canvas = canvas
         this.context = canvas.getContext("2d") 
         this.center = center
-        this.context.translate(center.x,center.y)
+        this.offScreenCanvas = document.createElement('canvas')
+        this.offScreenCtx = this.offScreenCanvas.getContext('2d')
+        this.offScreenCanvas.width = canvas.width;
+        this.offScreenCanvas.height = canvas.height;
+        this.offScreenCtx.translate(center.x,center.y)
     }
     
     _layerDamage(){
@@ -13,32 +18,24 @@ export default class Renderer{
     }
   
     _renderLayer(Layer){
-        if(Layer.subtype == 'base')
+        if(Layer.type == 'gate')
         {
-            this.context.clearRect(-this.center.x,-this.center.y,2*this.center.x,2*this.center.y)
-            this._renderLayer(Layer.params.geometryLayer)
+            this.offScreenCtx.clearRect(-this.center.x,-this.center.y,2*this.center.x,2*this.center.y)
+            this._renderLayer(Layer.geometryLayer)
         }
-        else if(Layer.subtype == 'geometry'){ 
-            if(Layer.link?.params?.damaged)
-            {
-                this._renderLayer(Layer.link)
-            }
-            // for each obj in a layer render object 
-            for (const object of Layer.params.object_array){
+        else { 
+            for (const object of Layer.array){
                 // call _transformationStack here
-                this.context.save() 
-                let t_matrix = object.transformation.params;
-                t_matrix = t_matrix.matrix
-                this.context.transform(t_matrix[0],t_matrix[1],t_matrix[3],t_matrix[4],t_matrix[6],t_matrix[7])
-                if(object.type == 'render'){
-                    this.context.fillStyle = object.params.color
-                    if(object.subtype == 'rectangle')
-                    {
-                        this._drawRect(object.params)  
-                    }
-                    this.context.fillStyle = '#000000'
+                this.offScreenCtx.save() 
+                let t_matrix = object.transformationLink.getMatrix();
+                this.offScreenCtx.transform(t_matrix[0],t_matrix[1],t_matrix[3],t_matrix[4],t_matrix[6],t_matrix[7])
+                this.offScreenCtx.fillStyle = object.params.color
+                if(object.type == 'rectangle')
+                {
+                    this._drawRect(object.params,this.offScreenCtx)
                 }
-                this.context.restore(); 
+                this.offScreenCtx.fillStyle = '#000000'
+                this.offScreenCtx.restore(); 
 
             }
         }
@@ -61,14 +58,15 @@ export default class Renderer{
         // code here for multi transforamtions
         return 0;
     } 
-    _drawRect(params){
 
+    _drawRect(params,ctx){
         if(params.texture != null){
-            this.context.drawImage(params.texture.params.img,-params.width/2,-params.height/2,params.width,params.height)
+            ctx.drawImage(params.texture.params.img,-params.width/2,-params.height/2,params.width,params.height)
         }
         else{
-        this.context.fillRect(-params.width/2,-params.height/2,params.width,params.height) 
+            ctx.fillRect(-params.width/2,-params.height/2,params.width,params.height) 
         }
+
     }
 
     _render(geometryLayer){
@@ -87,6 +85,8 @@ export default class Renderer{
 
     loopFunction(activeLayer){
         this._renderLayer(activeLayer);
+        this.context.clearRect(0,0,this.canvas.width,this.canvas.height)
+        this.context.drawImage(this.offScreenCanvas,0,0)
     }
 
 }
