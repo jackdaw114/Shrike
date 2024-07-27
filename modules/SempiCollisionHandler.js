@@ -1,4 +1,4 @@
-class XDVector{  // decrease precision (too precice waste of computation)
+class XDVector{  // DONT LOOK AT reason: helper class specific to my logic 
     constructor(x,y){
         if(x instanceof DOMPoint){
             this.x = x.x
@@ -34,39 +34,18 @@ class XDVector{  // decrease precision (too precice waste of computation)
 }
 
 export class CollisionHandler{
-    constructor(eventObject){
-        this.eventObject =eventObject
-    }
-    #loadHitboxLayer(shrikeLayer){ // could be of type base(should be but freedom given) or collision
-        if(shrikeLayer.type == 'gate'){  // check if javascript instanceof is faster (in my head it cannot be)
-            this.#loadHitboxLayer(shrikeLayer.collisionLayer)
-        }
-        else if(shrikeLayer.type == 'collision'){
-            counter = 0;
-            for(const hitbox in shrikeLayer.array){
-                       
-            }
-        }
+    constructor(eventObject){ // this can be whatever data u want (can modify core to accomodate)
+        this.eventObject =eventObject // gets global events (check event handler for all events)
     }
     
-    #detectCollision(shrikeLayer){
-        shrikeLayer.array.forEach((hitbox,index)=>{
-            if(hitbox.type == 'rectangle'){
-                                      
-            } 
-        })
-
-    }
      
 
-    #sdfBox(pBox,pPoint){
-        // box always at origin
-        // implement vector 2d library if this is a thing (fk me lol)
+    #sdfBox(pBox,pPoint){ // DONT LOOK AT reason: collision logic (dont use this this is a rendering technique disguised as collision detection for rectangles (should be really fast tho but im lazy to search whats an actual collision detection technique) )
         let distance = XDVector.subtract(pPoint.abs(),pBox)
         return XDVector.XDlength(XDVector.XDmax(distance,{x:0,y:0}))
     } 
 
-    #processClick(shrikeLayer){
+    #processClick(shrikeLayer){ // DONT LOOK AT reason: my logic its really bad cause event updation is not done correctly (all in one function (on click does mouse move out, mouse move in,mouse click, mouse release)) 
         if(shrikeLayer.type !='clickable')
         {
             throw new Error("not a clickable layer")
@@ -94,10 +73,10 @@ export class CollisionHandler{
         })
     }
 
-    _init(){
+    _init(){ // special function available if any preprocessing (just before game loop starts) needs to be done (only called by the core)
            
     }
-    loopFunction(shrikeLayer){
+    loopFunction(shrikeLayer){ // this is the loop thats called every frame (ill switch it to every tick but fo now it eez wat it eez)
         if(shrikeLayer.type == 'gate')
         this.#processClick(shrikeLayer.clickableLayer)
     }

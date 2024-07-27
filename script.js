@@ -24,11 +24,10 @@ const clickableLayer = new ShrikeLayer('clickable')
 geometryLayer.push(GameObject)
 clickableLayer.push(Hitbox)
 console.log(clickableLayer)
-//behaviorLayer.push(Hitbox) // behavior system removal is needed unified update and fixed update function replaces it  
 
 
 
-const baseLayer  = new ShrikeGate(geometryLayer,{},clickableLayer)
+const baseLayer  = new ShrikeGate(geometryLayer,{},clickableLayer) // what i had explained as base layer is now called gate
 
 Hitbox.bindOnClick()
 
@@ -36,15 +35,19 @@ transformation.matrix.e =100
 transformation.matrix.f =100
 
 
-GameEngine.bindPerFrameUpdateFunction((e)=>{
+GameEngine.bindPerFrameUpdateFunction((e)=>{ //all syntax in this function will change once complete 
     if(Hitbox.click){
         transformation.matrix.e = e.mouseCoords.x
-        transformation.matrix.f = e.mouseCoords.y
+        transformation.matrix.f = e.mouseCoords.y 
+        GameObject.params.color = "#fd0000"
     } 
+    else{
+        GameObject.params.color = "#fe00fd"
+    }
 })
 
 
 
-GameEngine.setActiveLayer(baseLayer)
+GameEngine.setActiveLayer(baseLayer) // for now this just activates a layer if u have 2 layers can switch between them
 
 GameEngine.shrikeRun();
