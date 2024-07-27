@@ -1,7 +1,7 @@
 import Renderer from './Renderer.js';
 import EventHandler from './EventHandler.js';
 import {BehaviorHandler} from './BehaviorHandler.js'
-import {CollisionHandler} from './CollisionHandler.js'
+import {CollisionHandler} from './SempiCollisionHandler.js'
 
 
 const fixedRate =100;
@@ -24,11 +24,8 @@ export class ShrikeRenderObject{
 
 export class ShrikeTransform{
     constructor(){
-        this.matrix = [1,0,0,0,1,0,0,0,1];
+        this.matrix =new DOMMatrix([1,0,0,1,0,0]); // (each 3 is a basis vector)
         this.link = null;
-    }
-    getMatrix(){
-        return this.matrix
     }
     addLink(shrikeTransform){
         if(shrikeTransform instanceof ShrikeTransform){
@@ -38,6 +35,10 @@ export class ShrikeTransform{
             console.error("object to be linked is not an instance of ShrikeTransform class")
         }
     }
+    transformPoint(x,y){
+        return {x:(this.matrix[0]*x + this.matrix[3]*y + this.matrix[6]),
+            y:(this.matrix[1]*x + this.matrix[4]*y + this.matrix[7])}
+    }
 }
 
 export class ShrikeHitbox{
@@ -46,6 +47,10 @@ export class ShrikeHitbox{
         this.params = params;
         this.transformationLink = null;
     }
+    bindOnClick(){
+        this.click = false
+    }
+
     bindTransformation(shrikeTransform){
         if(shrikeTransform instanceof ShrikeTransform){
             this.transformationLink = shrikeTransform;
@@ -72,6 +77,7 @@ export class ShrikeLayer{
                 }
                 break;
             case 'collision':
+            case'clickable':
                 if(shrikeObject instanceof ShrikeHitbox){
                     this.array.push(shrikeObject)
                 }
@@ -85,10 +91,11 @@ export class ShrikeLayer{
 }
 
 export class ShrikeGate{
-    constructor(geometryLayer,behaviorLayer,link){
+    constructor(geometryLayer,collisionLayer,clickableLayer,link){
         this.type = 'gate';
         this.geometryLayer = geometryLayer;
-        this.behaviorLayer = behaviorLayer;
+        this.collisionLayer = collisionLayer;
+        this.clickableLayer = clickableLayer
         this.access; 
         if(link){
             this.link = link;
@@ -107,37 +114,57 @@ export class ShrikeObject{
     } 
 }
 
+
 export class Shrike{
+    #gameSpeed
+    #shrikeCanvas
+    #CANVAS_WIDTH
+    #CANVAS_HEIGHT
+    #activeLayer
+    moduleList = []
+    #perFrameUpdate = (e) => {throw new Error("perFrameUpdate function not implemented by user \n use bindPerFrameUpdateFunction method to provide function")}
+    #fixedUpdate(e){}
+    #center
+    #lastUpdateTime
+    #timeBuffer = 0
+    tickrate = 100
     /**
-     *  default tickrate is 100ms
+     *  default tickrate is 100ms (10 ticks per second)
      *  
      * @param {HTMLCanvasElement} canvas - canvas element to draw on
-     * @param {Number} gameSpeed - modifies the time scaling of the engine
+     * @param {Number} #gameSpeed - modifies the time scaling of the engine
      * @param {Number} width - hint for what the width of the canvas should be
      * @param {Number} height - hint for what the height of the canvas should be
      */
     constructor(canvas,gameSpeed,width, height){
-        this.CANVAS_WIDTH = canvas.width =width;
-        this.CANVAS_HEIGHT = canvas.height = height;
-        this.shrikeCanvas = canvas; 
-        this.gameSpeed = gameSpeed
-        this.activeLayer = null;
+        this.#CANVAS_WIDTH = canvas.width =width;
+        this.#CANVAS_HEIGHT = canvas.height = height;
+        this.#shrikeCanvas = canvas; 
+        this.#gameSpeed = gameSpeed
+        this.#activeLayer = null;
         this._shrikeLoop = this._shrikeLoop.bind(this);
-        this.center = {
+        this.#center = {
             x: width/2,
             y: height/2,
         }
         this._shrikeInit();
         this.moduleList = [];
+        this.#lastUpdateTime = performance.now()
     }
+    setActiveLayer(activeLayer){
+        this.#activeLayer = activeLayer;
+    }  
     
-    
+    bindPerFrameUpdateFunction(perFrameUpdateFunction){
+        this.#perFrameUpdate = perFrameUpdateFunction
+    }
 
     _shrikeInit(){
-        this.eventObject = new EventHandler(this.shrikeCanvas);
-        this.shrikeRenderer = new Renderer(this.shrikeCanvas,this.center);
-        this.shrikeBehaviorHandler = new BehaviorHandler(this.shrikeCanvas,this.eventObject);
-        this.shrikeCollisionHandler = new CollisionHandler() // AVRON: see what data u want here 
+        this.eventObject = new EventHandler(this.#shrikeCanvas);
+        this.shrikeRenderer = new Renderer(this.#shrikeCanvas,this.#center);
+        this.shrikeBehaviorHandler = new BehaviorHandler(this.#shrikeCanvas,this.eventObject);
+        this.shrikeCollisionHandler = new CollisionHandler(this.eventObject) // AVRON: see what data u want here 
+        // ngl this can be moved to the constructor itself (i forgot why i needed this prolly something related to dynamic module selection (there are better ways to do that ig aswell))  
     }
    
 
@@ -145,11 +172,23 @@ export class Shrike{
         this._shrikeInit();
         this.shrikeRenderer.init(this.layers,this.textures); 
     }
-      
+    
+    
+    _templooptest(){ 
+        this.#timeBuffer = this.#timeBuffer + performance.now() - this.#lastUpdateTime;
+        while(this.#timeBuffer >= this.tickrate)
+        {
+            this.#fixedUpdate(this.eventObject)
+            this.#timeBuffer -= this.tickrate
+        }
+        this.#lastUpdateTime = performance.now()
+    }
+
     _shrikeLoop = () => { 
-        this.shrikeBehaviorHandler.loopFunction(this.activeLayer); //add a kind of event status here ig ? // active behavior layer?
-        this.shrikeRenderer.loopFunction(this.activeLayer);   
-        this.shrikeCollisionHandler.loopFunction(this.activeLayer);
+        this.shrikeRenderer.loopFunction(this.#activeLayer);   
+        this.shrikeCollisionHandler.loopFunction(this.#activeLayer);
+        this.#perFrameUpdate(this.eventObject) // function should be overidden by user
+        this._templooptest()
         requestAnimationFrame(this._shrikeLoop);
     }
           

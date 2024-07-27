@@ -23,8 +23,10 @@ export default class EventHandler{
      */
     constructor(canvas,ticker,onKeyPressFunction,onClickFunction){
         this.canvas = canvas;
-        this.mouse_x=0;
-        this.mouse_y=0;
+        this.quadrantData={x:0,y:0};
+        this.mouseCoords = new DOMPoint(0,0)
+        this.mouseX=0;
+        this.mouseY=0;
         this.left_mouse_down=false;
         this.right_mouse_down=false;
         this.keydown={};
@@ -78,8 +80,10 @@ export default class EventHandler{
         const scaleY = this.canvas.height / rect.height;
         const scrollX = window.scrollX;
         const scrollY = window.scrollY;
-        this.mouse_x = (event.clientX - rect.left + scrollX)* scaleX - this.canvas.width/2;
-        this.mouse_y = (event.clientY - rect.top + scrollY)* scaleY- this.canvas.height/2;
+        this.mouseX = (event.clientX - rect.left + scrollX)* scaleX - this.canvas.width/2;
+        this.mouseY = this.canvas.height/2 - (event.clientY - rect.top + scrollY)* scaleY;
+        this.mouseCoords.x = (event.clientX - rect.left + scrollX)* scaleX - this.canvas.width/2 
+        this.mouseCoords.y = this.canvas.height/2 - (event.clientY - rect.top + scrollY)* scaleY;
     }
 
     handleKeyUp(event){
@@ -107,21 +111,17 @@ export default class EventHandler{
     }
     handleMouseDown(event){
         event.preventDefault();
-        if(event.button === 1){
+        if(event.buttons === 1){
             this.left_mouse_down = true;
         }
-        if(event.button === 2){
+        if(event.buttons === 2){
             this.right_mouse_down = true;
         }
     }
     handleMouseUp(event){
         event.preventDefault();
-        if(event.button === 1){
             this.left_mouse_down = false;
-        }
-        if(event.button === 2){
             this.right_mouse_down = false;
-        }
     }
     handleKeyPress(event){
         event.preventDefault();

@@ -7,7 +7,10 @@ export default class Renderer{
         this.offScreenCtx = this.offScreenCanvas.getContext('2d')
         this.offScreenCanvas.width = canvas.width;
         this.offScreenCanvas.height = canvas.height;
-        this.offScreenCtx.translate(center.x,center.y)
+        this.offScreenCtx.scale(1,-1)
+        this.offScreenCtx.translate(center.x,-center.y)
+        this.offScreenCtx.imageSmoothingEnabled = true;
+        this.context.imageSmoothingEnabled =true
     }
     
     _layerDamage(){
@@ -27,8 +30,8 @@ export default class Renderer{
             for (const object of Layer.array){
                 // call _transformationStack here
                 this.offScreenCtx.save() 
-                let t_matrix = object.transformationLink.getMatrix();
-                this.offScreenCtx.transform(t_matrix[0],t_matrix[1],t_matrix[3],t_matrix[4],t_matrix[6],t_matrix[7])
+                let t_matrix = object.transformationLink.matrix;
+                this.offScreenCtx.transform(t_matrix.a,t_matrix.b,t_matrix.c,t_matrix.d,t_matrix.e,t_matrix.f)
                 this.offScreenCtx.fillStyle = object.params.color
                 if(object.type == 'rectangle')
                 {
