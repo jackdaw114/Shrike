@@ -1,3 +1,4 @@
+import { EventHandlerRewrite } from './modules/EventHandler.js';
 import { Shrike,ShrikeHitbox,ShrikeGate, ShrikeRenderObject,ShrikeLayer,ShrikeTransform } from './modules/Shrike.js';
 
 const canvas = document.getElementById('canvas1')
@@ -18,13 +19,21 @@ GameObject.bindTransformation(transformation)
 Hitbox.bindTransformation(transformation)
 
 const behaviorLayer = new ShrikeLayer('collision')
+const clickableLayer = new ShrikeLayer('clickable')  // looks like a subtype will be required T_T
 const geometryLayer = new ShrikeLayer('render')
-const clickableLayer = new ShrikeLayer('clickable')
 
 
 geometryLayer.push(GameObject)
 clickableLayer.push(Hitbox)
 console.log(clickableLayer)
+
+
+const eventTest = new EventHandlerRewrite(canvas) 
+eventTest.addEventListener('mousemove',(e)=>{
+    console.log(e)
+})
+
+canvas.addEventListener('click',(e)=>console.log(e))
 
 
 

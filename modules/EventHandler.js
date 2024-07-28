@@ -78,8 +78,9 @@ export default class EventHandler{
         const rect = this.canvas.getBoundingClientRect(); // handle all this stuff differently maybe dont need to check every move wether widow has changed
         const scaleX = this.canvas.width / rect.width;
         const scaleY = this.canvas.height / rect.height;
-        const scrollX = window.scrollX;
-        const scrollY = window.scrollY;
+        const scrollX = 0// window.scrollX;
+        const scrollY =0// window.scrollY;
+    
         this.mouseX = (event.clientX - rect.left + scrollX)* scaleX - this.canvas.width/2;
         this.mouseY = this.canvas.height/2 - (event.clientY - rect.top + scrollY)* scaleY;
         this.mouseCoords.x = (event.clientX - rect.left + scrollX)* scaleX - this.canvas.width/2 
@@ -134,3 +135,107 @@ export default class EventHandler{
         return this.handled_status;
     }    
 }
+
+
+export class EventHandlerRewrite{
+    #batchInterval = 16; 
+    #eventListeners = new Map()
+    #eventBatches = new Map()
+    #batchTimeouts = new Map()
+    constructor(element){
+        this.initEventListeners() 
+        this.canvas = element
+        this.elementBounds = element.getBoundingClientRect();
+    } 
+    initEventListeners(){
+        window.addEventListener('click',(e) =>this.clickEvent(e))
+        window.addEventListener('mousemove',(e)=>this.mousemoveEvent(e))
+    } 
+   
+    mousemoveEvent(event){
+        event.preventDefault();
+        const scaleX = this.canvas.width / this.elementBounds.width;
+        const scaleY = this.canvas.height / this.elementBounds.height;
+        const scrollX = 0// window.scrollX;
+        const scrollY =0// window.scrollY;
+        const mousemoveEventData = {
+            type:'mousemove',
+            x:(event.clientX -this.elementBounds.left + scrollX)* scaleX - this.canvas.width/2,
+            y: this.canvas.height/2 - (event.clientY - this.elementBounds.top + scrollY)* scaleY,
+            //time here?
+        }
+        this.batchHelper('mousemove',{
+            x:(event.clientX -this.elementBounds.left + scrollX)* scaleX - this.canvas.width/2,
+            y: this.canvas.height/2 - (event.clientY - this.elementBounds.top + scrollY)* scaleY,
+        })
+
+    }
+
+    batchHelper(eventType,eventData){
+        if(!this.#eventBatches.has(eventType)){
+            this.#eventBatches.set(eventType,[])
+        }
+        this.#eventBatches.get(eventType).push(eventData)
+        if(!this.#batchTimeouts.has(eventType)){
+            this.#batchTimeouts.set(eventType,setTimeout(()=>{
+                this.dispatchBatchEvent(eventType)
+            },this.#batchInterval))
+        }
+
+    }
+
+    dispatchBatchEvent(eventType){
+        const batch = this.#eventBatches.get(eventType);
+        if(batch && batch.length >0){
+            const lastEvent = batch[batch.length -1]
+            if(this.#eventListeners.has(eventType)){
+                for(let callback of this.#eventListeners.get(eventType))
+                {
+                    callback(lastEvent)
+                }
+            }
+        }
+        this.#eventBatches.delete(eventType)
+        this.#batchTimeouts.delete(eventType)
+    }
+    
+
+
+    clickEvent(event){
+        event.preventDefault();
+        const scaleX = this.canvas.width / this.elementBounds.width;
+        const scaleY = this.canvas.height / this.elementBounds.height;
+        const scrollX = 0// window.scrollX;
+        const scrollY =0// window.scrollY;
+        const clickEvent = {
+            type:'click',
+            x:(event.clientX -this.elementBounds.left + scrollX)* scaleX - this.canvas.width/2,
+            y: this.canvas.height/2 - (event.clientY - this.elementBounds.top + scrollY)* scaleY,
+            //time here?
+        }
+        this.dispatchEvent(clickEvent) 
+    }
+
+    addEventListener(eventType,callback){
+        if(!this.#eventListeners.has(eventType)){
+            this.#eventListeners.set(eventType,new Set())
+        }
+        this.#eventListeners.get(eventType).add(callback)
+    }
+    
+    removeEventListener(eventType,callback){
+        if(this.#eventListeners.has(eventType)){
+            this.#eventListeners.get(eventType).delete(callback);
+        }
+    }
+
+    dispatchEvent(shrikeEvent){
+        if(this.#eventListeners.has(shrikeEvent.type)){
+            for(let callback of this.#eventListeners.get(shrikeEvent.type)){
+                callback(shrikeEvent)
+            }
+        }
+    }
+}
+
+
