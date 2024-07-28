@@ -116,18 +116,16 @@ export class ShrikeObject{
 
 
 export class Shrike{
-    #gameSpeed
     #shrikeCanvas
     #CANVAS_WIDTH
     #CANVAS_HEIGHT
     #activeLayer
-    moduleList = []
-    #perFrameUpdate = (e) => {throw new Error("perFrameUpdate function not implemented by user \n use bindPerFrameUpdateFunction method to provide function")}
+    #perFrame = (e) => {throw new Error("perFrameUpdate function not implemented by user \n use bindPerFrameUpdateFunction method to provide function")}
     #fixedUpdate(e){}
     #center
     #lastUpdateTime
     #timeBuffer = 0
-    tickrate = 100
+    tickrate = 100 // gamespeed 
     /**
      *  default tickrate is 100ms (10 ticks per second)
      *  
@@ -140,7 +138,7 @@ export class Shrike{
         this.#CANVAS_WIDTH = canvas.width =width;
         this.#CANVAS_HEIGHT = canvas.height = height;
         this.#shrikeCanvas = canvas; 
-        this.#gameSpeed = gameSpeed
+        this.tickrate = this.tickrate * gameSpeed;
         this.#activeLayer = null;
         this._shrikeLoop = this._shrikeLoop.bind(this);
         this.#center = {
@@ -155,8 +153,8 @@ export class Shrike{
         this.#activeLayer = activeLayer;
     }  
     
-    bindPerFrameUpdateFunction(perFrameUpdateFunction){
-        this.#perFrameUpdate = perFrameUpdateFunction
+    bindPerFrameFunction(perFrameFunction){
+        this.#perFrame = perFrameFunction
     }
 
     _shrikeInit(){
@@ -183,12 +181,16 @@ export class Shrike{
         }
         this.#lastUpdateTime = performance.now()
     }
-
+    
+    #lastFrameTime=0;
+    #frameCount=0;
+    #fps=0;
     _shrikeLoop = () => { 
         this.shrikeRenderer.loopFunction(this.#activeLayer);   
         this.shrikeCollisionHandler.loopFunction(this.#activeLayer);
-        this.#perFrameUpdate(this.eventObject) // function should be overidden by user
+        this.#perFrame(this.eventObject) // function should be overidden by user
         this._templooptest()
+
         requestAnimationFrame(this._shrikeLoop);
     }
           
