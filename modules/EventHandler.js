@@ -191,6 +191,7 @@ export class EventHandlerRewrite{
             if(this.#eventListeners.has(eventType)){
                 for(let callback of this.#eventListeners.get(eventType))
                 {
+                    console.log(batch)
                     callback(lastEvent)
                 }
             }
