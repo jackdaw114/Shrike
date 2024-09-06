@@ -33,11 +33,12 @@ export default class Renderer{
                 let t_matrix = object.transformationLink.matrix;
                 this.offScreenCtx.transform(t_matrix.a,t_matrix.b,t_matrix.c,t_matrix.d,t_matrix.e,t_matrix.f)
                 this.offScreenCtx.fillStyle = object.params.color
-                if(object.type == 'rectangle')
-                {
+                if(object.type == 'rectangle'){
                     this._drawRect(object.params,this.offScreenCtx)
                 }
-                this.offScreenCtx.fillStyle = '#000000'
+                else if(object.type == 'circle'){
+                    this._drawCircle(object.params,this.offScreenCtx)
+                }
                 this.offScreenCtx.restore(); 
 
             }
@@ -62,15 +63,24 @@ export default class Renderer{
         return 0;
     } 
 
-    _drawRect(params,ctx){
-        if(params.texture != null){
-            ctx.drawImage(params.texture.params.img,-params.width/2,-params.height/2,params.width,params.height)
-        }
-        else{
-            ctx.fillRect(-params.width/2,-params.height/2,params.width,params.height) 
-        }
 
+    _drawRect(params,ctx){ ctx.fillRect(-params.width/2,-params.height/2,params.width,params.height) }
+
+
+
+    _drawImage(params,ctx){
+        ctx.drawImage(params.texture.params.img,-params.width/2,-params.height/2,params.width,params.height) 
     }
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     */
+    _drawCircle(params,ctx){
+        ctx.beginPath()
+        ctx.arc(0,0,params.r,0,2*Math.PI)
+        ctx.fill()
+        ctx.closePath()
+    }
+    
 
     _render(geometryLayer){
         for(const object of geometryLayer.object_array){

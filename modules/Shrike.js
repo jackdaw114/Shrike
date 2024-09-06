@@ -90,9 +90,9 @@ export class ShrikeLayer{
     }
 }
 
-export class ShrikeGate{
+export class ShrikeScene{
     constructor(geometryLayer,collisionLayer,clickableLayer,link){
-        this.type = 'gate';
+        this.type = 'scene';
         this.geometryLayer = geometryLayer;
         this.collisionLayer = collisionLayer;
         this.clickableLayer = clickableLayer
@@ -113,7 +113,6 @@ export class ShrikeObject{
         this.params = params; 
     } 
 }
-
 
 export class Shrike{
     #shrikeCanvas
