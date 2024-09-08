@@ -18,30 +18,30 @@ export default class Renderer{
     /**
     * @param {Float32Array} vertex_data
     */
-    test(vertex_data) {
+    test(vertex_data, indices) {
         const vertex_shader = this.createShader(this.#context.VERTEX_SHADER,testVert)
         const fragment_shader = this.createShader(this.#context.FRAGMENT_SHADER, testFrag)
         const test_program = this.createProgram(vertex_shader,fragment_shader) 
       
         this.#context.useProgram(test_program)
-        const vertices = new Float32Array([
-            0.0,  0.5,  // Vertex 1 (x, y)
-            -0.5, -0.5,  // Vertex 2 (x, y)
-            0.5, -0.5   // Vertex 3 (x, y)
-        ]); 
 
         const buffer = this.#context.createBuffer();
         this.#context.bindBuffer(this.#context.ARRAY_BUFFER,buffer)
-        this.#context.bufferData(this.#context.ARRAY_BUFFER,vertices,this.#context.STATIC_DRAW)
+        this.#context.bufferData(this.#context.ARRAY_BUFFER,vertex_data,this.#context.STATIC_DRAW)
        
         const positionLocation = this.#context.getAttribLocation(test_program,'a_position');
          
         this.#context.enableVertexAttribArray(positionLocation)
         this.#context.vertexAttribPointer(positionLocation,2,this.#context.FLOAT,false,0,0)
 
+        const indexBuffer = this.#context.createBuffer();
+        this.#context.bindBuffer(this.#context.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        this.#context.bufferData(this.#context.ELEMENT_ARRAY_BUFFER, indices, this.#context.STATIC_DRAW);
+
+
         this.#context.clearColor(0.0,0.0,0.0,1.0)
         this.#context.clear(this.#context.COLOR_BUFFER_BIT)
-        this.#context.drawArrays(this.#context.TRIANGLES,0,3)
+        this.#context.drawElements(this.#context.TRIANGLES,indices.length,this.#context.UNSIGNED_SHORT,0)
 
 
     }
