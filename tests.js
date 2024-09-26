@@ -2999,6 +2999,5 @@ f 505/526/942 323/549/942 321/550/942
     `
 )
 
-console.log(vertices,indices)
 
 renderer_t.test(vertices,indices)

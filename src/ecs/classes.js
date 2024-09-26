@@ -1,3 +1,5 @@
+import { mat4 } from "gl-matrix";
+
 export class Scene{
     /**
         * @param {Number} id
@@ -23,6 +25,12 @@ export class GameObject{
     }
 }
 
+export class Transformation{
+    constructor() {
+        this.matrix = mat4.create();
+    }
+}
+
 export class Geometry{
     /**
         * @param {Number} id
@@ -37,6 +45,16 @@ export class Geometry{
         this.indexList = indexList;
     }
     
+}
+
+// Axis aligned bounding box
+export class AABB{
+    /**
+        * @param {Number} id
+        */
+    constructor(id, top, bottom, right, left, near, far) {
+        
+    }
 }
 
 export class Texture{

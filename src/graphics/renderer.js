@@ -1,5 +1,5 @@
 import { testVert,testFrag } from "./shaders.js"  
-import "../../lib/vendor/gl-matrix.js"
+import { mat4,glMatrix } from "gl-matrix";
 
 export default class Renderer{
 
@@ -52,16 +52,16 @@ export default class Renderer{
         const matProjUniformLocation = this.#context.getUniformLocation(test_program, 'mProj')
         
         let identityMatrix = new Float32Array(16)
-        glMatrix.mat4.identity(identityMatrix)
+        mat4.identity(identityMatrix)
 
         let worldMatrix = new Float32Array(16)
         let viewMatrix = new Float32Array(16)
         let projMatrix = new Float32Array(16)
-        glMatrix.mat4.identity(worldMatrix)
-        glMatrix.mat4.rotate(worldMatrix,identityMatrix,3.14,[0,1,0])
+        mat4.identity(worldMatrix)
+        mat4.rotate(worldMatrix,identityMatrix,3.14,[0,1,0])
 
-        glMatrix.mat4.perspective(projMatrix,glMatrix.glMatrix.toRadian(45),this.aspect_ratio,0.1,1000.0)
-        glMatrix.mat4.lookAt(viewMatrix,[1,2,-5],[0,0,0],[0,1,0])
+        mat4.perspective(projMatrix,glMatrix.toRadian(45),this.aspect_ratio,0.1,1000.0)
+        mat4.lookAt(viewMatrix,[1,2,-5],[0,0,0],[0,1,0])
 
         this.#context.uniformMatrix4fv(matWorldUniformLocation, false, worldMatrix)
         this.#context.uniformMatrix4fv(matProjUniformLocation, false, projMatrix)
