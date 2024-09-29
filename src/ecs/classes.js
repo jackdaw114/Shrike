@@ -1,13 +1,10 @@
 import { mat4 } from "gl-matrix";
 
 export class Scene{
-    /**
-        * @param {Number} id
-        * @param {String} name
-        */
-    constructor(id,name) {
-        this.id = id;
-        this.name = name;
+    constructor() {
+        /**
+            * @type {GameObject[]}
+            */
         this.gameObjectArray = []
         this.cameraArray = []
         this.lightArray = []
@@ -22,6 +19,10 @@ export class GameObject{
     constructor(id,name) {
         this.id = id;
         this.name = name;
+        /**
+            * @type {Geometry[]}
+            */
+        this.geometry=[];
     }
 }
 
@@ -33,18 +34,32 @@ export class Transformation{
 
 export class Geometry{
     /**
-        * @param {Number} id
         * @param {String} name
+        * @param {Number} id
+        * @param {GeometryData} geometryData
+        * @param {Transformation} transformation
+        */
+    constructor(id,name,geometryData, transformation) {
+        this.name = name;
+        this.id = id;
+        this.geometryData = geometryData;
+        this.transformation = transformation;
+    }
+    
+}
+
+export class GeometryData{
+    /**
+        * @param {Number} id
         * @param {Float32Array} vertexList
         * @param {Uint16Array} indexList
         */
-    constructor(id, name, vertexList, indexList) {
+    constructor(id, vertexList, indexList) {
         this.id = id;
-        this.name = name;
         this.vertexList = vertexList;
         this.indexList = indexList;
     }
-    
+
 }
 
 // Axis aligned bounding box
