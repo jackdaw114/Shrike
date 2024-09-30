@@ -2,6 +2,7 @@ import {Scene} from "../ecs/classes";
 import Renderer from "../graphics/renderer";
 
 export class Shrike{
+    lastFrameTime=0;
     /**
         * @param {HTMLCanvasElement} canvas
         */
@@ -39,12 +40,14 @@ export class Shrike{
         this.testFunc = func
     }
     
-    gameLoop() {
+    gameLoop(currentTime) {
         this.renderer.renderScene(this.scenes[this.activeScene]) 
         // script processor 
-        
+         
         this.testFunc() 
+        const deltaTime = currentTime - this.lastFrameTime;
 
+        this.lastFrameTime = currentTime;
         requestAnimationFrame(this.gameLoop)
     }
 

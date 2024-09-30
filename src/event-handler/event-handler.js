@@ -13,7 +13,7 @@ export class EventHandler{
         this.elementBounds = element.getBoundingClientRect();
         EventHandler.instance = this;
     } 
- 
+   
 
     batchHelper(eventType,eventData){
         if(!this.#eventBatches.has(eventType)){
