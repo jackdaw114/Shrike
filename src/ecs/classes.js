@@ -1,135 +1,69 @@
-import { mat4 } from "gl-matrix";
-
-export class Scene{
-    constructor() {
+class Entity {
+    constructor(id) {
+        this.id = id;
         /**
-            * @type {GameObject[]}
-            */
-        this.gameObjectArray = []
-        this.cameraArray = []
-        this.lightArray = []
+         * @type {Object}
+         */
+        this.components = {};
     }
 }
 
-export class GameObject{
-    /**
-        * @param {Number} id
-        * @param {String} name
-        */
-    constructor(id,name) {
-        this.id = id;
-        this.name = name;
-        /**
-            * @type {Geometry[]}
-            */
-        this.geometry=[];
-    }
-}
-
-export class Transformation{
+class Component {
     constructor() {
-        this.matrix = mat4.create();
+        this.entity;
     }
 }
 
-export class Geometry{
-    /**
-        * @param {String} name
-        * @param {Number} id
-        * @param {GeometryData} geometryData
-        * @param {Transformation} transformation
-        */
-    constructor(id,name,geometryData, transformation) {
-        this.name = name;
-        this.id = id;
-        this.geometryData = geometryData;
-        this.transformation = transformation;
+class System {
+    constructor() {
+        this.components = [];
     }
-    
+
+    update(deltaTime) {}
 }
 
-export class GeometryData{
-    /**
-        * @param {Number} id
-        * @param {Float32Array} vertexList
-        * @param {Uint16Array} indexList
-        */
-    constructor(id, vertexList, indexList) {
-        this.id = id;
-        this.vertexList = vertexList;
-        this.indexList = indexList;
+class Scene {
+    constructor() {
+        this.entities = new Map();
+        this.systems = new Map();
+        this.componentMaps = new Map();
+        this.nextEntityId = 0;
     }
 
-}
-
-// Axis aligned bounding box
-export class AABB{
-    /**
-        * @param {Number} id
-        */
-    constructor(id, top, bottom, right, left, near, far) {
-        
-    }
-}
-
-export class Texture{
-    /**
-        * @param {Number} id
-        * @param {String} name
-        * @param {Image} texture
-        */
-    constructor(id, name,texture) {
-        this.id = id;
-        this.name = name;
-        this.texture = texture;
+    createEntity() {
+        const id = this.nextEntityId++;
+        const entity = new Entity(id);
+        this.entities.set(id, entity);
+        return entity;
     }
 
-}
-
-export class Material{
-    /**
-        * @param {Number} id
-        * @param {String} name
-        */
-    constructor(id, name) {
-        this.id = id;
-        this.name = name;
+    removeEntity(entity) {
+        this.entities.delete(entity.id);
     }
-}
 
-export class PerspectiveCamera{
-    /**
-        * @param {Number} id
-        * @param {String} name
-        * @param {Array<3>} position
-        * @param {Array<3>} lookAt
-        * @param {Array<3>} up
-        */
-    constructor(id,name,fov,aspectRatio,near,far,position = [0, 0, -1], lookAt = [0, 0, 0], up = [0, 1, 0]) {
-        this.id = id;
-        this.name = name;
-        this.position = position;
-        this.lookAt = lookAt;
-        this.up = up;
-        this.fov = fov;
-        this.aspectRatio = aspectRatio;
-        this.near = near;
-        this.far = far;
+    addComponent(entity, component) {
+        const componentClass = component.constructor.name;
+        entity.components[componentClass] = component;
+        component.entity = entity;
+        if (!this.componentMaps.has(componentClass)) {
+            this.componentMaps.set(componentClass, []);
+        }
+        this.componentMaps.get(componentClass).push(component);
     }
-}
 
-export class SpotLight{
-    /**
-        * @param {Number} id
-        * @param {String} name
-        */
-    constructor(id,name,intensity,position = [0, 0, -1], lookAt = [0, 0, 0], up = [0, 1, 0]) {
-        this.id = id;
-        this.name = name;
-        this.position = position;
-        this.lookAt = lookAt;
-        this.up = up;
-        this.intensity = intensity;
-        // TODO light properties (resolution, max bounces)
+    removeComponents(entity) {
+        Object.entries(entity.components).forEach(([key, value]) => {
+            const list = this.componentMaps.get(key);
+            const index = list.indexOf(value);
+            list.splice(index, 1);
+        });
     }
+
+    addSystem(system, requiredComponents) {}
+
+    removeSystem(system) {}
+
+    update(deltaTime) {}
+
+    getMask(components) {}
 }
