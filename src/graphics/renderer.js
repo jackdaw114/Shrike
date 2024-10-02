@@ -1,14 +1,15 @@
-import {Scene, Transformation} from "../ecs/classes.js";
+import {Scene, System} from "../ecs/classes.js";
 import { testVert,testFrag } from "./shaders.js"  
 import { mat4,glMatrix } from "gl-matrix";
 
-export default class Renderer{
+export default class Renderer extends System{
 
     #context
     /**
      * @param {HTMLCanvasElement} canvas
      */
     constructor(canvas,aspect_ratio){
+        super()
         this.aspect_ratio = aspect_ratio;
         this.#context = canvas.getContext("webgl2")
         if (!this.#context) {
@@ -31,18 +32,16 @@ export default class Renderer{
     /**
         * @param {Scene} scene
         */
-    renderScene(scene){
+    renderScene(){
+
         // octree culling here then provide updated array to the loop below
         this.#context.clear(this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT)
-        scene.gameObjectArray.forEach((val)=>{
-            if (val.geometry.length > 0) {
-                // batch geometry here
-                
-                val.geometry.forEach((data)=>{
-                    this.test(data.geometryData.vertexList, data.geometryData.indexList,data.transformation)
-                })
-            }
-        }) 
+        const geometry = this.components.get("Geometry")
+        geometry.forEach((val) => {
+        console.log(val)
+            this.test(val.VBO,val.IBO,val.transformation)
+        })
+
     }
 
 

@@ -1,25 +1,21 @@
-import {mat4} from "gl-matrix";
-import {parseOBJ} from "./lib/parse-obj.js";
-import {GameObject, Geometry, GeometryData, Scene, Transformation} from "./src/ecs/classes.js";
-import Renderer from "./src/graphics/renderer.js"
-import {Shrike} from "./src/core/core.js";
+import { mat4 } from "gl-matrix";
+import { parseOBJ } from "./lib/parse-obj.js";
+import {
+    Component,
+    Scene,
+    System,
+} from "./src/ecs/classes.js";
+import Renderer from "./src/graphics/renderer.js";
+import {Geometry, Transformation} from "./src/ecs/component-classes.js";
 
 let canvas = document.getElementById("canvas1")
 
 const CANVAS_WIDTH = canvas.width = window.innerWidth;
-const CANVAS_HEIGHT = canvas.height = window.innerHeight; 
+const CANVAS_HEIGHT = canvas.height = window.innerHeight;
 
-let renderer_t = new Renderer(canvas,CANVAS_WIDTH/CANVAS_HEIGHT)
+let testScene = new Scene()
 
-let testvert = new Float32Array([
-    0, 0, 0, 1,0,0,
-    -1, -1, 0,0.,1.,0.,
-    1,-1,0,0.,0.,1.
-])
-
-let testindices = new Uint16Array([
-    0,1,2
-])
+let entity = testScene.createEntity()
 
 let {indices, vertices} = parseOBJ(
     `
@@ -3001,43 +2997,14 @@ let {indices, vertices} = parseOBJ(
         f 505/526/942 323/549/942 321/550/942
     `
 )
-
 let transformation = new Transformation()
-let transformation2 = new Transformation()
 
-let identityMatrix = mat4.create()
+testScene.addComponent(entity, new Geometry(vertices,indices,transformation))
 
-let gameObject = new GameObject(0, 'test1')
-let geoData = new GeometryData(0,vertices,indices)
-let geo = new Geometry(0,'testgeo',geoData,transformation)
-let geo2 = new Geometry(0,'testgeo',geoData,transformation2)
-
-let gameObject2= new GameObject(1, 'test2')
-
-gameObject2.geometry.push(geo2)
-gameObject.geometry.push(geo)
+const renderer = new Renderer(canvas,CANVAS_WIDTH/CANVAS_HEIGHT)
 
 
-let scene = new Scene(0,'testScene') 
+testScene.addSystem(renderer, ["Geometry"])
 
 
-mat4.rotate(transformation.matrix, identityMatrix, 2.3, [0,1,0])
-mat4.rotate(transformation2.matrix,transformation2.matrix,2.14,[0,1,1])
-
-mat4.translate(transformation2.matrix,transformation2.matrix,[-2,0,0])
-mat4.translate(transformation.matrix,transformation.matrix,[2,0,0])
-
-scene.gameObjectArray.push(gameObject)
-
-scene.gameObjectArray.push(gameObject2)
-
-
-let engine = new Shrike(canvas,window.innerWidth,window.innerHeight)
-
-engine.testFunciton(()=>{
-    mat4.rotate(transformation.matrix, transformation.matrix,0.01,[0,1,1])
-    mat4.rotate(transformation2.matrix, transformation2.matrix,0.01,[1,0,0])
-})
-
-engine.addScene(scene, 'test1')
-engine.gameLoop()
+renderer.renderScene()

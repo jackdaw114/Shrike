@@ -8,21 +8,21 @@ class Entity {
     }
 }
 
-class Component {
+export class Component {
     constructor() {
         this.entity;
     }
 }
 
-class System {
+export class System {
     constructor() {
-        this.components = [];
+        this.components = new Map();
     }
 
     update(deltaTime) {}
 }
 
-class Scene {
+export class Scene {
     constructor() {
         this.entities = new Map();
         this.systems = new Map();
@@ -38,6 +38,7 @@ class Scene {
     }
 
     removeEntity(entity) {
+        this.removeComponents(entity);
         this.entities.delete(entity.id);
     }
 
@@ -48,7 +49,8 @@ class Scene {
         if (!this.componentMaps.has(componentClass)) {
             this.componentMaps.set(componentClass, []);
         }
-        this.componentMaps.get(componentClass).push(component);
+        let components = this.componentMaps.get(componentClass);
+        components.push(component);
     }
 
     removeComponents(entity) {
@@ -59,7 +61,14 @@ class Scene {
         });
     }
 
-    addSystem(system, requiredComponents) {}
+    addSystem(system, requiredComponents) {
+        this.systems.set(system, requiredComponents);
+        for (let component of requiredComponents) {
+            let tempComponent = this.componentMaps.get(component)
+            system.components.set(component,tempComponent);
+            
+        }
+    }
 
     removeSystem(system) {}
 
