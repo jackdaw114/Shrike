@@ -4,9 +4,10 @@ import {
     Component,
     Scene,
     System,
+    Transformation,
 } from "./src/ecs/classes.js";
 import Renderer from "./src/graphics/renderer.js";
-import {Geometry, Transformation} from "./src/ecs/component-classes.js";
+import {Geometry} from "./src/ecs/component-classes.js";
 
 let canvas = document.getElementById("canvas1")
 
@@ -3006,5 +3007,4 @@ const renderer = new Renderer(canvas,CANVAS_WIDTH/CANVAS_HEIGHT)
 
 testScene.addSystem(renderer, ["Geometry"])
 
-
-renderer.renderScene()
+testScene.update(1)

@@ -1,3 +1,12 @@
+import {mat4} from "gl-matrix";
+
+
+export class Transformation{
+    constructor() {
+        this.matrix = mat4.create()
+    }
+}
+
 class Entity {
     constructor(id) {
         this.id = id;
@@ -5,7 +14,18 @@ class Entity {
          * @type {Object}
          */
         this.components = {};
+        this.transformation = new Transformation() 
     }
+    getComponent(componentName) {
+        if (this.components.hasOwnProperty(componentName)) {
+            return this.components[componentName]
+        }
+        console.error("Entity", this.id, " Doesnt have ",componentName," Component")
+        return null
+    }
+
+    
+
 }
 
 export class Component {
@@ -19,7 +39,12 @@ export class System {
         this.components = new Map();
     }
 
-    update(deltaTime) {}
+    update(deltaTime) {
+        throw new Error("Method 'update' must be implemented.");
+    }
+    init() {
+        throw new Error("Method 'init' must be implemented.");
+    }
 }
 
 export class Scene {
@@ -71,8 +96,17 @@ export class Scene {
     }
 
     removeSystem(system) {}
+    
 
-    update(deltaTime) {}
-
-    getMask(components) {}
+    init() {
+        for (const system in this.systems) {
+            system.init()
+        }
+    }
+    update(deltaTime) {
+        for (const [system,reqComponents] of this.systems) {
+            system.update(deltaTime)
+        }
+    }
+    
 }

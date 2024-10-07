@@ -32,18 +32,20 @@ export default class Renderer extends System{
     /**
         * @param {Scene} scene
         */
-    renderScene(){
-
+    update(deltaTime){
         // octree culling here then provide updated array to the loop below
         this.#context.clear(this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT)
         const geometry = this.components.get("Geometry")
         geometry.forEach((val) => {
-        console.log(val)
             this.test(val.VBO,val.IBO,val.transformation)
         })
 
     }
 
+    
+    init() {
+        
+    }
 
     /**
         * @param {Float32Array} vertex_data
