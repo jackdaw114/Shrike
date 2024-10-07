@@ -3007,4 +3007,5 @@ const renderer = new Renderer(canvas,CANVAS_WIDTH/CANVAS_HEIGHT)
 
 testScene.addSystem(renderer, ["Geometry"])
 
+testScene.init()
 testScene.update(1)

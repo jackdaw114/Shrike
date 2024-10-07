@@ -3,14 +3,14 @@ import {Component, Transformation} from "./classes";
 
 export class Geometry extends Component{
     /**
-        * @param {Float32Array} VBO
-        * @param {Uint16Array} IBO
+        * @param {Float32Array} vertices
+        * @param {Uint16Array} indices
         * @param {Transformation} transformation
         */
-    constructor(VBO,IBO,transformation) {
+    constructor(vertices,indices,transformation) {
         super()
-        this.VBO = VBO;
-        this.IBO = IBO;
+        this.vertices = vertices;
+        this.indices = indices;
         this.transformation = transformation
     } 
 }

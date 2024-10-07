@@ -15,6 +15,7 @@ class Entity {
          */
         this.components = {};
         this.transformation = new Transformation() 
+
     }
     getComponent(componentName) {
         if (this.components.hasOwnProperty(componentName)) {
@@ -36,7 +37,7 @@ export class Component {
 
 export class System {
     constructor() {
-        this.components = new Map();
+        this.components = {};
     }
 
     update(deltaTime) {
@@ -44,6 +45,9 @@ export class System {
     }
     init() {
         throw new Error("Method 'init' must be implemented.");
+    }
+    addComponent(componentClass) {
+        throw new Error("Method 'addComponent' must be implemented.");
     }
 }
 
@@ -53,6 +57,7 @@ export class Scene {
         this.systems = new Map();
         this.componentMaps = new Map();
         this.nextEntityId = 0;
+        this.isRunning = false;
     }
 
     createEntity() {
@@ -76,6 +81,13 @@ export class Scene {
         }
         let components = this.componentMaps.get(componentClass);
         components.push(component);
+        if (this.isRunning) {
+            for (const [system, system_component] of this.systems) {
+                if (componentClass in system_component) {
+                    system.addComponent(componentClass)
+                }
+            }
+        }
     }
 
     removeComponents(entity) {
@@ -90,7 +102,7 @@ export class Scene {
         this.systems.set(system, requiredComponents);
         for (let component of requiredComponents) {
             let tempComponent = this.componentMaps.get(component)
-            system.components.set(component,tempComponent);
+            system.components[component] = tempComponent;
             
         }
     }
@@ -99,9 +111,10 @@ export class Scene {
     
 
     init() {
-        for (const system in this.systems) {
+        for (const [system,reqComponents] of this.systems) {
             system.init()
         }
+        this.isRunning = true;
     }
     update(deltaTime) {
         for (const [system,reqComponents] of this.systems) {
