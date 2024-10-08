@@ -7,11 +7,11 @@ export class Geometry extends Component{
         * @param {Uint16Array} indices
         * @param {Transformation} transformation
         */
-    constructor(vertices,indices,transformation) {
+    constructor(vertices,indices) {
         super()
         this.vertices = vertices;
         this.indices = indices;
-        this.transformation = transformation
+        this.texture = 0
     } 
 }
 

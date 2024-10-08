@@ -18,6 +18,7 @@ let testScene = new Scene()
 
 let entity = testScene.createEntity()
 
+
 let {indices, vertices} = parseOBJ(
     `
         # Blender 4.2.1 LTS
@@ -2999,8 +3000,9 @@ let {indices, vertices} = parseOBJ(
     `
 )
 let transformation = new Transformation()
+mat4.rotate(entity.getTransformation().getMatrix(), mat4.create(), 2.4, [0,1,0])
 
-testScene.addComponent(entity, new Geometry(vertices,indices,transformation))
+testScene.addComponent(entity, new Geometry(vertices,indices))
 
 const renderer = new Renderer(canvas,CANVAS_WIDTH/CANVAS_HEIGHT)
 

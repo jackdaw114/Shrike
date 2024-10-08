@@ -5,6 +5,9 @@ export class Transformation{
     constructor() {
         this.matrix = mat4.create()
     }
+    getMatrix() {
+        return this.matrix
+    }
 }
 
 class Entity {
@@ -16,6 +19,9 @@ class Entity {
         this.components = {};
         this.transformation = new Transformation() 
 
+    }
+    getTransformation() {
+        return this.transformation
     }
     getComponent(componentName) {
         if (this.components.hasOwnProperty(componentName)) {
