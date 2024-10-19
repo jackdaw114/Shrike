@@ -56,6 +56,7 @@ export default class Renderer extends System{
     init() {
         console.log(this.components["Geometry"])
         for (const component of this.components["Geometry"]) {
+            console.log(component)
             this.initGeometry(component)             
         }
     }
@@ -67,10 +68,12 @@ export default class Renderer extends System{
         * @param {Component} component
         */
     initGeometry(component) {
+        console.log(component)
         component.vaoID = this.#context.createVertexArray();
         this.#context.bindVertexArray(component.vaoID)
         component.vboID = this.#context.createBuffer(); 
         this.#context.bindBuffer(this.#context.ARRAY_BUFFER,component.vboID)
+        console.log(component.vertices.length)
         this.#context.bufferData(this.#context.ARRAY_BUFFER,component.vertices.length * Float32Array.BYTES_PER_ELEMENT, this.#context.DYNAMIC_DRAW)
          
         const positionLocation = this.#context.getAttribLocation(this.test_program,'a_position');
@@ -90,6 +93,8 @@ export default class Renderer extends System{
         this.#context.bufferData(this.#context.ELEMENT_ARRAY_BUFFER, component.indices, this.#context.STATIC_DRAW);
     }
 
+    
+
 
     tempFun() {
         for (const component of this.components["Geometry"]) {
@@ -97,7 +102,17 @@ export default class Renderer extends System{
             this.render(component)
         }
     }
-   
+
+    testRef() {
+        for (const component of this.components["Geometry"]) {
+            console.log(component)
+        }
+    }
+    testNoRef(scene) {
+        for (const component of scene.componentMaps["Geometry"]) {
+            console.log(component)
+        }
+    }
 
     /**
         * @param {Component} component
@@ -125,9 +140,7 @@ export default class Renderer extends System{
     
         let worldMatrix = component.entity.transformation.getMatrix();
         console.log(component.entity)
-        // TODO:- Replace with camera matrix
         let viewMatrix = new Float32Array(16)
-        // TODO:- Static Projection matrix (Creating too many rn)
         let projMatrix = new Float32Array(16)
 
         mat4.perspective(projMatrix,glMatrix.toRadian(45),this.aspect_ratio,0.1,1000.0)

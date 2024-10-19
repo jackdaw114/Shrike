@@ -59,9 +59,9 @@ export class System {
 
 export class Scene {
     constructor() {
-        this.entities = new Map();
-        this.systems = new Map();
-        this.componentMaps = new Map();
+        this.entities = {};
+        this.systems =new Map();
+        this.componentMaps = {};
         this.nextEntityId = 0;
         this.isRunning = false;
     }
@@ -69,7 +69,7 @@ export class Scene {
     createEntity() {
         const id = this.nextEntityId++;
         const entity = new Entity(id);
-        this.entities.set(id, entity);
+        this.entities[id] = entity;
         return entity;
     }
 
@@ -82,10 +82,10 @@ export class Scene {
         const componentClass = component.constructor.name;
         entity.components[componentClass] = component;
         component.entity = entity;
-        if (!this.componentMaps.has(componentClass)) {
-            this.componentMaps.set(componentClass, []);
+        if (!this.componentMaps.hasOwnProperty(componentClass)) {
+            this.componentMaps[componentClass] =  [];
         }
-        let components = this.componentMaps.get(componentClass);
+        let components = this.componentMaps[componentClass];
         components.push(component);
         if (this.isRunning) {
             for (const [system, system_component] of this.systems) {
@@ -107,9 +107,7 @@ export class Scene {
     addSystem(system, requiredComponents) {
         this.systems.set(system, requiredComponents);
         for (let component of requiredComponents) {
-            let tempComponent = this.componentMaps.get(component)
-            system.components[component] = tempComponent;
-            
+            system.components[component] =this.componentMaps[component]
         }
     }
 

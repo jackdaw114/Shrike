@@ -1,0 +1,66 @@
+/* floating window styling */
+.sgui-window {
+    position: fixed;
+    top: 100px;
+    left: 100px;
+    width: auto;
+    min-width: 20em;
+    border: 2px solid #101216;
+    border-radius: 0.2em;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    overflow: hidden;
+    color: #fff;
+}
+
+.window-list{
+    background-color: #101216;
+    margin: 0;
+    padding-left: 1.5em;
+}
+
+.top-bar{
+    display: flex;
+    color: #fff;
+    height:1.5rem;
+    font-size: 0.8rem;
+    background-color: #212730;
+    justify-content: space-between;
+    align-content: center;
+}
+
+.top-bar > *{
+    align-self: center;
+    margin: 0.5rem;
+}
+
+/* close button styling */
+.close-btn {
+    float: right;
+    align-self: center;
+    justify-self: right;
+    cursor: pointer;
+    background-color: #bf1c1c;
+    color: white;
+    border: none;
+    border-radius: 1em;
+    height: 0.7em;
+    width: 1em;
+    margin-right: 0.5em;
+}
+
+/* background overlay */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: none;
+}
+/* show the overlay and floating window when active */
+.show {
+    display: block;
+}

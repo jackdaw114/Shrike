@@ -8,6 +8,7 @@ import {
 } from "./src/ecs/classes.js";
 import Renderer from "./src/graphics/renderer.js";
 import {Geometry} from "./src/ecs/component-classes.js";
+import SGui from "./lib/shrike-gui/sgui.js";
 
 let canvas = document.getElementById("canvas1")
 
@@ -17,6 +18,23 @@ const CANVAS_HEIGHT = canvas.height = window.innerHeight;
 let testScene = new Scene()
 
 let entity = testScene.createEntity()
+
+function measureTime(callback, iterations = 1000) {
+    const start = performance.now();
+  for (let i = 0; i < iterations; i++) {
+    callback();
+  }
+    const end = performance.now();
+    return end - start
+}
+
+
+function runTest(name, jsonCallback,  iterations = 1000, params) {
+  console.log(`\n${name} test:`);
+  console.log('JSON:', measureTime(() => jsonCallback(params), iterations));
+}
+
+
 
 
 let {indices, vertices} = parseOBJ(
@@ -3008,6 +3026,10 @@ const renderer = new Renderer(canvas,CANVAS_WIDTH/CANVAS_HEIGHT)
 
 
 testScene.addSystem(renderer, ["Geometry"])
+customElements.define("s-gui", SGui)
+
+let testGui2 = new SGui()
+
 
 testScene.init()
 testScene.update(1)
