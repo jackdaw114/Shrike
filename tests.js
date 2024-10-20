@@ -9,6 +9,7 @@ import {
 import Renderer from "./src/graphics/renderer.js";
 import {Geometry} from "./src/ecs/component-classes.js";
 import SGui from "./lib/shrike-gui/sgui.js";
+import {Shrike} from "./src/core/core.js";
 
 let canvas = document.getElementById("canvas1")
 
@@ -3018,7 +3019,7 @@ let {indices, vertices} = parseOBJ(
     `
 )
 let transformation = new Transformation()
-mat4.rotate(entity.getTransformation().getMatrix(), mat4.create(), 2.4, [0,1,0])
+mat4.rotate(entity.getTransformation().getMatrix(), mat4.create(), 1.4, [0,1,0])
 
 testScene.addComponent(entity, new Geometry(vertices,indices))
 
@@ -3029,7 +3030,25 @@ testScene.addSystem(renderer, ["Geometry"])
 customElements.define("s-gui", SGui)
 
 let testGui2 = new SGui()
+testGui2.SGuiList("external title", {value:0}, ["array replace later","test"])
+testGui2.SGuiColorPicker("title",{value:0})
+
+let gameEngineHandle = new Shrike(canvas,CANVAS_WIDTH,CANVAS_HEIGHT)
+
+gameEngineHandle.addScene(testScene,"testScene")
+gameEngineHandle.start()
 
 
-testScene.init()
-testScene.update(1)
+let rotation =0
+
+//NOTE: example of how a script object works (this is bad code)
+function repeatingFunction() {
+    mat4.rotate(entity.getTransformation().getMatrix(), mat4.create(), rotation/30, [0,1,0])
+    rotation++
+}
+
+// Repeat every 1 second (1000 milliseconds)
+setInterval(repeatingFunction, 15);
+
+//testScene.init()
+//testScene.update(1)

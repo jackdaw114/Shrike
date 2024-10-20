@@ -27,11 +27,10 @@ export class Shrike{
         */
     addScene(scene,name) {
         if (!(this.scenes.hasOwnProperty(name))) {
-
+            scene.init() //check if init in required
             this.scenes[name] = scene
-            console.log(this.scenes)
             if (this.activeScene == null) {
-                this.activeScene = name
+                this.activeScene = scene
             }
         }
     }
@@ -41,12 +40,10 @@ export class Shrike{
     }
     
     gameLoop(currentTime) {
-        this.renderer.renderScene(this.scenes[this.activeScene]) 
-        // script processor 
-         
-        this.testFunc() 
-        const deltaTime = currentTime - this.lastFrameTime;
 
+
+        const deltaTime = currentTime - this.lastFrameTime;
+        this.activeScene.update(deltaTime)
         this.lastFrameTime = currentTime;
         requestAnimationFrame(this.gameLoop)
     }

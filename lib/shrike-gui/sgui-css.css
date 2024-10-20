@@ -1,3 +1,4 @@
+
 /* floating window styling */
 .sgui-window {
     position: fixed;
@@ -11,6 +12,13 @@
     z-index: 1000;
     overflow: hidden;
     color: #fff;
+}
+.sgui-base{
+    background-color: rgba(0, 0, 0, 1);
+}
+
+.sgui-color-picker{
+    padding: 10px;
 }
 
 .window-list{
