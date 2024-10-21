@@ -1,12 +1,11 @@
-import {mat4} from "gl-matrix";
+import { mat4 } from "gl-matrix";
 
-
-export class Transformation{
+export class Transformation {
     constructor() {
-        this.matrix = mat4.create()
+        this.matrix = mat4.create();
     }
     getMatrix() {
-        return this.matrix
+        return this.matrix;
     }
 }
 
@@ -17,33 +16,36 @@ class Entity {
          * @type {Object}
          */
         this.components = {};
-        this.transformation = new Transformation() 
-
+        this.transformation = new Transformation();
     }
     getTransformation() {
-        return this.transformation
+        return this.transformation;
     }
     getComponent(componentName) {
         if (this.components.hasOwnProperty(componentName)) {
-            return this.components[componentName]
+            return this.components[componentName];
         }
-        console.error("Entity", this.id, " Doesnt have ",componentName," Component")
-        return null
+        console.error(
+            "Entity",
+            this.id,
+            " Doesnt have ",
+            componentName,
+            " Component"
+        );
+        return null;
     }
-
-    
-
 }
 
 export class Component {
-    constructor() {
+    constructor() {// take entity reference here
         this.entity;
     }
 }
 
 export class System {
-    constructor() {
+    constructor(scene) {
         this.components = {};
+        this.scene = scene
     }
 
     update(deltaTime) {
@@ -55,12 +57,16 @@ export class System {
     addComponent(componentClass) {
         throw new Error("Method 'addComponent' must be implemented.");
     }
+    changeScene(scene) {
+        this.scene = scene
+        // prolly call its init funciton here create a destructor like deinit first ig 
+    }
 }
 
 export class Scene {
     constructor() {
         this.entities = {};
-        this.systems =new Map();
+        this.systems = new Map();
         this.componentMaps = {};
         this.nextEntityId = 0;
         this.isRunning = false;
@@ -83,14 +89,14 @@ export class Scene {
         entity.components[componentClass] = component;
         component.entity = entity;
         if (!this.componentMaps.hasOwnProperty(componentClass)) {
-            this.componentMaps[componentClass] =  [];
+            this.componentMaps[componentClass] = [];
         }
         let components = this.componentMaps[componentClass];
         components.push(component);
         if (this.isRunning) {
             for (const [system, system_component] of this.systems) {
                 if (componentClass in system_component) {
-                    system.addComponent(componentClass)
+                    system.addComponent(componentClass);
                 }
             }
         }
@@ -107,23 +113,21 @@ export class Scene {
     addSystem(system, requiredComponents) {
         this.systems.set(system, requiredComponents);
         for (let component of requiredComponents) {
-            system.components[component] =this.componentMaps[component]
+            system.components[component] = this.componentMaps[component];
         }
     }
 
     removeSystem(system) {}
-    
 
     init() {
-        for (const [system,reqComponents] of this.systems) {
-            system.init()
+        for (const [system, reqComponents] of this.systems) {
+            system.init();
         }
         this.isRunning = true;
     }
     update(deltaTime) {
-        for (const [system,reqComponents] of this.systems) {
-            system.update(deltaTime)
+        for (const [system, reqComponents] of this.systems) {
+            system.update(deltaTime);
         }
     }
-    
 }

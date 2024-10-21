@@ -21,16 +21,12 @@ export default class Renderer extends System{
 
     #context
     /**
-     * @param {HTMLCanvasElement} canvas
+     * @param {WebGL2RenderingContext} canvas
      */
-    constructor(canvas,aspect_ratio){
-        super()
+    constructor(scene,context,aspect_ratio){
+        super(scene)
         this.aspect_ratio = aspect_ratio;
-        this.#context = canvas.getContext("webgl2")
-
-        if (!this.#context) {
-            console.error("Web Gl Not Supported")
-        }
+        this.#context = context
         this.#context.enable(this.#context.DEPTH_TEST)
         this.#context.enable(this.#context.CULL_FACE)
         this.#context.frontFace(this.#context.CCW)
@@ -39,8 +35,8 @@ export default class Renderer extends System{
     // TODO:- change this to some other function prolly called in init and has some sort of dynamic override maybe
         const vertex_shader = this.createShader(this.#context.VERTEX_SHADER,testVert)
         const fragment_shader = this.createShader(this.#context.FRAGMENT_SHADER, testFrag)
-        this.test_program = this.createProgram(vertex_shader,fragment_shader) 
-        this.#context.useProgram(this.test_program)
+        this.test_program = this.createProgram(vertex_shader,fragment_shader)
+        this.#context.useProgram(this.test_program) 
         this.#context.clearColor(1.0,1.0,1.0,1.0)
     }
 
@@ -142,6 +138,7 @@ export default class Renderer extends System{
         this.#context.uniformMatrix4fv(matWorldUniformLocation, false, worldMatrix)
         this.#context.uniformMatrix4fv(matProjUniformLocation, false, projMatrix)
         this.#context.uniformMatrix4fv(matViewUniformLocation, false, viewMatrix)
+
         this.#context.drawElements(this.#context.TRIANGLES,component.indices.length,this.#context.UNSIGNED_SHORT,0)
     }
 

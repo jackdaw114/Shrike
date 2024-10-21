@@ -7,9 +7,10 @@ import {
     Transformation,
 } from "./src/ecs/classes.js";
 import Renderer from "./src/graphics/renderer.js";
-import {Geometry} from "./src/ecs/component-classes.js";
+import {DebugLine, Geometry} from "./src/ecs/component-classes.js";
 import SGui from "./lib/shrike-gui/sgui.js";
 import {Shrike} from "./src/core/core.js";
+import DebugSystem from "./src/graphics/debug-helper.js";
 
 let canvas = document.getElementById("canvas1")
 
@@ -3022,21 +3023,34 @@ let transformation = new Transformation()
 mat4.rotate(entity.getTransformation().getMatrix(), mat4.create(), 1.4, [0,1,0])
 
 testScene.addComponent(entity, new Geometry(vertices,indices))
+testScene.addComponent(entity, new DebugLine([1,1,1,1,1,1]))
 
-const renderer = new Renderer(canvas,CANVAS_WIDTH/CANVAS_HEIGHT)
+const renderer = new Renderer("test",canvas.getContext("webgl2"),CANVAS_WIDTH/CANVAS_HEIGHT)
 
+const debugSystem = new DebugSystem(testScene,canvas.getContext("webgl2"),CANVAS_WIDTH/CANVAS_HEIGHT)
+debugSystem.init()
 
+testScene.addSystem(debugSystem, ["DebugLine"])
 testScene.addSystem(renderer, ["Geometry"])
 customElements.define("s-gui", SGui)
 
-let testGui2 = new SGui()
-testGui2.SGuiList("external title", {value:0}, ["array replace later","test"])
-testGui2.SGuiColorPicker("title",{value:0})
 
 let gameEngineHandle = new Shrike(canvas,CANVAS_WIDTH,CANVAS_HEIGHT)
 
 gameEngineHandle.addScene(testScene,"testScene")
 gameEngineHandle.start()
+
+
+let sguiInstance = new SGui();
+
+let handle = sguiInstance.SGuiCustom("test", true)
+let controller = {
+    r: 0,
+    g: 0,
+    b: 0
+}
+handle.appendColorPicker(controller)
+
 
 
 let rotation =0
