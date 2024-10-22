@@ -3058,7 +3058,7 @@ gameEngineHandle.start()
 
 let sguiInstance = new SGui();
 
-let handle = sguiInstance.SGuiCustom("test", true)
+let handle = sguiInstance.createWindow("test", true)
 let controller = {
     r: 0,
     g: 0,
