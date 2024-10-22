@@ -1,5 +1,7 @@
 
 /* floating window styling */
+
+
 .sgui-window {
     position: fixed;
     top: 100px;
@@ -15,6 +17,19 @@
 }
 .sgui-base{
     background-color: rgba(0, 0, 0, 1);
+    display: grid;
+    justify-items: center;
+    width: auto;
+}
+
+.sgui-input-box{
+    width:85%;
+    color: #fff;
+    background-color: rgb(39, 37, 37);
+    border-radius: 4.5px;
+    outline: none;
+    margin-top: 2px;
+    margin-bottom: 4px;
 }
 
 .sgui-color-picker{

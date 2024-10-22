@@ -7,9 +7,9 @@ import {
     Transformation,
 } from "./src/ecs/classes.js";
 import Renderer from "./src/graphics/renderer.js";
-import {DebugLine, Geometry} from "./src/ecs/component-classes.js";
+import { DebugLine, Geometry } from "./src/ecs/component-classes.js";
 import SGui from "./lib/shrike-gui/sgui.js";
-import {Shrike} from "./src/core/core.js";
+import { Shrike } from "./src/core/core.js";
 import DebugSystem from "./src/graphics/debug-helper.js";
 
 let canvas = document.getElementById("canvas1")
@@ -23,23 +23,23 @@ let entity = testScene.createEntity()
 
 function measureTime(callback, iterations = 1000) {
     const start = performance.now();
-  for (let i = 0; i < iterations; i++) {
-    callback();
-  }
+    for (let i = 0; i < iterations; i++) {
+        callback();
+    }
     const end = performance.now();
     return end - start
 }
 
 
-function runTest(name, jsonCallback,  iterations = 1000, params) {
-  console.log(`\n${name} test:`);
-  console.log('JSON:', measureTime(() => jsonCallback(params), iterations));
+function runTest(name, jsonCallback, iterations = 1000, params) {
+    console.log(`\n${name} test:`);
+    console.log('JSON:', measureTime(() => jsonCallback(params), iterations));
 }
 
 
 
 
-let {indices, vertices} = parseOBJ(
+let { indices, vertices } = parseOBJ(
     `
         # Blender 4.2.1 LTS
         # www.blender.org
@@ -3021,73 +3021,92 @@ let {indices, vertices} = parseOBJ(
 )
 let transformation = new Transformation()
 
-testScene.addComponent(entity, new Geometry(vertices,indices))
-testScene.addComponent(entity, new DebugLine([1,1,1,1,1,1]))
+testScene.addComponent(entity, new Geometry(vertices, indices))
+testScene.addComponent(entity, new DebugLine([1, 1, 1, 1, 1, 1]))
 
-const renderer = new Renderer(testScene,canvas.getContext("webgl2"),CANVAS_WIDTH/CANVAS_HEIGHT)
+const renderer = new Renderer(testScene, canvas.getContext("webgl2"), CANVAS_WIDTH / CANVAS_HEIGHT)
 
-const debugSystem = new DebugSystem(testScene,canvas.getContext("webgl2"),CANVAS_WIDTH/CANVAS_HEIGHT)
+const debugSystem = new DebugSystem(testScene, canvas.getContext("webgl2"), CANVAS_WIDTH / CANVAS_HEIGHT)
 debugSystem.init()
 
 let lineObj = new DebugLine()
 
-function drawGrid(lineComponent, numberOfLines,spacing) {
+function drawGrid(lineComponent, numberOfLines, spacing) {
     let size = (numberOfLines * spacing - spacing) / 2
     for (let i = 0; i < numberOfLines; i++) {
-        lineComponent.addLine([-size,spacing*i-size,0,0,0,0],[size,spacing*i-size,0,0,0,0])
+        lineComponent.addLine([-size, spacing * i - size, 0, 0, 0, 0], [size, spacing * i - size, 0, 0, 0, 0])
     }
     for (let i = 0; i < numberOfLines; i++) {
-        lineComponent.addLine([spacing*i-size,-size,0,0,0,0],[spacing*i-size,size,0,0,0,0])
+        lineComponent.addLine([spacing * i - size, -size, 0, 0, 0, 0], [spacing * i - size, size, 0, 0, 0, 0])
     }
 }
 
 drawGrid(lineObj, 15, 0.5)
 
-testScene.addComponent(entity,lineObj)
+testScene.addComponent(entity, lineObj)
 
 testScene.addSystem(debugSystem, ["DebugLine"])
 testScene.addSystem(renderer, ["Geometry"])
 customElements.define("s-gui", SGui)
 
 
-let gameEngineHandle = new Shrike(canvas,CANVAS_WIDTH,CANVAS_HEIGHT)
+let gameEngineHandle = new Shrike(canvas, CANVAS_WIDTH, CANVAS_HEIGHT)
 
-gameEngineHandle.addScene(testScene,"testScene")
+gameEngineHandle.addScene(testScene, "testScene")
 gameEngineHandle.start()
 
 
 let sguiInstance = new SGui();
 
 let handle = sguiInstance.createWindow("test", true)
-let controller = {
+let colouPickerController = {
     r: 0,
     g: 0,
     b: 0
 }
-handle.appendColorPicker(controller)
+
+let inputBoxController = {
+    _value: "", 
+
+    get value() {
+        return this._value;
+    },
+
+    set value(newValue) {
+        this._value = newValue;
+    },
+};
+
+handle.appendColorPicker(colouPickerController)
+handle.appendInputBox(inputBoxController);
 
 
 
-let rotation =0
-
-let camera = testScene.getCamera()
-//NOTE: example of how a script object works (this is bad code)
-function repeatingFunction() {
-
-    let zoom = Math.sin(rotation/100) * 3 +10
-    mat4.lookAt(camera, [zoom*Math.sin(rotation/60),zoom*Math.cos(rotation/60),1], [0,0,0], [0,0,1])
-     
-    rotation++
-
-}
-
-
-
-
-// Repeat every 1 second (1000 milliseconds)
-setInterval(repeatingFunction, 15);
-
-//testScene.init()
+    
+    
+    
+    
+    
+    let rotation = 0
+    
+    let camera = testScene.getCamera()
+    //NOTE: example of how a script object works (this is bad code)
+    function repeatingFunction(inputBoxController) {
+        
+        let zoom = Math.sin(rotation / 60) * 3 + 5
+        mat4.lookAt(camera, [zoom * Math.sin(rotation / 61), zoom * Math.cos(rotation / 60), 1], [0, 0, 0], [0, 0, 1])
+        rotation++
+        // console.log(inputBoxController.value);
+        
+    }
+    
+    
+    
+    
+    // Repeat every 1 second (1000 milliseconds)
+    setInterval(() => repeatingFunction(inputBoxController), 15);
+    
+    //testScene.init()
 //testScene.update(1)
 //
 
