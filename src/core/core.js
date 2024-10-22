@@ -9,10 +9,6 @@ export class Shrike {
     constructor(canvas, width, height) {
         this.CANVAS_WIDTH = canvas.width = width;
         this.CANVAS_HEIGHT = canvas.height = height;
-        this.renderer = new Renderer("test",
-            canvas.getContext("webgl2"),
-            this.CANVAS_WIDTH / this.CANVAS_HEIGHT
-        ); // this bad
         /**
          * @type {Object}
          */

@@ -70,6 +70,8 @@ export class Scene {
         this.componentMaps = {};
         this.nextEntityId = 0;
         this.isRunning = false;
+        this.activeCamera = mat4.create()
+        mat4.lookAt(this.activeCamera, [0,0,-1], [0,0,0], [0,1,0])
     }
 
     createEntity() {
@@ -129,5 +131,8 @@ export class Scene {
         for (const [system, reqComponents] of this.systems) {
             system.update(deltaTime);
         }
+    }
+    getCamera() {
+        return this.activeCamera
     }
 }

@@ -22,14 +22,12 @@ export default class DebugSystem extends System {
     vboID;
     started = false;
     MAX_LINES = 500;
-    lines = [];
 
     /**
      * @param {WebGL2RenderingContext} canvas
      */
     constructor(scene, context, aspect_ratio) {
         super(scene);
-        console.log(this.scene);
         this.aspect_ratio = aspect_ratio;
         this.#context = context;
 
@@ -49,18 +47,12 @@ export default class DebugSystem extends System {
         );
         this.test_program = this.createProgram(vertex_shader, fragment_shader);
         this.#context.useProgram(this.test_program);
-        this.#context.clearColor(1.0, 1.0, 1.0, 1.0);
-        for (const component of this.scene.componentMaps["DebugLine"]) {
-            this.initLine(component);
-        }
 
         this.vaoID = this.#context.createVertexArray();
         this.#context.bindVertexArray(this.vaoID);
         this.vboID = this.#context.createBuffer();
-        this.#context.bindBuffer(this.#context.ARRAY_BUFFER,this.vboID)
+        this.#context.bindBuffer(this.#context.ARRAY_BUFFER, this.vboID);
 
-
-        console.log(this.MAX_LINES * Float32Array.BYTES_PER_ELEMENT)
         this.#context.bufferData(
             this.#context.ARRAY_BUFFER,
             this.MAX_LINES * Float32Array.BYTES_PER_ELEMENT,
@@ -97,23 +89,23 @@ export default class DebugSystem extends System {
 
     init() {}
 
-    initLine(component) {
-        this.lines.push(...component.arrayBuffer);
-        console.log(this.lines);
-    }
-
     update(deltaTime) {
-        this.render();
+        for (const component of this.scene.componentMaps["DebugLine"]) {
+            this.render(component);
+        }
     }
 
-    render() {
+    render(component) {
+        if (component.arrayBuffer.length == 0) {
+            return;
+        }
         this.#context.bindVertexArray(this.vaoID);
-        this.#context.bindBuffer(this.#context.ARRAY_BUFFER, this.vboID)
+        this.#context.bindBuffer(this.#context.ARRAY_BUFFER, this.vboID);
 
         this.#context.bufferSubData(
             this.#context.ARRAY_BUFFER,
             0,
-            new Float32Array(this.lines)
+            new Float32Array(component.arrayBuffer)
         );
 
         this.#context.enableVertexAttribArray(
@@ -142,7 +134,7 @@ export default class DebugSystem extends System {
         mat4.identity(identityMatrix);
 
         let worldMatrix = mat4.create();
-        let viewMatrix = new Float32Array(16);
+        let viewMatrix = this.scene.getCamera();
         let projMatrix = new Float32Array(16);
 
         mat4.perspective(
@@ -152,7 +144,6 @@ export default class DebugSystem extends System {
             0.1,
             1000.0
         );
-        mat4.lookAt(viewMatrix, [1, 2, -5], [0, 0, 0], [0, 1, 0]);
 
         this.#context.uniformMatrix4fv(
             matWorldUniformLocation,
@@ -173,7 +164,7 @@ export default class DebugSystem extends System {
         this.#context.drawArrays(
             this.#context.LINES,
             0,
-            this.lines.length / 6
+            component.arrayBuffer.length / (6) //TODO: constafiy
         );
         // TODO: this.#context.disableVertexAttribArray()
     }

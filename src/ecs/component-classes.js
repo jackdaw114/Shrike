@@ -34,10 +34,12 @@ export class GuiComponent extends Component {
 }
 
 export class DebugLine extends Component{
-    constructor(data) {
+    constructor() {
         super();
-        this.arrayBuffer = new Float32Array(data);
+        this.arrayBuffer = [];
     }
 
-
+    addLine(from, to) {
+        this.arrayBuffer = new Float32Array([...this.arrayBuffer,...from,...to])
+    }
 }

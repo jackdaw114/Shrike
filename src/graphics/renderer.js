@@ -129,11 +129,10 @@ export default class Renderer extends System{
 
     
         let worldMatrix = component.entity.transformation.getMatrix();
-        let viewMatrix = new Float32Array(16)
+        let viewMatrix = this.scene.getCamera()
         let projMatrix = new Float32Array(16)
 
         mat4.perspective(projMatrix,glMatrix.toRadian(45),this.aspect_ratio,0.1,1000.0)
-        mat4.lookAt(viewMatrix,[1,2,-5],[0,0,0],[0,1,0])
 
         this.#context.uniformMatrix4fv(matWorldUniformLocation, false, worldMatrix)
         this.#context.uniformMatrix4fv(matProjUniformLocation, false, projMatrix)

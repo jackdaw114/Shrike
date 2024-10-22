@@ -25,3 +25,40 @@ export const testFrag = `#version 300 es
             outColor = vec4(v_color,1.0);
         }`
 
+
+export default class Shader{
+    vertexShader;
+    fragmentShader;
+    program;
+    #context;
+    constructor() {
+
+    }
+    getProgram(){
+        return this.program
+    }
+    createProgram(vertexShader,fragmentShader) {
+        const program = this.#context.createProgram();
+        this.#context.attachShader(program,vertexShader)
+        this.#context.attachShader(program,fragmentShader)
+        this.#context.linkProgram(program)
+        if(!this.#context.getProgramParameter(program,this.#context.LINK_STATUS)){
+            console.error("failed to link program")
+            this.#context.deleteProgram(program)
+            return null
+        }
+        return program
+    }
+
+    createShader(type,source){
+        const shader = this.#context.createShader(type)
+        this.#context.shaderSource(shader,source)
+        this.#context.compileShader(shader)
+        if(!this.#context.getShaderParameter(shader,this.#context.COMPILE_STATUS)){
+        console.error('Shader compilation failed:', this.#context.getShaderInfoLog(shader));
+            this.#context.deleteShader(shader)
+            return null
+        }
+        return shader
+    }
+}

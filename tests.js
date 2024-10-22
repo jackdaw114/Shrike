@@ -3020,15 +3020,30 @@ let {indices, vertices} = parseOBJ(
     `
 )
 let transformation = new Transformation()
-mat4.rotate(entity.getTransformation().getMatrix(), mat4.create(), 1.4, [0,1,0])
 
 testScene.addComponent(entity, new Geometry(vertices,indices))
 testScene.addComponent(entity, new DebugLine([1,1,1,1,1,1]))
 
-const renderer = new Renderer("test",canvas.getContext("webgl2"),CANVAS_WIDTH/CANVAS_HEIGHT)
+const renderer = new Renderer(testScene,canvas.getContext("webgl2"),CANVAS_WIDTH/CANVAS_HEIGHT)
 
 const debugSystem = new DebugSystem(testScene,canvas.getContext("webgl2"),CANVAS_WIDTH/CANVAS_HEIGHT)
 debugSystem.init()
+
+let lineObj = new DebugLine()
+
+function drawGrid(lineComponent, numberOfLines,spacing) {
+    let size = (numberOfLines * spacing - spacing) / 2
+    for (let i = 0; i < numberOfLines; i++) {
+        lineComponent.addLine([-size,spacing*i-size,0,0,0,0],[size,spacing*i-size,0,0,0,0])
+    }
+    for (let i = 0; i < numberOfLines; i++) {
+        lineComponent.addLine([spacing*i-size,-size,0,0,0,0],[spacing*i-size,size,0,0,0,0])
+    }
+}
+
+drawGrid(lineObj, 15, 0.5)
+
+testScene.addComponent(entity,lineObj)
 
 testScene.addSystem(debugSystem, ["DebugLine"])
 testScene.addSystem(renderer, ["Geometry"])
@@ -3055,14 +3070,24 @@ handle.appendColorPicker(controller)
 
 let rotation =0
 
+let camera = testScene.getCamera()
 //NOTE: example of how a script object works (this is bad code)
 function repeatingFunction() {
-    mat4.rotate(entity.getTransformation().getMatrix(), mat4.create(), rotation/30, [0,1,0])
+
+    let zoom = Math.sin(rotation/100) * 3 +10
+    mat4.lookAt(camera, [zoom*Math.sin(rotation/60),zoom*Math.cos(rotation/60),1], [0,0,0], [0,0,1])
+     
     rotation++
+
 }
+
+
+
 
 // Repeat every 1 second (1000 milliseconds)
 setInterval(repeatingFunction, 15);
 
 //testScene.init()
 //testScene.update(1)
+//
+
