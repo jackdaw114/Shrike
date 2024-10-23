@@ -117,7 +117,7 @@ export default class PickingSystem extends System {
         );
         this.#context.bindTexture(this.#context.TEXTURE_2D, this.pickerTexture);
         this.#context.disable(this.#context.BLEND)
-            
+        this.#context.clearColor(0.0,0.0,0.0 ,0.0 ) 
         this.#context.clear(this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT)
 
         for (const component of this.scene.componentMaps["Geometry"]) {
@@ -127,8 +127,8 @@ export default class PickingSystem extends System {
             this.#context.FRAMEBUFFER,
             null
         );
-        this.#context.bindTexture(this.#context.TEXTURE_2D, null);
         this.#context.enable(this.#context.BLEND)
+        this.#context.bindTexture(this.#context.TEXTURE_2D, null);
 
     }
     
@@ -212,7 +212,7 @@ export default class PickingSystem extends System {
             false,
             viewMatrix
         );
-        this.#context.uniform1f(idLocation, 3)
+        this.#context.uniform1f(idLocation, component.entity.id)
 
         this.#context.drawElements(
             this.#context.TRIANGLES,

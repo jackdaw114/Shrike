@@ -64,6 +64,9 @@ export class EventHandler {
         }
     }
 }
+
+
+
 export class MouseEvent {
     constructor(element) {
         this.element = element;
@@ -71,6 +74,7 @@ export class MouseEvent {
         this.mouseY = 0;
         this.lastX = 0;
         this.lastY = 0;
+        this.prevScrollY = 0;
         this.mouseDown = false;
         this.dragCallback = () => {};
         this.activeKeys ={}
@@ -78,6 +82,7 @@ export class MouseEvent {
         element.addEventListener('mousedown', (e)=>this.handleMouseDown(e));
         element.addEventListener('mouseup', (e) =>this.handleMouseUp(e));
         element.addEventListener('mousemove',(e)=>this.handleMouseMove(e))
+        element.addEventListener('wheel',(e)=>this.handleScroll(e))
         document.body.addEventListener('keydown',(e)=>this.handleKeyDown(e)) 
         document.body.addEventListener('keyup',(e)=>this.handleKeyUp(e)) 
         element.addEventListener('dragstart', (e) => e.preventDefault());
@@ -102,13 +107,17 @@ export class MouseEvent {
         console.log(this.activeKeys)
     }
 
+    handleScroll(e) {
+        e.preventDefault()
+        this.scrollCallback(e)
+        
+
+    }
     handleMouseMove(e) {
     if (this.mouseDown && !Object.keys(this.activeKeys).length) {
-            // Calculate displacement from last position
             const dispX = e.clientX - this.lastX;
             const dispY = e.clientY - this.lastY;
 
-            // Call the drag callback with the event and displacements
             this.dragCallback({
                 originalEvent: e,
                 dispX,
@@ -120,7 +129,6 @@ export class MouseEvent {
             });
         }
 
-        // Update the last known position
         this.lastX = e.clientX;
         this.lastY = e.clientY;
     }
@@ -128,6 +136,9 @@ export class MouseEvent {
     addEventListener(type, callback) {
         if (type === 'drag') {
             this.dragCallback = callback;
+        }
+        if (type === 'scroll') {
+            this.scrollCallback = callback;
         }
     }
 

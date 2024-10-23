@@ -1,4 +1,4 @@
-import { mat4 } from "gl-matrix";
+import { mat4, vec3 } from "gl-matrix";
 import { parseOBJ } from "./lib/parse-obj.js";
 import {
     Component,
@@ -25,6 +25,7 @@ const context = canvas.getContext("webgl2")
 let testScene = new Scene()
 
 let entity = testScene.createEntity()
+let entity2 = testScene.createEntity()
 
 function measureTime(callback, iterations = 1000) {
     const start = performance.now();
@@ -3028,9 +3029,14 @@ let {indices, vertices} = parseOBJ(
 
 let transformation = new Transformation()
 
-testScene.addComponent(entity, new Geometry(vertices,indices))
-testScene.addComponent(entity, new DebugLine([1,1,1,1,1,1]))
+entity.transformation = transformation
+mat4.rotate(transformation.getMatrix(), transformation.getMatrix(), 1.4, [0,1,0])
+mat4.translate(transformation.getMatrix(), transformation.getMatrix(), [0,0,2])
 
+testScene.addComponent(entity, new Geometry(vertices,indices))
+testScene.addComponent(entity2, new Geometry(vertices,indices))
+
+testScene.addComponent(entity, new DebugLine([1,1,1,1,1,1]))
 const renderer = new Renderer(testScene,context,CANVAS_WIDTH/CANVAS_HEIGHT)
 
 
@@ -3132,13 +3138,32 @@ document.body.addEventListener('keydown', (e)=>{
 const mouseEvents = new MouseEvent(canvas)
 
 mouseEvents.addEventListener('drag', (e) => {
-    const rate = 20;
+    const rate = 200;
     mat4.translate(camera,camera , tempCamera.getRight().map((num)=>-(num/rate)*e.dispX) )
     mat4.translate(camera,camera , tempCamera.getUp().map((num)=>(num/rate)*e.dispY) )
+    console.log(tempCamera.getTranslate())
+    console.log(tempCamera.getForward())
 })
+
+
+
+let counter = 1
+
+
+// Wrong get formulas for forward ,right, up and position
+mouseEvents.addEventListener('scroll', (e)=>{
+    console.log(tempCamera.getTranslate()) 
+    let tempVec = [0,0,0];
+    console.log(e.deltaY)
+    let sign = (e.deltaY > 0) ? 2:0.5;
+    console.log(sign)
+    mat4.lookAt(camera, tempCamera.getTranslate().map((item)=>-item*(sign)), [0,0,0], [0,1,0])
+})
+
 
 console.log(camera)
 
+entity.id = 7
 canvas.addEventListener('click', (e)=>{
     const rect = canvas.getBoundingClientRect()
     const x = e.clientX - rect.left;

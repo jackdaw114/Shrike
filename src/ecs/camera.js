@@ -8,9 +8,15 @@ export default class Camera {
         this.up = [0,0,1]
     }
     getRight() {
-        return this.matrix.slice(0,4)
+        return this.matrix.slice(0,3)
     }
     getUp() {
-        return this.matrix.slice(4,8)
+        return this.matrix.slice(4,7)
+    }
+    getForward() {
+        return this.matrix.slice(8,11)
+    }
+    getTranslate() {
+        return this.matrix.slice(12,15)
     }
 }

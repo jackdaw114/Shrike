@@ -1,4 +1,5 @@
 import { Component, Scene, System } from "../ecs/classes.js";
+import {Geometry} from "../ecs/component-classes.js";
 import Shader, { testVert, testFrag } from "./shaders.js";
 import { mat4, glMatrix } from "gl-matrix";
 
@@ -36,7 +37,7 @@ export default class Renderer extends System {
         this.#context.enable(this.#context.CULL_FACE);
         this.#context.frontFace(this.#context.CCW);
         this.#context.cullFace(this.#context.BACK);
-
+        
         // TODO:- change this to some other function prolly called in init and has some sort of dynamic override maybe
         this.shader = new Shader(this.#context, testVert, testFrag);
         this.#context.clearColor(1.0, 1.0, 1.0, 1.0);
@@ -56,16 +57,6 @@ export default class Renderer extends System {
         }
     }
 
-    readColor(x, y) {
-        console.log(x,y)
-        console.log(this)
-        this.#context.flush();
-        this.#context.finish();
-        this.#context.bindFramebuffer(this.#context.FRAMEBUFFER, null)    
-        let pixels = new Uint8Array(4)
-        this.#context.readPixels(x, y, 1, 1, this.#context.RGBA, this.#context.UNSIGNED_BYTE, pixels)
-        return pixels
-    }
 
     /**
      * @param {Component} component
@@ -125,7 +116,7 @@ export default class Renderer extends System {
     }
 
     /**
-     * @param {Component} component
+     * @param {Geometry} component
      */
     render(component) {
         this.#context.bindVertexArray(component.vaoID);
