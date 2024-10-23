@@ -3059,12 +3059,15 @@ gameEngineHandle.start()
 let sguiInstance = new SGui();
 
 let handle = sguiInstance.createWindow("test", true)
+let panelHandler = sguiInstance.createWindow("panel", true)
+
 let colouPickerController = {
     r: 0,
     g: 0,
     b: 0
 }
 
+// use Getter to get the value 
 let inputBoxController = {
     _value: "", 
 
@@ -3072,13 +3075,24 @@ let inputBoxController = {
         return this._value;
     },
 
-    set value(newValue) {
-        this._value = newValue;
-    },
 };
+
+let filePanelController = {
+    _files: [],
+    _currentContext: "",
+
+    get files() {
+        return this._files;
+    },
+
+    get currentContext() {
+        return this._currentContext;
+    },
+}
 
 handle.appendColorPicker(colouPickerController)
 handle.appendInputBox(inputBoxController);
+panelHandler.appendFilePanel(filePanelController);
 
 
 
@@ -3097,14 +3111,23 @@ handle.appendInputBox(inputBoxController);
         mat4.lookAt(camera, [zoom * Math.sin(rotation / 61), zoom * Math.cos(rotation / 60), 1], [0, 0, 0], [0, 0, 1])
         rotation++
         // console.log(inputBoxController.value);
+        // console.log(filePanelController.files);
+        // console.log(filePanelController.currentContext);
         
     }
+
+function outputChecker(filePanelController) {
+    console.log(filePanelController.files)
+    console.log(filePanelController.currentContext)
+}
     
     
     
     
     // Repeat every 1 second (1000 milliseconds)
-    setInterval(() => repeatingFunction(inputBoxController), 15);
+setInterval(() => repeatingFunction(inputBoxController), 15);
+    
+setInterval(()=>outputChecker(filePanelController), 2000)
     
     //testScene.init()
 //testScene.update(1)
