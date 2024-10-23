@@ -3084,7 +3084,7 @@ let inputBoxController = {
 
 let filePanelController = {
     _files: [],
-    _currentContext: "",
+    _currentContext: null,
 
     get files() {
         return this._files;

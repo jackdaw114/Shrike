@@ -1,6 +1,9 @@
 
 /* floating window styling */
 
+*{
+    font-family: "Helvetica";
+}
 
 .sgui-window {
     position: fixed;
@@ -24,7 +27,7 @@
 .sgui-input-box{
     width:85%;
     color: #fff;
-    background-color: rgb(39, 37, 37);
+    background-color: #212730;
     border-radius: 4.5px;
     outline: none;
     margin-top: 2px;
@@ -34,6 +37,8 @@
 .sgui-file-panel{
     display: block;
     height: auto;
+    /* text-align: left; */
+
     padding: 5px;
     
 } 
@@ -46,6 +51,8 @@
     border-radius: 0.5rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     max-height: 300px;  /* Add scrolling after this height */
+    min-height:100px;
+    text-align: left;
     /* max-width: 300px; TODO: set a max width with wrapping */
 }
 
@@ -53,11 +60,12 @@
 .sgui-file-list li {
     padding: 0.2rem 0.5rem;
     background-color: #212730;  /* Same as top-bar */
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.1rem;
     border-radius: 0.3rem;
     transition: background-color 0.2s ease;
     cursor: pointer;
     font-size: smaller;
+    color: rgb(179, 179, 179);
 
 }
 
@@ -87,6 +95,16 @@
 .sgui-file-list::-webkit-scrollbar-thumb:hover {
     background: #445267;
 }
+
+.file-placeholder {
+    display: block;
+    text-align: center;
+    padding: 10px;
+    color: #606a79;
+
+    /* font-style: italic; */
+}
+
 
 .sgui-color-picker{
     padding: 10px;
