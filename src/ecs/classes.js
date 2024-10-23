@@ -70,8 +70,10 @@ export class Scene {
         this.systems = new Map();
         this.componentMaps = {};
         this.isRunning = false;
-        this.activeCamera = mat4.create()
-        mat4.lookAt(this.activeCamera, [0,0,-1], [0,0,0], [0,1,0])
+        this.activeCamera;
+    }
+    setCamera(camera) {
+        this.activeCamera = camera
     }
 
     createEntity() {
@@ -134,6 +136,6 @@ export class Scene {
         }
     }
     getCamera() {
-        return this.activeCamera
+        return this.activeCamera.matrix
     }
 }

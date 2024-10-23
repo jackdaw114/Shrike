@@ -13,6 +13,8 @@ import {Shrike} from "./src/core/core.js";
 import DebugSystem from "./src/graphics/debug-helper.js";
 import PickingSystem from "./src/graphics/picker.js";
 import TestRenderer from "./src/graphics/test.js";
+import Camera from "./src/ecs/camera.js";
+import {MouseEvent} from "./src/event-handler/event-handler.js";
 
 let canvas = document.getElementById("canvas1")
 
@@ -3041,10 +3043,10 @@ let lineObj = new DebugLine()
 function drawGrid(lineComponent, numberOfLines,spacing) {
     let size = (numberOfLines * spacing - spacing) / 2
     for (let i = 0; i < numberOfLines; i++) {
-        lineComponent.addLine([-size,spacing*i-size,0,0,0,0],[size,spacing*i-size,0,0,0,0])
+        lineComponent.addLine([-size,0,spacing*i-size,0,0,0],[size,0,spacing*i-size,0,0,0])
     }
     for (let i = 0; i < numberOfLines; i++) {
-        lineComponent.addLine([spacing*i-size,-size,0,0,0,0],[spacing*i-size,size,0,0,0,0])
+        lineComponent.addLine([spacing*i-size,0,-size,0,0,0],[spacing*i-size,0,size,0,0,0])
     }
 }
 
@@ -3059,9 +3061,9 @@ renderer.width = CANVAS_WIDTH
 renderer.height = CANVAS_HEIGHT
 
 
-testScene.addSystem(debugSystem, ["DebugLine"])
 testScene.addSystem(renderer, ["Geometry"])
 testScene.addSystem(testPickingSystem, ["Geometry"])
+testScene.addSystem(debugSystem, ["DebugLine"])
 customElements.define("s-gui", SGui)
 
 
@@ -3084,8 +3086,10 @@ handle.appendColorPicker(controller)
 
 
 let rotation =0
-
+let tempCamera = new Camera()
+testScene.setCamera(tempCamera)
 let camera = testScene.getCamera()
+
 //NOTE: example of how a script object works (this is bad code)
 function repeatingFunction() {
     let zoom = Math.sin(rotation/100) * 3 +10
@@ -3095,12 +3099,45 @@ function repeatingFunction() {
 
 }
 
-let zoom = Math.sin(rotation/100) * 3 +10
-mat4.lookAt(camera, [zoom*Math.sin(rotation/60),zoom*Math.cos(rotation/60),10], [0,0,0], [0,0,1])
+mat4.lookAt(camera, [0,1,4], [0,0,0], [0,1,0])
+console.log(tempCamera.getRight())
+
+
 
 
 // Repeat every 1 second (1000 milliseconds)
 //setInterval(repeatingFunction, 15);
+
+document.body.addEventListener('keydown', (e)=>{
+    const rate = 20;
+    console.log("event keydown:" ,e.key)
+    if (e.key === "ArrowRight") {
+        
+        mat4.translate(camera,camera , tempCamera.getRight().map((num)=>-(num/rate)) )
+    }
+    if (e.key === "ArrowLeft") {
+        
+        mat4.translate(camera,camera , tempCamera.getRight().map((num)=>(num/rate)) )
+    }
+
+    if (e.key === "ArrowUp") {
+        mat4.translate(camera,camera , tempCamera.getUp().map((num)=>-(num/rate)) )
+    }
+    if (e.key === "ArrowDown") {
+        mat4.translate(camera,camera , tempCamera.getUp().map((num)=>(num/rate)) )
+    }
+
+})
+
+const mouseEvents = new MouseEvent(canvas)
+
+mouseEvents.addEventListener('drag', (e) => {
+    const rate = 20;
+    mat4.translate(camera,camera , tempCamera.getRight().map((num)=>-(num/rate)*e.dispX) )
+    mat4.translate(camera,camera , tempCamera.getUp().map((num)=>(num/rate)*e.dispY) )
+})
+
+console.log(camera)
 
 canvas.addEventListener('click', (e)=>{
     const rect = canvas.getBoundingClientRect()

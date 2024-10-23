@@ -39,13 +39,14 @@ export default class Renderer extends System {
 
         // TODO:- change this to some other function prolly called in init and has some sort of dynamic override maybe
         this.shader = new Shader(this.#context, testVert, testFrag);
-        this.#context.clearColor(1.0, 1.0, 0.0, 1.0);
+        this.#context.clearColor(1.0, 1.0, 1.0, 1.0);
 
 
     }
 
     update(deltaTime) {
         // octree culling here then provide updated array to the loop below
+        
         this.tempFun();
     }
 
@@ -116,6 +117,7 @@ export default class Renderer extends System {
 
     tempFun() {
         this.#context.useProgram(this.shader.getProgram())
+        this.#context.clear(this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT)
         for (const component of this.components["Geometry"]) {
             this.render(component);
 

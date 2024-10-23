@@ -117,6 +117,8 @@ export default class PickingSystem extends System {
         );
         this.#context.bindTexture(this.#context.TEXTURE_2D, this.pickerTexture);
         this.#context.disable(this.#context.BLEND)
+            
+        this.#context.clear(this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT)
 
         for (const component of this.scene.componentMaps["Geometry"]) {
             this.render(component);
