@@ -3075,6 +3075,11 @@ let inputBoxController = {
         return this._value;
     },
 
+    set value(newValue) {
+        this._value = newValue;
+    
+    }
+
 };
 
 let filePanelController = {
@@ -3085,9 +3090,14 @@ let filePanelController = {
         return this._files;
     },
 
+    
     get currentContext() {
         return this._currentContext;
     },
+
+    set currentContext(newContext) {
+        this._currentContext = newContext;
+    }
 }
 
 handle.appendColorPicker(colouPickerController)
@@ -3110,7 +3120,7 @@ panelHandler.appendFilePanel(filePanelController);
         let zoom = Math.sin(rotation / 60) * 3 + 5
         mat4.lookAt(camera, [zoom * Math.sin(rotation / 61), zoom * Math.cos(rotation / 60), 1], [0, 0, 0], [0, 0, 1])
         rotation++
-        // console.log(inputBoxController.value);
+        console.log(inputBoxController.value);
         // console.log(filePanelController.files);
         // console.log(filePanelController.currentContext);
         
