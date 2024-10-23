@@ -1,5 +1,4 @@
 import { Scene } from "../ecs/classes";
-import Renderer from "../graphics/renderer";
 
 export class Shrike {
     lastFrameTime = 0;

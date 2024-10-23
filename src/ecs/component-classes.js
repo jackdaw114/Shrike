@@ -43,3 +43,10 @@ export class DebugLine extends Component{
         this.arrayBuffer = new Float32Array([...this.arrayBuffer,...from,...to])
     }
 }
+
+export class Picker extends Component{
+    constructor() {
+        super();
+    }
+
+}

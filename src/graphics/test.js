@@ -1,25 +1,10 @@
+
 import { Component, Scene, System } from "../ecs/classes.js";
-import Shader, { testVert, testFrag } from "./shaders.js";
+import Shader from "./shaders.js";
 import { mat4, glMatrix } from "gl-matrix";
+import { testFrag,testVert } from "../assent-manager/shader-assets.js";
 
-export default class Renderer extends System {
-    POS_SIZE = 3;
-    COLOR_SIZE = 3;
-    UV_SIZE = 2;
-    TEXTURE_ID_SIZE = 1;
-
-    POS_OFFSET = 0;
-    COLOR_OFFSET =
-        this.POS_OFFSET + this.POS_SIZE * Float32Array.BYTES_PER_ELEMENT;
-    UV_OFFSET =
-        this.COLOR_OFFSET + this.COLOR_SIZE * Float32Array.BYTES_PER_ELEMENT;
-
-    TEXTURE_ID_OFFSET =
-        this.UV_OFFSET + this.UV_SIZE * Float32Array.BYTES_PER_ELEMENT;
-
-    VERTEX_SIZE =
-        this.POS_SIZE + this.COLOR_SIZE + this.UV_SIZE + this.TEXTURE_ID_SIZE;
-    VERTEX_SIZE_IN_BYTES = this.VERTEX_SIZE * Float32Array.BYTES_PER_ELEMENT;
+export default class TestRenderer extends System {
 
     /**
      * @type {WebGL2RenderingContext}
@@ -28,95 +13,105 @@ export default class Renderer extends System {
     /**
      * @param {WebGL2RenderingContext} canvas
      */
-    constructor(scene, context, aspect_ratio) {
+    constructor(scene,width,height, context) {
         super(scene);
-        this.aspect_ratio = aspect_ratio;
+        this.aspect_ratio = width/height;
         this.#context = context;
         this.#context.enable(this.#context.DEPTH_TEST);
         this.#context.enable(this.#context.CULL_FACE);
         this.#context.frontFace(this.#context.CCW);
         this.#context.cullFace(this.#context.BACK);
 
-        // TODO:- change this to some other function prolly called in init and has some sort of dynamic override maybe
         this.shader = new Shader(this.#context, testVert, testFrag);
-        this.#context.clearColor(1.0, 1.0, 0.0, 1.0);
 
+        this.pickerFramebuffer = this.#context.createFramebuffer();
+        this.pickerDepthTexture = this.#context.createTexture();
+        this.#context.bindFramebuffer(
+            this.#context.FRAMEBUFFER,
+            this.pickerFramebuffer
+        );
 
+        this.initTexture(width, height);
+        this.#context.bindFramebuffer(this.#context.FRAMEBUFFER, null);
+        this.#context.bindTexture(this.#context.TEXTURE_2D, null);
     }
 
-    update(deltaTime) {
-        // octree culling here then provide updated array to the loop below
-        this.tempFun();
-    }
+    initTexture(width, height) {
+        this.pickerTexture = this.#context.createTexture();
+        this.#context.bindTexture(this.#context.TEXTURE_2D, this.pickerTexture);
+        this.#context.texParameteri(
+            this.#context.TEXTURE_2D,
+            this.#context.TEXTURE_WRAP_S,
+            this.#context.REPEAT
+        );
+        this.#context.texParameteri(
+            this.#context.TEXTURE_2D,
+            this.#context.TEXTURE_WRAP_T,
+            this.#context.REPEAT
+        );
+        this.#context.texParameteri(
+            this.#context.TEXTURE_2D,
+            this.#context.TEXTURE_MAG_FILTER,
+            this.#context.NEAREST
+        );
+        this.#context.texParameteri(
+            this.#context.TEXTURE_2D,
+            this.#context.TEXTURE_MIN_FILTER,
+            this.#context.NEAREST
+        );
+        this.#context.texImage2D(
+            this.#context.TEXTURE_2D,
+            0,
+            this.#context.RGBA32F,
+            width,
+            height,
+            0,
+            this.#context.RGBA,
+            this.#context.FLOAT,
+            null
+        );
 
-    init() {
-        for (const component of this.components["Geometry"]) {
-            this.initGeometry(component);
+        this.#context.framebufferTexture2D(
+            this.#context.FRAMEBUFFER,
+            this.#context.COLOR_ATTACHMENT0,
+            this.#context.TEXTURE_2D,
+            this.pickerTexture,
+            0
+        );
+
+        this.#context.bindTexture(
+            this.#context.TEXTURE_2D,
+            this.pickerDepthTexture
+        );
+        this.#context.texImage2D(
+            this.#context.TEXTURE_2D,
+            0,
+            this.#context.DEPTH_COMPONENT24,
+            width,
+            height,
+            0,
+            this.#context.DEPTH_COMPONENT,
+            this.#context.UNSIGNED_INT,
+            null
+        );
+        this.#context.framebufferTexture2D(
+            this.#context.FRAMEBUFFER,
+            this.#context.DEPTH_ATTACHMENT,
+            this.#context.TEXTURE_2D,
+            this.pickerDepthTexture,
+            0
+        );
+
+        if (
+            this.#context.checkFramebufferStatus(this.#context.FRAMEBUFFER) !==
+            this.#context.FRAMEBUFFER_COMPLETE
+        ) {
+            console.error("Framebuffer is not complete");
         }
     }
-
-    readColor(x, y) {
-        console.log(x,y)
-        console.log(this)
-        this.#context.flush();
-        this.#context.finish();
-        this.#context.bindFramebuffer(this.#context.FRAMEBUFFER, null)    
-        let pixels = new Uint8Array(4)
-        this.#context.readPixels(x, y, 1, 1, this.#context.RGBA, this.#context.UNSIGNED_BYTE, pixels)
-        return pixels
-    }
-
-    /**
-     * @param {Component} component
-     */
-    initGeometry(component) {
-        component.vaoID = this.#context.createVertexArray();
-        this.#context.bindVertexArray(component.vaoID);
-        component.vboID = this.#context.createBuffer();
-        this.#context.bindBuffer(this.#context.ARRAY_BUFFER, component.vboID);
-        this.#context.bufferData(
-            this.#context.ARRAY_BUFFER,
-            component.vertices.length * Float32Array.BYTES_PER_ELEMENT,
-            this.#context.DYNAMIC_DRAW
-        );
-
-
-        this.#context.enableVertexAttribArray(0);
-        this.#context.enableVertexAttribArray(1);
-
-        //TODO: figure out vertex buffer layout properly
-        this.#context.vertexAttribPointer(
-            0,
-            this.POS_SIZE,
-            this.#context.FLOAT,
-            false,
-            this.VERTEX_SIZE_IN_BYTES,
-            this.POS_OFFSET
-        );
-        this.#context.vertexAttribPointer(
-            1,
-            3,
-            this.#context.FLOAT,
-            false,
-            this.VERTEX_SIZE_IN_BYTES,
-            this.COLOR_OFFSET
-        );
-
-        component.eboID = this.#context.createBuffer();
-        this.#context.bindBuffer(
-            this.#context.ELEMENT_ARRAY_BUFFER,
-            component.eboID
-        );
-        this.#context.bufferData(
-            this.#context.ELEMENT_ARRAY_BUFFER,
-            component.indices,
-            this.#context.STATIC_DRAW
-        );
-    }
-
-    tempFun() {
+    update(deltaTime) {
         this.#context.useProgram(this.shader.getProgram())
-        for (const component of this.components["Geometry"]) {
+        for (const component of this.scene.componentMaps["Geometry"]) {
             this.render(component);
 
         }
@@ -169,6 +164,7 @@ export default class Renderer extends System {
         let worldMatrix = component.entity.transformation.getMatrix();
         let viewMatrix = this.scene.getCamera();
         let projMatrix = new Float32Array(16);
+
         mat4.perspective(
             projMatrix,
             glMatrix.toRadian(45),

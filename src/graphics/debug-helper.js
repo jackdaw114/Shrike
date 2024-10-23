@@ -1,6 +1,6 @@
 import { mat4, glMatrix } from "gl-matrix";
 import { System } from "../ecs/classes";
-import { testVert, testFrag } from "./shaders.js";
+import Shader, { testVert, testFrag } from "./shaders.js";
 
 export default class DebugSystem extends System {
     POS_SIZE = 3;
@@ -37,16 +37,8 @@ export default class DebugSystem extends System {
         this.#context.cullFace(this.#context.BACK);
 
         // TODO:- change this to some other function prolly called in init and has some sort of dynamic override maybe
-        const vertex_shader = this.createShader(
-            this.#context.VERTEX_SHADER,
-            testVert
-        );
-        const fragment_shader = this.createShader(
-            this.#context.FRAGMENT_SHADER,
-            testFrag
-        );
-        this.test_program = this.createProgram(vertex_shader, fragment_shader);
-        this.#context.useProgram(this.test_program);
+        this.shader = new Shader(this.#context,testVert,testFrag)
+        this.#context.useProgram(this.shader.getProgram());
 
         this.vaoID = this.#context.createVertexArray();
         this.#context.bindVertexArray(this.vaoID);
@@ -60,11 +52,11 @@ export default class DebugSystem extends System {
         );
 
         const positionLocation = this.#context.getAttribLocation(
-            this.test_program,
+            this.shader.getProgram(),
             "a_position"
         );
         const colorLocation = this.#context.getAttribLocation(
-            this.test_program,
+            this.shader.getProgram(),
             "a_color"
         );
         this.#context.enableVertexAttribArray(positionLocation);
@@ -109,24 +101,24 @@ export default class DebugSystem extends System {
         );
 
         this.#context.enableVertexAttribArray(
-            this.#context.getAttribLocation(this.test_program, "a_color")
+            this.#context.getAttribLocation(this.shader.getProgram(), "a_color")
         );
         this.#context.enableVertexAttribArray(
-            this.#context.getAttribLocation(this.test_program, "a_position")
+            this.#context.getAttribLocation(this.shader.getProgram(), "a_position")
         );
 
-        this.#context.useProgram(this.test_program);
+        this.#context.useProgram(this.shader.getProgram());
 
         const matWorldUniformLocation = this.#context.getUniformLocation(
-            this.test_program,
+            this.shader.getProgram(),
             "mWorld"
         );
         const matViewUniformLocation = this.#context.getUniformLocation(
-            this.test_program,
+            this.shader.getProgram(),
             "mView"
         );
         const matProjUniformLocation = this.#context.getUniformLocation(
-            this.test_program,
+            this.shader.getProgram(),
             "mProj"
         );
 
@@ -167,42 +159,5 @@ export default class DebugSystem extends System {
             component.arrayBuffer.length / (6) //TODO: constafiy
         );
         // TODO: this.#context.disableVertexAttribArray()
-    }
-    createProgram(vertexShader, fragmentShader) {
-        const program = this.#context.createProgram();
-        this.#context.attachShader(program, vertexShader);
-        this.#context.attachShader(program, fragmentShader);
-        this.#context.linkProgram(program);
-        if (
-            !this.#context.getProgramParameter(
-                program,
-                this.#context.LINK_STATUS
-            )
-        ) {
-            console.error("failed to link program");
-            this.#context.deleteProgram(program);
-            return null;
-        }
-        return program;
-    }
-
-    createShader(type, source) {
-        const shader = this.#context.createShader(type);
-        this.#context.shaderSource(shader, source);
-        this.#context.compileShader(shader);
-        if (
-            !this.#context.getShaderParameter(
-                shader,
-                this.#context.COMPILE_STATUS
-            )
-        ) {
-            console.error(
-                "Shader compilation failed:",
-                this.#context.getShaderInfoLog(shader)
-            );
-            this.#context.deleteShader(shader);
-            return null;
-        }
-        return shader;
     }
 }

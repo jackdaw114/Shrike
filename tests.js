@@ -11,12 +11,15 @@ import {DebugLine, Geometry} from "./src/ecs/component-classes.js";
 import SGui from "./lib/shrike-gui/sgui.js";
 import {Shrike} from "./src/core/core.js";
 import DebugSystem from "./src/graphics/debug-helper.js";
+import PickingSystem from "./src/graphics/picker.js";
+import TestRenderer from "./src/graphics/test.js";
 
 let canvas = document.getElementById("canvas1")
 
 const CANVAS_WIDTH = canvas.width = window.innerWidth;
 const CANVAS_HEIGHT = canvas.height = window.innerHeight;
 
+const context = canvas.getContext("webgl2")
 let testScene = new Scene()
 
 let entity = testScene.createEntity()
@@ -3019,17 +3022,21 @@ let {indices, vertices} = parseOBJ(
         f 505/526/942 323/549/942 321/550/942
     `
 )
+
+
 let transformation = new Transformation()
 
 testScene.addComponent(entity, new Geometry(vertices,indices))
 testScene.addComponent(entity, new DebugLine([1,1,1,1,1,1]))
 
-const renderer = new Renderer(testScene,canvas.getContext("webgl2"),CANVAS_WIDTH/CANVAS_HEIGHT)
+const renderer = new Renderer(testScene,context,CANVAS_WIDTH/CANVAS_HEIGHT)
 
-const debugSystem = new DebugSystem(testScene,canvas.getContext("webgl2"),CANVAS_WIDTH/CANVAS_HEIGHT)
+
+const debugSystem = new DebugSystem(testScene,context,CANVAS_WIDTH/CANVAS_HEIGHT)
 debugSystem.init()
 
 let lineObj = new DebugLine()
+
 
 function drawGrid(lineComponent, numberOfLines,spacing) {
     let size = (numberOfLines * spacing - spacing) / 2
@@ -3041,12 +3048,20 @@ function drawGrid(lineComponent, numberOfLines,spacing) {
     }
 }
 
+
 drawGrid(lineObj, 15, 0.5)
+
+let testPickingSystem = new PickingSystem(testScene,CANVAS_WIDTH,CANVAS_HEIGHT,canvas.getContext("webgl2"))
 
 testScene.addComponent(entity,lineObj)
 
+renderer.width = CANVAS_WIDTH
+renderer.height = CANVAS_HEIGHT
+
+
 testScene.addSystem(debugSystem, ["DebugLine"])
 testScene.addSystem(renderer, ["Geometry"])
+testScene.addSystem(testPickingSystem, ["Geometry"])
 customElements.define("s-gui", SGui)
 
 
@@ -3073,19 +3088,28 @@ let rotation =0
 let camera = testScene.getCamera()
 //NOTE: example of how a script object works (this is bad code)
 function repeatingFunction() {
-
     let zoom = Math.sin(rotation/100) * 3 +10
-    mat4.lookAt(camera, [zoom*Math.sin(rotation/60),zoom*Math.cos(rotation/60),1], [0,0,0], [0,0,1])
+    mat4.lookAt(camera, [zoom*Math.sin(rotation/60),zoom*Math.cos(rotation/60),10], [0,0,0], [0,0,1])
      
     rotation++
 
 }
 
-
+let zoom = Math.sin(rotation/100) * 3 +10
+mat4.lookAt(camera, [zoom*Math.sin(rotation/60),zoom*Math.cos(rotation/60),10], [0,0,0], [0,0,1])
 
 
 // Repeat every 1 second (1000 milliseconds)
-setInterval(repeatingFunction, 15);
+//setInterval(repeatingFunction, 15);
+
+canvas.addEventListener('click', (e)=>{
+    const rect = canvas.getBoundingClientRect()
+    const x = e.clientX - rect.left;
+    const y = rect.height - (e.clientY - rect.top); // flip Y
+    console.log(x,y)
+    console.log(testPickingSystem.readColor(x, y))
+    
+})
 
 //testScene.init()
 //testScene.update(1)

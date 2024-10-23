@@ -64,11 +64,11 @@ export class System {
 }
 
 export class Scene {
+    nextEntityId = 0;
     constructor() {
         this.entities = {};
         this.systems = new Map();
         this.componentMaps = {};
-        this.nextEntityId = 0;
         this.isRunning = false;
         this.activeCamera = mat4.create()
         mat4.lookAt(this.activeCamera, [0,0,-1], [0,0,0], [0,1,0])
@@ -123,6 +123,7 @@ export class Scene {
 
     init() {
         for (const [system, reqComponents] of this.systems) {
+            console.log("initializing :",system)
             system.init();
         }
         this.isRunning = true;

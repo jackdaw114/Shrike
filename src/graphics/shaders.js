@@ -1,8 +1,8 @@
 export const testVert = `#version 300 es
         precision mediump float;
 
-        in vec3 a_position;
-        in vec3 a_color;
+        layout(location=0)in vec3 a_position;
+        layout(location=1)in vec3 a_color;
 
         out vec3 v_color;
 
@@ -27,13 +27,17 @@ export const testFrag = `#version 300 es
 
 
 export default class Shader{
-    vertexShader;
-    fragmentShader;
     program;
     #context;
-    constructor() {
-
+    constructor(context,vertexShader,fragmentShader) {
+        this.#context = context
+        const vertex_shader = this.createShader(this.#context.VERTEX_SHADER,vertexShader)
+        const fragment_shader = this.createShader(this.#context.FRAGMENT_SHADER, fragmentShader)
+        this.program = this.createProgram(vertex_shader, fragment_shader) 
     }
+
+
+
     getProgram(){
         return this.program
     }
@@ -47,7 +51,10 @@ export default class Shader{
             this.#context.deleteProgram(program)
             return null
         }
+        this.#context.deleteShader(vertexShader)
+        this.#context.deleteShader(fragmentShader)
         return program
+        
     }
 
     createShader(type,source){
