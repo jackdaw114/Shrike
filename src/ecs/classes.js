@@ -16,10 +16,6 @@ class Entity {
          * @type {Object}
          */
         this.components = {};
-        this.transformation = new Transformation();
-    }
-    getTransformation() {
-        return this.transformation;
     }
     getComponent(componentName) {
         if (this.components.hasOwnProperty(componentName)) {

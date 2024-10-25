@@ -185,7 +185,7 @@ export default class PickingSystem extends System {
         let identityMatrix = new Float32Array(16);
         mat4.identity(identityMatrix);
 
-        let worldMatrix = component.entity.transformation.getMatrix();
+        let worldMatrix = component.entity.getComponent("Transformation").getMatrix();
         let viewMatrix = this.scene.getCamera();
         let projMatrix = new Float32Array(16);
 

@@ -40,7 +40,6 @@ export default class Renderer extends System {
         
         // TODO:- change this to some other function prolly called in init and has some sort of dynamic override maybe
         this.shader = new Shader(this.#context, testVert, testFrag);
-        this.#context.clearColor(1.0, 1.0, 1.0, 1.0);
 
 
     }
@@ -108,6 +107,7 @@ export default class Renderer extends System {
 
     tempFun() {
         this.#context.useProgram(this.shader.getProgram())
+        this.#context.clearColor(0.3, 0.3, 0.3, 1.0);
         this.#context.clear(this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT)
         for (const component of this.components["Geometry"]) {
             this.render(component);
@@ -158,8 +158,11 @@ export default class Renderer extends System {
 
         let identityMatrix = new Float32Array(16);
         mat4.identity(identityMatrix);
+        
+        
+        // custom error handeling required (check peroformance impact)
 
-        let worldMatrix = component.entity.transformation.getMatrix();
+        let worldMatrix = component.entity.getComponent("Transformation").getMatrix();
         let viewMatrix = this.scene.getCamera();
         let projMatrix = new Float32Array(16);
         mat4.perspective(

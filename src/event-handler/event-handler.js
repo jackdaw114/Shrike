@@ -117,6 +117,7 @@ export class MouseEvent {
     if (this.mouseDown && !Object.keys(this.activeKeys).length) {
             const dispX = e.clientX - this.lastX;
             const dispY = e.clientY - this.lastY;
+            
 
             this.dragCallback({
                 originalEvent: e,

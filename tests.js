@@ -3030,10 +3030,16 @@ let {indices, vertices} = parseOBJ(
 let transformation = new Transformation()
 
 entity.transformation = transformation
+
+
+
+
 mat4.rotate(transformation.getMatrix(), transformation.getMatrix(), 1.4, [0,1,0])
 mat4.translate(transformation.getMatrix(), transformation.getMatrix(), [0,0,2])
 
 testScene.addComponent(entity, new Geometry(vertices,indices))
+testScene.addComponent(entity, transformation)
+testScene.addComponent(entity2,new Transformation)
 testScene.addComponent(entity2, new Geometry(vertices,indices))
 
 testScene.addComponent(entity, new DebugLine([1,1,1,1,1,1]))
@@ -3105,8 +3111,6 @@ function repeatingFunction() {
 
 }
 
-mat4.lookAt(camera, [0,1,4], [0,0,0], [0,1,0])
-console.log(tempCamera.getRight())
 
 
 
@@ -3114,54 +3118,31 @@ console.log(tempCamera.getRight())
 // Repeat every 1 second (1000 milliseconds)
 //setInterval(repeatingFunction, 15);
 
-document.body.addEventListener('keydown', (e)=>{
-    const rate = 20;
-    console.log("event keydown:" ,e.key)
-    if (e.key === "ArrowRight") {
-        
-        mat4.translate(camera,camera , tempCamera.getRight().map((num)=>-(num/rate)) )
-    }
-    if (e.key === "ArrowLeft") {
-        
-        mat4.translate(camera,camera , tempCamera.getRight().map((num)=>(num/rate)) )
-    }
-
-    if (e.key === "ArrowUp") {
-        mat4.translate(camera,camera , tempCamera.getUp().map((num)=>-(num/rate)) )
-    }
-    if (e.key === "ArrowDown") {
-        mat4.translate(camera,camera , tempCamera.getUp().map((num)=>(num/rate)) )
-    }
-
-})
 
 const mouseEvents = new MouseEvent(canvas)
 
 mouseEvents.addEventListener('drag', (e) => {
     const rate = 200;
-    mat4.translate(camera,camera , tempCamera.getRight().map((num)=>-(num/rate)*e.dispX) )
-    mat4.translate(camera,camera , tempCamera.getUp().map((num)=>(num/rate)*e.dispY) )
-    console.log(tempCamera.getTranslate())
-    console.log(tempCamera.getForward())
+    tempCamera.panHorizontal(e.dispX/rate)
+    console.log(e.dispY)
+    tempCamera.panVertical(e.dispY/rate)
 })
 
 
 
 let counter = 1
 
+tempCamera.setPosition([3,5,10])
+tempCamera.setTarget([1,0,1])
+
 
 // Wrong get formulas for forward ,right, up and position
 mouseEvents.addEventListener('scroll', (e)=>{
-    console.log(tempCamera.getTranslate()) 
-    let tempVec = [0,0,0];
-    console.log(e.deltaY)
-    let sign = (e.deltaY > 0) ? 2:0.5;
-    console.log(sign)
-    mat4.lookAt(camera, tempCamera.getTranslate().map((item)=>-item*(sign)), [0,0,0], [0,1,0])
+    const rate = 200;
+    tempCamera.zoom(e.wheelDeltaY/rate)
 })
 
 
-console.log(camera)
 
 entity.id = 7
 canvas.addEventListener('click', (e)=>{
@@ -3176,4 +3157,3 @@ canvas.addEventListener('click', (e)=>{
 //testScene.init()
 //testScene.update(1)
 //
-
