@@ -109,7 +109,7 @@ export default class Renderer extends System {
         this.#context.useProgram(this.shader.getProgram())
         this.#context.clearColor(0.3, 0.3, 0.3, 1.0);
         this.#context.clear(this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT)
-        for (const component of this.components["Geometry"]) {
+        for (const component of this.scene.componentMaps["Geometry"]) {
             this.render(component);
 
         }
