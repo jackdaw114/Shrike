@@ -1,5 +1,5 @@
 import { Component, Scene, System } from "../ecs/classes.js";
-import {Geometry} from "../ecs/component-classes.js";
+import { Geometry } from "../ecs/component-classes.js";
 import Shader, { testVert, testFrag } from "./shaders.js";
 import { mat4, glMatrix } from "gl-matrix";
 
@@ -8,16 +8,13 @@ export default class Renderer extends System {
     COLOR_SIZE = 3;
     UV_SIZE = 2;
     TEXTURE_ID_SIZE = 1;
-
     POS_OFFSET = 0;
     COLOR_OFFSET =
         this.POS_OFFSET + this.POS_SIZE * Float32Array.BYTES_PER_ELEMENT;
     UV_OFFSET =
         this.COLOR_OFFSET + this.COLOR_SIZE * Float32Array.BYTES_PER_ELEMENT;
-
     TEXTURE_ID_OFFSET =
         this.UV_OFFSET + this.UV_SIZE * Float32Array.BYTES_PER_ELEMENT;
-
     VERTEX_SIZE =
         this.POS_SIZE + this.COLOR_SIZE + this.UV_SIZE + this.TEXTURE_ID_SIZE;
     VERTEX_SIZE_IN_BYTES = this.VERTEX_SIZE * Float32Array.BYTES_PER_ELEMENT;
@@ -37,25 +34,27 @@ export default class Renderer extends System {
         this.#context.enable(this.#context.CULL_FACE);
         this.#context.frontFace(this.#context.CCW);
         this.#context.cullFace(this.#context.BACK);
-        
+
         // TODO:- change this to some other function prolly called in init and has some sort of dynamic override maybe
         this.shader = new Shader(this.#context, testVert, testFrag);
-
-
     }
 
     update(deltaTime) {
         // octree culling here then provide updated array to the loop below
-        
+
         this.tempFun();
     }
 
     init() {
-        for (const component of this.components["Geometry"]) {
+        if (!this.scene.componentRegister.hasOwnProperty("Geometry")) {
+            throw new Error(
+                "The current scene is missing a Geometry component. Please add a Geometry component to enable the renderer, or detach the renderer."
+            );
+        }
+        for (const component of this.scene.componentRegister["Geometry"]) {
             this.initGeometry(component);
         }
     }
-
 
     /**
      * @param {Component} component
@@ -70,7 +69,6 @@ export default class Renderer extends System {
             component.vertices.length * Float32Array.BYTES_PER_ELEMENT,
             this.#context.DYNAMIC_DRAW
         );
-
 
         this.#context.enableVertexAttribArray(0);
         this.#context.enableVertexAttribArray(1);
@@ -106,12 +104,13 @@ export default class Renderer extends System {
     }
 
     tempFun() {
-        this.#context.useProgram(this.shader.getProgram())
+        this.#context.useProgram(this.shader.getProgram());
         this.#context.clearColor(0.3, 0.3, 0.3, 1.0);
-        this.#context.clear(this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT)
-        for (const component of this.components["Geometry"]) {
+        this.#context.clear(
+            this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT
+        );
+        for (const component of this.scene.componentRegister["Geometry"]) {
             this.render(component);
-
         }
     }
 
@@ -158,11 +157,12 @@ export default class Renderer extends System {
 
         let identityMatrix = new Float32Array(16);
         mat4.identity(identityMatrix);
-        
-        
+
         // custom error handeling required (check peroformance impact)
 
-        let worldMatrix = component.entity.getComponent("Transformation").getMatrix();
+        let worldMatrix = component.entity
+            .getComponent("Transformation")
+            .getMatrix();
         let viewMatrix = this.scene.getCamera();
         let projMatrix = new Float32Array(16);
         mat4.perspective(

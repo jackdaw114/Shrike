@@ -79,10 +79,17 @@ export default class DebugSystem extends System {
         );
     }
 
-    init() {}
+    init() {
+        
+        if (!this.scene.componentRegister.hasOwnProperty("DebugLine")) {
+            throw new Error(
+                "The current scene is missing a DebugLine component. Please add a DebugLine component to enable the debug line system, or detach the debug line system."
+            );
+        }
+    }
 
     update(deltaTime) {
-        for (const component of this.scene.componentMaps["DebugLine"]) {
+        for (const component of this.scene.componentRegister["DebugLine"]) {
             this.render(component);
         }
     }

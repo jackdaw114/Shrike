@@ -1,15 +1,7 @@
 import { mat4 } from "gl-matrix";
+import Camera from "./camera";
 
-export class Transformation {
-    constructor() {
-        this.matrix = mat4.create();
-    }
-    getMatrix() {
-        return this.matrix;
-    }
-}
-
-class Entity {
+export class Entity {
     constructor(id) {
         this.id = id;
         /**
@@ -21,19 +13,19 @@ class Entity {
         if (this.components.hasOwnProperty(componentName)) {
             return this.components[componentName];
         }
-        console.error(
+        throw new Error(
             "Entity",
             this.id,
             " Doesnt have ",
             componentName,
             " Component"
         );
-        return null;
     }
 }
 
 export class Component {
-    constructor() {// take entity reference here
+    constructor() {
+        // take entity reference here
         this.entity;
     }
 }
@@ -41,7 +33,7 @@ export class Component {
 export class System {
     constructor(scene) {
         this.components = {};
-        this.scene = scene
+        this.scene = scene;
     }
 
     update(deltaTime) {
@@ -54,22 +46,31 @@ export class System {
         throw new Error("Method 'addComponent' must be implemented.");
     }
     changeScene(scene) {
-        this.scene = scene
-        // prolly call its init funciton here create a destructor like deinit first ig 
+        this.scene = scene;
+        // prolly call its init funciton here create a destructor like deinit first ig
     }
 }
 
 export class Scene {
-    nextEntityId = 0;
     constructor() {
         this.entities = {};
-        this.systems = new Map();
-        this.componentMaps = {};
+        this.systems = {};
+        this.componentRegister = {};
         this.isRunning = false;
-        this.activeCamera;
+        this.activeCamera = new Camera();
     }
     setCamera(camera) {
-        this.activeCamera = camera
+        this.activeCamera = camera;
+    }
+
+    /*
+     * @param {System} system
+     */
+    attachSystem(system) {
+        this.systems[system.constructor.name] = system;
+        if (!system.scene) {
+            system.scene = this
+        }
     }
 
     createEntity() {
@@ -77,6 +78,9 @@ export class Scene {
         const entity = new Entity(id);
         this.entities[id] = entity;
         return entity;
+    }
+    addEntity(id, entity) {
+        this.entities[id] = entity;
     }
 
     removeEntity(entity) {
@@ -88,10 +92,10 @@ export class Scene {
         const componentClass = component.constructor.name;
         entity.components[componentClass] = component;
         component.entity = entity;
-        if (!this.componentMaps.hasOwnProperty(componentClass)) {
-            this.componentMaps[componentClass] = [];
+        if (!this.componentRegister.hasOwnProperty(componentClass)) {
+            this.componentRegister[componentClass] = [];
         }
-        let components = this.componentMaps[componentClass];
+        let components = this.componentRegister[componentClass];
         components.push(component);
         if (this.isRunning) {
             for (const [system, system_component] of this.systems) {
@@ -104,34 +108,39 @@ export class Scene {
 
     removeComponents(entity) {
         Object.entries(entity.components).forEach(([key, value]) => {
-            const list = this.componentMaps.get(key);
+            const list = this.componentRegister.get(key);
             const index = list.indexOf(value);
             list.splice(index, 1);
         });
     }
 
-    addSystem(system, requiredComponents) {
-        this.systems.set(system, requiredComponents);
-        for (let component of requiredComponents) {
-            system.components[component] = this.componentMaps[component];
-        }
-    }
 
     removeSystem(system) {}
 
     init() {
-        for (const [system, reqComponents] of this.systems) {
-            console.log("initializing :",system)
+        for (const system of Object.values(this.systems)) {
+            console.log("initializing :", system);
             system.init();
         }
         this.isRunning = true;
     }
     update(deltaTime) {
-        for (const [system, reqComponents] of this.systems) {
+        for (const system of Object.values(this.systems)) {
             system.update(deltaTime);
         }
     }
     getCamera() {
-        return this.activeCamera.matrix
+        return this.activeCamera.matrix;
+    }
+}
+
+// TODO: move this into some other file
+export class Transformation extends Component {
+    constructor() {
+        super()
+        this.matrix = mat4.create();
+    }
+    getMatrix() {
+        return this.matrix;
     }
 }

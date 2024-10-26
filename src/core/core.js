@@ -1,40 +1,68 @@
-import { Scene } from "../ecs/classes";
+import { Entity, Scene } from "../ecs/classes";
 
 export class Shrike {
     lastFrameTime = 0;
+
+    entity_uid = 1;
+    component_uid = 1;
+    scene_uid = 1;
+    system_uid = 1;
+
     /**
-     * @param {HTMLCanvasElement} canvas
+     * Initializes a new game instance with canvas and dimensions
+     * @param {HTMLCanvasElement} canvas - The canvas element to render the game on
+     * @param {number} width - The width of the canvas in pixels
+     * @param {number} height - The height of the canvas in pixels
+     * @property {number} CANVAS_WIDTH - The fixed canvas width
+     * @property {number} CANVAS_HEIGHT - The fixed canvas height
+     * @property {Object.<string, Scene>} scenes - Collection of game scenes
+     * @property {Object.<string, Entity>} entities - Collection of game entities
+     * @property {string} activeScene - The currently active scene identifier
      */
     constructor(canvas, width, height) {
         this.CANVAS_WIDTH = canvas.width = width;
         this.CANVAS_HEIGHT = canvas.height = height;
-        /**
-         * @type {Object}
-         */
         this.scenes = {};
-        /**
-         * @tyep {String}
-         */
-        this.activeScene;
+        this.systems = {};
+        this.entities = {};
+        this.activeScene = {};
         this.gameLoop = this.gameLoop.bind(this);
     }
-    // generrate data from json file?
 
     /**
      * @param {Scene} scene
      */
-    addScene(scene, name) {
-        if (!this.scenes.hasOwnProperty(name)) {
-            scene.init(); //check if init in required
-            this.scenes[name] = scene;
-            if (this.activeScene == null) {
-                this.activeScene = scene;
-            }
+    addScene() {
+        const scene = new Scene
+        this.scenes[this.scene_uid] = scene;
+
+        if (!Object.keys(this.activeScene).length) {
+            this.activeScene = this.scenes[this.scene_uid];
         }
+        this.scene_uid++;
+        return scene
     }
 
-    testFunciton(func) {
-        this.testFunc = func;
+    createSystem(Constructor, ...args) {
+        const system = new Constructor(
+            this.activeScene,
+            ...args
+        );
+
+        this.systems[this.system_uid] = system
+        this.system_uid++;
+        return system;
+    }
+
+    /**
+     * @param {Scene} scene
+     */
+    createEntity(scene) {
+        const entity = new Entity(this.entity_uid);
+        this.entities[this.entity_uid] = entity;
+        scene.addEntity(entity);
+        this.entity_uid++;
+        return entity
     }
 
     gameLoop(currentTime) {
@@ -45,7 +73,18 @@ export class Shrike {
     }
 
     start() {
+        if (!Object.keys(this.activeScene).length) {
+            throw new Error(
+                "No active scene found. Please create a scene or set an existing one as active."
+            );
+        }
         // do checks hreer brefore starting game loop
         requestAnimationFrame(this.gameLoop);
+    }
+    init() {
+        for (const scene of Object.values(this.scenes)) {
+            console.log(scene);
+            scene.init();
+        }
     }
 }

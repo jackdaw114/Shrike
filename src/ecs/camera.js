@@ -1,18 +1,14 @@
 import {glMatrix, mat4, vec3} from "gl-matrix"
-import {Component} from "./classes"
 
 
 // too much going on even if its simd calculations
-export default class Camera extends Component{
+export default class Camera{
     constructor() {
-        super()
         this.matrix = mat4.create()
         this.position = [0,0,-1]
         this.target = [0,0,0]
         this.up = [0,1,0]
-        
         this.forward = vec3.create() 
-        console.log(this.forward)
         this.right =vec3.create() 
         this.calculateRight()
     }
@@ -28,7 +24,6 @@ export default class Camera extends Component{
     }
     calculateUp() {
         vec3.cross(this.up, this.forward, this.right)
-        console.log(this.up)
     }
 
     normalizeAll() {

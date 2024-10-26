@@ -9,7 +9,7 @@ export default class PickingSystem extends System {
      */
     #context;
 
-    constructor(scene, width, height, context) {
+    constructor(scene,context, width, height) {
         super(scene);
         this.aspect_ratio = width/height
         this.width = width;
@@ -120,7 +120,7 @@ export default class PickingSystem extends System {
         this.#context.clearColor(0.0,0.0,0.0 ,0.0 ) 
         this.#context.clear(this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT)
 
-        for (const component of this.scene.componentMaps["Geometry"]) {
+        for (const component of this.scene.componentRegister["Geometry"]) {
             this.render(component);
         }
         this.#context.bindFramebuffer(
