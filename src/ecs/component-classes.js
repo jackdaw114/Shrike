@@ -50,3 +50,17 @@ export class Picker extends Component{
     }
 
 }
+
+export class Script extends Component{
+    constructor() {
+        super();
+    }
+
+    update(deltaTime,components) {
+        console.log("update script not Overridden \nscript attached to entity: -",this.entity.id,"\navailable components are:-",components)
+        
+        this.update = () => {}
+        
+        //to override
+    }
+}

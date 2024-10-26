@@ -4,11 +4,12 @@ import { monke } from "./monke";
 import { Shrike } from "./src/core/core";
 import Camera from "./src/ecs/camera";
 import { Transformation } from "./src/ecs/classes";
-import { DebugLine, Geometry } from "./src/ecs/component-classes";
+import { DebugLine, Geometry, Script } from "./src/ecs/component-classes";
 import Renderer from "./src/graphics/renderer";
 import DebugSystem from "./src/graphics/debug-helper";
 import PickingSystem from "./src/graphics/picker";
 import {MouseEvent} from "./src/event-handler/event-handler";
+import {ScriptSystem} from "./src/script-system/script-system";
 
 let canvas = document.getElementById("canvas1");
 
@@ -25,7 +26,7 @@ const renderer = engine.createSystem(
     canvas.getContext("webgl2"),
     CANVAS_WIDTH / CANVAS_HEIGHT
 );
-
+const scriptSystem = engine.createSystem(ScriptSystem)
 const pickingSystem = engine.createSystem(PickingSystem,context,CANVAS_WIDTH,CANVAS_HEIGHT)
 
 const debugSystem = engine.createSystem(DebugSystem,canvas.getContext("webgl2"),CANVAS_WIDTH/CANVAS_HEIGHT)
@@ -38,6 +39,7 @@ const debugLineEntity = engine.createEntity(scene1)
 scene1.attachSystem(renderer);
 scene1.attachSystem(debugSystem);
 scene1.attachSystem(pickingSystem);
+scene1.attachSystem(scriptSystem)
 
 const { indices, vertices } = parseOBJ(monke);
 
@@ -46,6 +48,7 @@ scene1.addComponent(entity1, new Transformation());
 scene1.addComponent(entity2, new Geometry(vertices, indices));
 scene1.addComponent(entity2, new Transformation())
 scene1.addComponent(debugLineEntity, new DebugLine())
+scene1.addComponent(entity1,new Script())
 
 
 
@@ -55,6 +58,11 @@ scene1.addComponent(debugLineEntity, new DebugLine())
 // ********************* Test Stuff ******************
 
 const transformation = entity2.getComponent('Transformation')
+const ent1Script = entity1.getComponent("Script")
+ent1Script.update = (deltaTime, components) => {
+    let {Transformation} = components
+    mat4.translate(Transformation.matrix, Transformation.matrix, [0,0,0.01])
+}
 
 mat4.rotate(transformation.getMatrix(), transformation.getMatrix(), 1.4, [0,1,0])
 mat4.translate(transformation.getMatrix(), transformation.getMatrix(), [0,0,2])
@@ -102,7 +110,9 @@ mouseEvents.addEventListener('scroll', (e)=>{
     const rate = 200;
     tempCamera.zoom(e.wheelDeltaY/rate)
 })
+
 // ********************* END *************************
+
 
 engine.init();
 engine.start();

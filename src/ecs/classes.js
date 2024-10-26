@@ -24,30 +24,12 @@ export class Entity {
 }
 
 export class Component {
+    /**
+        * @property {Entity} entity
+        */
     constructor() {
         // take entity reference here
         this.entity;
-    }
-}
-
-export class System {
-    constructor(scene) {
-        this.components = {};
-        this.scene = scene;
-    }
-
-    update(deltaTime) {
-        throw new Error("Method 'update' must be implemented.");
-    }
-    init() {
-        throw new Error("Method 'init' must be implemented.");
-    }
-    addComponent(componentClass) {
-        throw new Error("Method 'addComponent' must be implemented.");
-    }
-    changeScene(scene) {
-        this.scene = scene;
-        // prolly call its init funciton here create a destructor like deinit first ig
     }
 }
 
@@ -133,6 +115,32 @@ export class Scene {
         return this.activeCamera.matrix;
     }
 }
+
+
+export class System {
+    /**
+        * @property {Scene} entity
+        */
+    constructor(scene) {
+        this.components = {};
+        this.scene = scene;
+    }
+
+    update(deltaTime) {
+        throw new Error("Method 'update' must be implemented.");
+    }
+    init() {
+        throw new Error("Method 'init' must be implemented.");
+    }
+    addComponent(componentClass) {
+        throw new Error("Method 'addComponent' must be implemented.");
+    }
+    changeScene(scene) {
+        this.scene = scene;
+        // prolly call its init funciton here create a destructor like deinit first ig
+    }
+}
+
 
 // TODO: move this into some other file
 export class Transformation extends Component {
