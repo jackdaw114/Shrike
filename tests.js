@@ -115,6 +115,27 @@ let controller = {
 }
 handle.appendColorPicker(controller)
 
+let panelHandler = sguiInstance.createWindow("panel", true)
+let filePanelController = {
+    _files: [],
+    _currentContext: null,
+
+    get files() {
+        return this._files;
+    },
+
+    
+    get currentContext() {
+        return this._currentContext;
+    },
+
+    set currentContext(newContext) {
+        this._currentContext = newContext;
+    }
+}
+
+panelHandler.appendFilePanel(filePanelController);
+
 
 
 // ********************* END *************************
