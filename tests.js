@@ -9,6 +9,7 @@ import Renderer from "./src/graphics/renderer";
 import DebugSystem from "./src/graphics/debug-helper";
 import PickingSystem from "./src/graphics/picker";
 import {MouseEvent} from "./src/event-handler/event-handler";
+import SGui from "./lib/shrike-gui/sgui";
 
 let canvas = document.getElementById("canvas1");
 
@@ -102,6 +103,20 @@ mouseEvents.addEventListener('scroll', (e)=>{
     const rate = 200;
     tempCamera.zoom(e.wheelDeltaY/rate)
 })
+
+customElements.define("s-gui", SGui)
+const sguiInstance = new SGui();
+
+const handle = sguiInstance.createWindow("test", true)
+let controller = {
+    r: 0,
+    g: 0,
+    b: 0
+}
+handle.appendColorPicker(controller)
+
+
+
 // ********************* END *************************
 
 engine.init();
