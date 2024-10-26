@@ -17,7 +17,7 @@ const CANVAS_HEIGHT = (canvas.height = window.innerHeight);
 
 const engine = new Shrike(canvas, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-const scene1 = engine.addScene();
+const scene1 = engine.createScene();
 
 const context = canvas.getContext("webgl2")
 const renderer = engine.createSystem(

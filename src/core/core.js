@@ -32,7 +32,7 @@ export class Shrike {
     /**
      * @param {Scene} scene
      */
-    addScene() {
+    createScene() {
         const scene = new Scene
         this.scenes[this.scene_uid] = scene;
 
