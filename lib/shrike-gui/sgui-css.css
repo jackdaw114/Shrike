@@ -1,5 +1,10 @@
 
 /* floating window styling */
+
+*{
+    font-family: "Helvetica";
+}
+
 .sgui-window {
     position: fixed;
     top: 100px;
@@ -15,11 +20,96 @@
 }
 .sgui-base{
     background-color: rgba(0, 0, 0, 1);
+    display: grid;
+    justify-items: center;
 }
+
+.sgui-input-box{
+    width:85%;
+    color: #fff;
+    background-color: #212730;
+    border-radius: 4.5px;
+    outline: none;
+    margin-top: 2px;
+    margin-bottom: 4px;
+}
+
+.sgui-file-panel{
+    display: block;
+    height: auto;
+    /* text-align: left; */
+
+    padding: 5px;
+    
+} 
+
+.sgui-file-list {
+    list-style-type: none;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0.8rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-height: 300px;  /* Add scrolling after this height */
+    min-height:100px;
+    text-align: left;
+    /* max-width: 300px; TODO: set a max width with wrapping */
+}
+
+/* Add styles for list items */
+.sgui-file-list li {
+    padding: 0.2rem 0.5rem;
+    background-color: #212730;  /* Same as top-bar */
+    margin-bottom: 0.1rem;
+    border-radius: 0.3rem;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+    font-size: smaller;
+    color: rgb(179, 179, 179);
+
+}
+
+.sgui-file-list li:hover {
+    background-color: #2a3441;
+}
+
+.sgui-file-list li:active {
+    background-color: #1a222b;
+}
+
+
+.sgui-file-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sgui-file-list::-webkit-scrollbar-track {
+    background: #1a222b;
+    border-radius: 3px;
+}
+
+.sgui-file-list::-webkit-scrollbar-thumb {
+    background: #364150;
+    border-radius: 3px;
+}
+
+.sgui-file-list::-webkit-scrollbar-thumb:hover {
+    background: #445267;
+}
+
+.file-placeholder {
+    display: block;
+    text-align: center;
+    padding: 10px;
+    color: #606a79;
+
+    /* font-style: italic; */
+}
+
 
 .sgui-color-picker{
     padding: 10px;
 }
+
 
 .window-list{
     background-color: #101216;
