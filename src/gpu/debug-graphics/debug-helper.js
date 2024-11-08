@@ -1,8 +1,9 @@
 import { mat4, glMatrix } from "gl-matrix";
-import { System } from "../ecs/classes";
-import Shader, { testVert, testFrag } from "./shaders.js";
+import { System } from "../../ecs/classes";
+import Shader from "../shaders.js";
+import { testFrag, testVert } from "../../assent-manager/shader-assets";
 
-export default class DebugSystem extends System {
+export  class DebugSystem extends System {
     POS_SIZE = 3;
     COLOR_SIZE = 3;
     POS_OFFSET = 0;
@@ -37,7 +38,7 @@ export default class DebugSystem extends System {
         this.#context.cullFace(this.#context.BACK);
 
         // TODO:- change this to some other function prolly called in init and has some sort of dynamic override maybe
-        this.shader = new Shader(this.#context,testVert,testFrag)
+        this.shader = new Shader(this.#context,testVert,testFrag,["mView","mProj","mWorld"])
         this.#context.useProgram(this.shader.getProgram());
 
         this.vaoID = this.#context.createVertexArray();

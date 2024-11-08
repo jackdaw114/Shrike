@@ -1,9 +1,10 @@
-import { Component, Scene, System } from "../ecs/classes.js";
-import { Geometry } from "../ecs/component-classes.js";
-import Shader, { testVert, testFrag } from "./shaders.js";
+import { Component, Scene, System } from "../../ecs/classes.js";
+import { Geometry } from "../../ecs/component-classes.js";
+import Shader from "../shaders.js";
+import { testFrag, testVert } from "../../assent-manager/shader-assets.js";
 import { mat4, glMatrix } from "gl-matrix";
 
-export default class Renderer extends System {
+export class Renderer extends System {
     POS_SIZE = 3;
     COLOR_SIZE = 3;
     UV_SIZE = 2;
@@ -26,7 +27,7 @@ export default class Renderer extends System {
     /**
      * @param {WebGL2RenderingContext} canvas
      */
-    constructor(scene, context, aspect_ratio) {
+    constructor(scene, context, aspect_ratio, width, height) {
         super(scene);
         this.aspect_ratio = aspect_ratio;
         this.#context = context;
@@ -36,12 +37,67 @@ export default class Renderer extends System {
         this.#context.cullFace(this.#context.BACK);
 
         // TODO:- change this to some other function prolly called in init and has some sort of dynamic override maybe
-        this.shader = new Shader(this.#context, testVert, testFrag);
+        this.shader = new Shader(this.#context, testVert, testFrag, [
+            "mWorld",
+            "mView",
+            "mProj",
+            "diffuseColor",
+            "specularColor",
+            "shininess",
+            "ambientColor",
+            "lightPosition",
+        ]);
+
+        this.framebuffer = this.#context.createFramebuffer();
+        this.#context.bindFramebuffer(
+            this.#context.FRAMEBUFFER,
+            this.framebuffer
+        );
+
+        this.texture = this.#context.createTexture();
+        this.#context.bindTexture(this.#context.TEXTURE_2D, this.texture);
+
+        this.#context.texImage2D(
+            this.#context.TEXTURE_2D,
+            0,
+            this.#context.RGBA,
+            width,
+            height,
+            0,
+            this.#context.RGBA,
+            this.#context.UNSIGNED_BYTE,
+            null
+        );
+
+        this.#context.texParameteri(
+            this.#context.TEXTURE_2D,
+            this.#context.TEXTURE_MIN_FILTER,
+            this.#context.LINEAR
+        );
+        this.#context.texParameteri(
+            this.#context.TEXTURE_2D,
+            this.#context.TEXTURE_MAG_FILTER,
+            this.#context.LINEAR
+        );
+
+        this.#context.framebufferTexture2D(
+            this.#context.FRAMEBUFFER,
+            this.#context.COLOR_ATTACHMENT0,
+            this.#context.TEXTURE_2D,
+            this.texture,
+            0
+        );
+        
+        this.#context.bindFramebuffer(this.#context.FRAMEBUFFER,null)
+        this.#context.bindTexture(this.#context.TEXTURE_2D, null);
+
+        this.options = {
+            clear: true,
+        };
     }
 
     update(deltaTime) {
         // octree culling here then provide updated array to the loop below
-
         this.tempFun();
     }
 
@@ -106,11 +162,22 @@ export default class Renderer extends System {
     tempFun() {
         this.#context.useProgram(this.shader.getProgram());
         this.#context.clearColor(0.3, 0.3, 0.3, 1.0);
-        this.#context.clear(
-            this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT
-        );
+
+        if (this.options.clear) {
+            this.#context.clear(
+                this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT
+            );
+        }
         for (const component of this.scene.componentRegister["Geometry"]) {
-            this.render(component);
+            if (component.render) {
+                if (!component.depthTest) {
+                    this.#context.disable(this.#context.DEPTH_TEST);
+                }
+                this.render(component);
+                if (!component.depthTest) {
+                    this.#context.enable(this.#context.DEPTH_TEST);
+                }
+            }
         }
     }
 
@@ -163,6 +230,7 @@ export default class Renderer extends System {
         let worldMatrix = component.entity
             .getComponent("Transformation")
             .getMatrix();
+
         let viewMatrix = this.scene.getCamera();
         let projMatrix = new Float32Array(16);
         mat4.perspective(
@@ -172,12 +240,15 @@ export default class Renderer extends System {
             0.1, // get from camera
             1000.0 // get from camera
         );
+        // ************************** setUniforms *******************************
+        //TODO: create some sort of Uniform location holder
 
         this.#context.uniformMatrix4fv(
             matWorldUniformLocation,
             false,
             worldMatrix
         );
+
         this.#context.uniformMatrix4fv(
             matProjUniformLocation,
             false,
@@ -189,6 +260,38 @@ export default class Renderer extends System {
             viewMatrix
         );
 
+        this.#context.uniform3fv(
+            this.shader.getUniform("diffuseColor"),
+            component.material.getDiffuse()
+        );
+
+        this.#context.uniform3fv(
+            this.shader.getUniform("specularColor"),
+            component.material.getSpecular()
+        );
+
+        this.#context.uniform1f(
+            this.shader.getUniform("shininess"),
+            component.material.getShininess()
+        );
+        this.#context.uniform3fv(
+            this.shader.getUniform("ambientColor"),
+            component.material.getAmbient()
+        );
+        this.#context.uniform3fv(
+            this.shader.getUniform("lightPosition"),
+            [10, 10, 0]
+        );
+        this.#context.uniform1f(
+            this.#context.getUniformLocation(
+                this.shader.getProgram(),
+                "shininess"
+            ),
+            component.material.getShininess()
+        );
+        //this.#context.uniform3fv(this.#context.getUnifor, data)
+
+        // ************************** END *******************************
         this.#context.drawElements(
             this.#context.TRIANGLES,
             component.indices.length,

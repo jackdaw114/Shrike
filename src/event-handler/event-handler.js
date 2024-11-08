@@ -86,10 +86,14 @@ export class MouseEvent {
         document.body.addEventListener('keydown',(e)=>this.handleKeyDown(e)) 
         document.body.addEventListener('keyup',(e)=>this.handleKeyUp(e)) 
         element.addEventListener('dragstart', (e) => e.preventDefault());
+        element.addEventListener('mouseleave', (e) => {
+            this.mouseDown =false
+        })
     }
 
     handleMouseDown(e) {
-        this.mouseDown = true;
+        console.log(e)
+        this.mouseDown = e.buttons;
         this.lastX = e.clientX;
         this.lastY = e.clientY;
     }
@@ -120,6 +124,7 @@ export class MouseEvent {
             
 
             this.dragCallback({
+                button: this.mouseDown,
                 originalEvent: e,
                 dispX,
                 dispY,

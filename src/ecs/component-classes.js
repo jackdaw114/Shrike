@@ -1,6 +1,7 @@
-import { mat4 } from "gl-matrix";
+import { mat4, vec3 } from "gl-matrix";
 import { Component, Transformation } from "./classes";
 import {SGuiWindowBase} from "../../lib/shrike-gui/sgui";
+import {Material} from "../material/material";
 
 export class Geometry extends Component {
     /**
@@ -13,6 +14,13 @@ export class Geometry extends Component {
         this.vertices = vertices;
         this.indices = indices;
         this.texture = 0;
+        this.render = true;
+        this.depthTest = true;
+        this.material = new Material(new Float32Array([1.,1.,1.]),new Float32Array([1.,1.,1.]) , new Float32Array([1.,1.,1.]), 0);
+    }
+    materialOptions(params) {
+        const {diffuseColor=new Float32Array([1.0,1.0,1.0]), ambientColor=new Float32Array([1.0,1.0,1.0]), specularColor=new Float32Array([1.0,1.0,1.0]), shininess = 0.} = params;
+        this.material = new Material(diffuseColor,ambientColor,specularColor,shininess)
     }
 }
 

@@ -1,9 +1,9 @@
 import {glMatrix, mat4} from "gl-matrix";
-import { pickerFrag, pickerVert } from "../assent-manager/shader-assets";
-import { System } from "../ecs/classes";
-import Shader, { testFrag, testVert } from "./shaders";
+import { pickerFrag, pickerVert } from "../../assent-manager/shader-assets";
+import { System } from "../../ecs/classes";
+import Shader from "../shaders";
 
-export default class PickingSystem extends System {
+export class PickingSystem extends System {
     /**
      * @type {WebGL2RenderingContext}
      */
@@ -15,7 +15,7 @@ export default class PickingSystem extends System {
         this.width = width;
         this.height = height
         this.#context = context;
-        this.shader = new Shader(context,pickerVert,pickerFrag)
+        this.shader = new Shader(context,pickerVert,pickerFrag,["id","mWorld","mView","mProj"])
         this.pickerFramebuffer = this.#context.createFramebuffer();
         this.pickerDepthTexture = this.#context.createTexture();
         this.#context.bindFramebuffer(

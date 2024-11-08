@@ -25,7 +25,7 @@ export class Shrike {
         this.scenes = {};
         this.systems = {};
         this.entities = {};
-        this.activeScene = {};
+        this.activeScenes = [];
         this.gameLoop = this.gameLoop.bind(this);
     }
 
@@ -33,23 +33,23 @@ export class Shrike {
      * @param {Scene} scene
      */
     createScene() {
-        const scene = new Scene
+        const scene = new Scene();
         this.scenes[this.scene_uid] = scene;
 
-        if (!Object.keys(this.activeScene).length) {
-            this.activeScene = this.scenes[this.scene_uid];
+        if (!Object.keys(this.activeScenes).length) {
+            this.activeScenes.push(this.scenes[this.scene_uid]);
         }
         this.scene_uid++;
-        return scene
+        return scene;
+    }
+    activateScene(scene) {
+        this.activeScenes.push(scene)
     }
 
-    createSystem(Constructor, ...args) {
-        const system = new Constructor(
-            this.activeScene,
-            ...args
-        );
+    createSystem(Constructor,scene, ...args) {
+        const system = new Constructor(scene, ...args);
 
-        this.systems[this.system_uid] = system
+        this.systems[this.system_uid] = system;
         this.system_uid++;
         return system;
     }
@@ -62,18 +62,20 @@ export class Shrike {
         this.entities[this.entity_uid] = entity;
         scene.addEntity(entity);
         this.entity_uid++;
-        return entity
+        return entity;
     }
 
     gameLoop(currentTime) {
         const deltaTime = currentTime - this.lastFrameTime;
-        this.activeScene.update(deltaTime);
+        for (const scene of this.activeScenes) {
+            scene.update(deltaTime);
+        }
         this.lastFrameTime = currentTime;
         requestAnimationFrame(this.gameLoop);
     }
 
     start() {
-        if (!Object.keys(this.activeScene).length) {
+        if (!Object.keys(this.activeScenes).length) {
             throw new Error(
                 "No active scene found. Please create a scene or set an existing one as active."
             );

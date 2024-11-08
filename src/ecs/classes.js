@@ -9,9 +9,9 @@ export class Entity {
          */
         this.components = {};
     }
-    getComponent(componentName) {
+    getComponent(componentName,index=0) {
         if (this.components.hasOwnProperty(componentName)) {
-            return this.components[componentName];
+            return this.components[componentName][index]; // get by id here
         }
         throw new Error(
             "Entity",
@@ -25,8 +25,8 @@ export class Entity {
 
 export class Component {
     /**
-        * @property {Entity} entity
-        */
+     * @property {Entity} entity
+     */
     constructor() {
         // take entity reference here
         this.entity;
@@ -51,7 +51,7 @@ export class Scene {
     attachSystem(system) {
         this.systems[system.constructor.name] = system;
         if (!system.scene) {
-            system.scene = this
+            system.scene = this;
         }
     }
 
@@ -72,8 +72,17 @@ export class Scene {
 
     addComponent(entity, component) {
         const componentClass = component.constructor.name;
-        entity.components[componentClass] = component;
-        component.entity = entity;
+        if (!entity.hasOwnProperty(componentClass)) {
+            entity.components[componentClass] = [
+                component
+            ];
+        } else {
+            entity.components[componentClass] = [
+                ...entity.components[componentClass],
+                component,
+            ];
+        }
+        component.entity = entity; // for component reference a workaround this would be required
         if (!this.componentRegister.hasOwnProperty(componentClass)) {
             this.componentRegister[componentClass] = [];
         }
@@ -96,7 +105,6 @@ export class Scene {
         });
     }
 
-
     removeSystem(system) {}
 
     init() {
@@ -116,11 +124,10 @@ export class Scene {
     }
 }
 
-
 export class System {
     /**
-        * @property {Scene} entity
-        */
+     * @property {Scene} entity
+     */
     constructor(scene) {
         this.components = {};
         this.scene = scene;
@@ -141,11 +148,10 @@ export class System {
     }
 }
 
-
 // TODO: move this into some other file
 export class Transformation extends Component {
     constructor() {
-        super()
+        super();
         this.matrix = mat4.create();
     }
     getMatrix() {
