@@ -3,7 +3,7 @@ import { System } from "../../ecs/classes";
 import Shader from "../shaders.js";
 import { testFrag, testVert } from "../../assent-manager/shader-assets";
 
-export  class DebugSystem extends System {
+export class DebugSystem extends System {
     POS_SIZE = 3;
     COLOR_SIZE = 3;
     POS_OFFSET = 0;
@@ -28,6 +28,7 @@ export  class DebugSystem extends System {
      * @param {WebGL2RenderingContext} canvas
      */
     constructor(scene, context, aspect_ratio) {
+        // TODO: Add input for framebuffer attachment here
         super(scene);
         this.aspect_ratio = aspect_ratio;
         this.#context = context;
@@ -38,7 +39,11 @@ export  class DebugSystem extends System {
         this.#context.cullFace(this.#context.BACK);
 
         // TODO:- change this to some other function prolly called in init and has some sort of dynamic override maybe
-        this.shader = new Shader(this.#context,testVert,testFrag,["mView","mProj","mWorld"])
+        this.shader = new Shader(this.#context, testVert, testFrag, [
+            "mView",
+            "mProj",
+            "mWorld",
+        ]);
         this.#context.useProgram(this.shader.getProgram());
 
         this.vaoID = this.#context.createVertexArray();
@@ -56,9 +61,10 @@ export  class DebugSystem extends System {
             this.shader.getProgram(),
             "a_position"
         );
+
         const colorLocation = this.#context.getAttribLocation(
             this.shader.getProgram(),
-            "a_color"
+            "a_normal"
         );
         this.#context.enableVertexAttribArray(positionLocation);
         this.#context.enableVertexAttribArray(colorLocation);
@@ -81,7 +87,6 @@ export  class DebugSystem extends System {
     }
 
     init() {
-        
         if (!this.scene.componentRegister.hasOwnProperty("DebugLine")) {
             throw new Error(
                 "The current scene is missing a DebugLine component. Please add a DebugLine component to enable the debug line system, or detach the debug line system."
@@ -109,10 +114,16 @@ export  class DebugSystem extends System {
         );
 
         this.#context.enableVertexAttribArray(
-            this.#context.getAttribLocation(this.shader.getProgram(), "a_color")
+            this.#context.getAttribLocation(
+                this.shader.getProgram(),
+                "a_normal"
+            )
         );
         this.#context.enableVertexAttribArray(
-            this.#context.getAttribLocation(this.shader.getProgram(), "a_position")
+            this.#context.getAttribLocation(
+                this.shader.getProgram(),
+                "a_position"
+            )
         );
 
         this.#context.useProgram(this.shader.getProgram());
@@ -164,7 +175,7 @@ export  class DebugSystem extends System {
         this.#context.drawArrays(
             this.#context.LINES,
             0,
-            component.arrayBuffer.length / (6) //TODO: constafiy
+            component.arrayBuffer.length / 6 //TODO: constafiy
         );
         // TODO: this.#context.disableVertexAttribArray()
     }

@@ -3,7 +3,7 @@ export const testVert = `#version 300 es
         precision mediump float;
 
         in vec3 a_position;
-        in vec3 a_color;
+        in vec3 a_normal;
 
         uniform mat4 mWorld;
         uniform mat4 mView;
@@ -23,7 +23,7 @@ export const testVert = `#version 300 es
             vec4 mvPosition = mView * worldPosition;
             vViewPosition = -mvPosition.xyz;
             
-            vNormal = mat3(mWorld) * a_color;
+            vNormal = mat3(mWorld) * a_normal;
             vLightPosition = normalize(mat3(mView) * lightPosition);
 
             gl_Position = mProj * mvPosition;

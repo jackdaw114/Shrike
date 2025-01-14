@@ -1,4 +1,5 @@
 import { Entity, Scene } from "../ecs/classes";
+import {Compositor} from "./compositor/compositor";
 
 export class Shrike {
     lastFrameTime = 0;
@@ -27,6 +28,8 @@ export class Shrike {
         this.entities = {};
         this.activeScenes = [];
         this.gameLoop = this.gameLoop.bind(this);
+        this.compositor = new Compositor(canvas.getContext("webgl2"), width / height, width, height)
+        console.log(this.compositor)
     }
 
     /**
@@ -71,6 +74,8 @@ export class Shrike {
             scene.update(deltaTime);
         }
         this.lastFrameTime = currentTime;
+        // use compositor here to render to screen 
+        this.compositor.render()
         requestAnimationFrame(this.gameLoop);
     }
 

@@ -28,7 +28,7 @@ export class PickingSystem extends System {
     }
 
     initTexture(width, height) {
-        const ext = this.#context.getExtension("EXT_color_buffer_float");
+        const ext = this.#context.getExtension("EXT_color_buffer_float"); // extensions lol
         this.pickerTexture = this.#context.createTexture();
         this.#context.bindTexture(this.#context.TEXTURE_2D, this.pickerTexture);
         this.#context.texParameteri(

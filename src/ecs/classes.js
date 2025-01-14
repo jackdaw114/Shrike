@@ -1,4 +1,4 @@
-import { mat4 } from "gl-matrix";
+import { mat4, quat } from "gl-matrix";
 import Camera from "./camera";
 
 export class Entity {
@@ -9,16 +9,16 @@ export class Entity {
          */
         this.components = {};
     }
-    getComponent(componentName,index=0) {
+    getComponent(componentName, index = 0) {
         if (this.components.hasOwnProperty(componentName)) {
             return this.components[componentName][index]; // get by id here
         }
         throw new Error(
             "Entity",
             this.id,
-            " Doesnt have ",
+            "Doesnt have",
             componentName,
-            " Component"
+            "Component"
         );
     }
 }
@@ -73,9 +73,7 @@ export class Scene {
     addComponent(entity, component) {
         const componentClass = component.constructor.name;
         if (!entity.hasOwnProperty(componentClass)) {
-            entity.components[componentClass] = [
-                component
-            ];
+            entity.components[componentClass] = [component];
         } else {
             entity.components[componentClass] = [
                 ...entity.components[componentClass],
@@ -153,6 +151,18 @@ export class Transformation extends Component {
     constructor() {
         super();
         this.matrix = mat4.create();
+        this.quaternion = quat.create();
+        this.position = {
+            x: 0,
+            y: 0,
+            z: 0,
+        };
+        this.scale = {
+            x: 1,
+            y: 1,
+            z: 1,
+        };
+        this.dirtyTransform = false;
     }
     getMatrix() {
         return this.matrix;

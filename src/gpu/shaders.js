@@ -13,7 +13,8 @@ export default class Shader {
         );
         this.program = this.createProgram(vertex_shader, fragment_shader);
         this.uniforms = {}; // TODO: uniform manager
-        this.initUniforms(uniforms);
+        if (uniforms)
+            this.initUniforms(uniforms);
     }
 
     initUniforms(uniforms) {
@@ -38,7 +39,7 @@ export default class Shader {
                         errorMsg = `Unknown WebGL error: ${error}`;
                 }
                 throw new Error(
-                    `Failed to get uniform '${uniformName}': ${errorMsg}`
+                    `Failed to get uniform '${uniform}': ${errorMsg}`
                 );
             }
             if (this.uniforms[uniform] === null) {
@@ -47,6 +48,10 @@ export default class Shader {
                 );
             }
         }
+    }
+    use() {
+        this.#context.useProgram(this.program) 
+    
     }
 
     getUniform(uniform) {

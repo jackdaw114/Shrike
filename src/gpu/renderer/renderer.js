@@ -3,6 +3,11 @@ import { Geometry } from "../../ecs/component-classes.js";
 import Shader from "../shaders.js";
 import { testFrag, testVert } from "../../assent-manager/shader-assets.js";
 import { mat4, glMatrix } from "gl-matrix";
+import {
+    compositorFragmentShader,
+    compositorVertexShader,
+} from "../../assent-manager/shader/compositor.js";
+import {createFramebuffer} from "../framebuffer.js";
 
 export class Renderer extends System {
     POS_SIZE = 3;
@@ -30,13 +35,14 @@ export class Renderer extends System {
     constructor(scene, context, aspect_ratio, width, height) {
         super(scene);
         this.aspect_ratio = aspect_ratio;
+        this.width = width;
+        this.height = height;
         this.#context = context;
         this.#context.enable(this.#context.DEPTH_TEST);
         this.#context.enable(this.#context.CULL_FACE);
         this.#context.frontFace(this.#context.CCW);
         this.#context.cullFace(this.#context.BACK);
 
-        // TODO:- change this to some other function prolly called in init and has some sort of dynamic override maybe
         this.shader = new Shader(this.#context, testVert, testFrag, [
             "mWorld",
             "mView",
@@ -48,49 +54,14 @@ export class Renderer extends System {
             "lightPosition",
         ]);
 
-        this.framebuffer = this.#context.createFramebuffer();
-        this.#context.bindFramebuffer(
-            this.#context.FRAMEBUFFER,
-            this.framebuffer
-        );
+        this.framebuffer = createFramebuffer(this.#context)
 
-        this.texture = this.#context.createTexture();
-        this.#context.bindTexture(this.#context.TEXTURE_2D, this.texture);
+        this.texturebuffer = this.#context.createTexture();
+        this.#context.bindTexture(this.#context.TEXTURE_2D, this.texturebuffer)
 
-        this.#context.texImage2D(
-            this.#context.TEXTURE_2D,
-            0,
-            this.#context.RGBA,
-            width,
-            height,
-            0,
-            this.#context.RGBA,
-            this.#context.UNSIGNED_BYTE,
-            null
-        );
 
-        this.#context.texParameteri(
-            this.#context.TEXTURE_2D,
-            this.#context.TEXTURE_MIN_FILTER,
-            this.#context.LINEAR
-        );
-        this.#context.texParameteri(
-            this.#context.TEXTURE_2D,
-            this.#context.TEXTURE_MAG_FILTER,
-            this.#context.LINEAR
-        );
 
-        this.#context.framebufferTexture2D(
-            this.#context.FRAMEBUFFER,
-            this.#context.COLOR_ATTACHMENT0,
-            this.#context.TEXTURE_2D,
-            this.texture,
-            0
-        );
-        
-        this.#context.bindFramebuffer(this.#context.FRAMEBUFFER,null)
-        this.#context.bindTexture(this.#context.TEXTURE_2D, null);
-
+        console.log(this.framebuffer)
         this.options = {
             clear: true,
         };
@@ -98,7 +69,14 @@ export class Renderer extends System {
 
     update(deltaTime) {
         // octree culling here then provide updated array to the loop below
+
+
         this.tempFun();
+
+    }
+
+    getFramebuffer() {
+        return this.framebuffer
     }
 
     init() {
@@ -162,7 +140,12 @@ export class Renderer extends System {
     tempFun() {
         this.#context.useProgram(this.shader.getProgram());
         this.#context.clearColor(0.3, 0.3, 0.3, 1.0);
-
+        this.#context.bindFramebuffer(
+            this.#context.FRAMEBUFFER,
+            this.framebuffer.fbo
+            //null  // once compositor is doen use frame buffer herer
+        );
+        this.#context.bindTexture(this.#context.TEXTURE_2D, this.framebuffer.texture);
         if (this.options.clear) {
             this.#context.clear(
                 this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT
@@ -185,6 +168,8 @@ export class Renderer extends System {
      * @param {Geometry} component
      */
     render(component) {
+        //console.log(this.framebuffer)
+        this.#context.bindFramebuffer(this.#context.FRAMEBUFFER, this.framebuffer.fbo)
         this.#context.bindVertexArray(component.vaoID);
         this.#context.bindBuffer(this.#context.ARRAY_BUFFER, component.vboID);
 
@@ -195,7 +180,10 @@ export class Renderer extends System {
         );
 
         this.#context.enableVertexAttribArray(
-            this.#context.getAttribLocation(this.shader.getProgram(), "a_color")
+            this.#context.getAttribLocation(
+                this.shader.getProgram(),
+                "a_normal"
+            )
         );
         this.#context.enableVertexAttribArray(
             this.#context.getAttribLocation(
@@ -209,23 +197,8 @@ export class Renderer extends System {
             component.eboID
         );
 
-        const matWorldUniformLocation = this.#context.getUniformLocation(
-            this.shader.getProgram(),
-            "mWorld"
-        );
-        const matViewUniformLocation = this.#context.getUniformLocation(
-            this.shader.getProgram(),
-            "mView"
-        );
-        const matProjUniformLocation = this.#context.getUniformLocation(
-            this.shader.getProgram(),
-            "mProj"
-        );
-
         let identityMatrix = new Float32Array(16);
         mat4.identity(identityMatrix);
-
-        // custom error handeling required (check peroformance impact)
 
         let worldMatrix = component.entity
             .getComponent("Transformation")
@@ -244,18 +217,18 @@ export class Renderer extends System {
         //TODO: create some sort of Uniform location holder
 
         this.#context.uniformMatrix4fv(
-            matWorldUniformLocation,
+            this.shader.getUniform("mWorld"),
             false,
             worldMatrix
         );
 
         this.#context.uniformMatrix4fv(
-            matProjUniformLocation,
+            this.shader.getUniform("mProj"),
             false,
             projMatrix
         );
         this.#context.uniformMatrix4fv(
-            matViewUniformLocation,
+            this.shader.getUniform("mView"),
             false,
             viewMatrix
         );
@@ -289,7 +262,7 @@ export class Renderer extends System {
             ),
             component.material.getShininess()
         );
-        //this.#context.uniform3fv(this.#context.getUnifor, data)
+        //this.#context.uniform3fv(this.#context.getUniform, data)
 
         // ************************** END *******************************
         this.#context.drawElements(

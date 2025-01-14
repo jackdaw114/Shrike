@@ -1,1 +1,2 @@
-import "./src/editor/editor"
+import "./src/editor/editor";
+
