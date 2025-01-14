@@ -1,12 +1,12 @@
 import { Component, Scene, System } from "../../ecs/classes.js";
 import { Geometry } from "../../ecs/component-classes.js";
 import Shader from "../shaders.js";
-import { testFrag, testVert } from "../../assent-manager/shader-assets.js";
+import { testFrag, testVert } from "../../asset-manager/shader-assets.js";
 import { mat4, glMatrix } from "gl-matrix";
 import {
     compositorFragmentShader,
     compositorVertexShader,
-} from "../../assent-manager/shader/compositor.js";
+} from "../../asset-manager/shader/compositor.js";
 import {createFramebuffer} from "../framebuffer.js";
 
 export class Renderer extends System {

@@ -1,7 +1,7 @@
 import { mat4, glMatrix } from "gl-matrix";
 import { System } from "../../ecs/classes";
 import Shader from "../shaders.js";
-import { testFrag, testVert } from "../../assent-manager/shader-assets";
+import { testFrag, testVert } from "../../asset-manager/shader-assets.js";
 
 export class DebugSystem extends System {
     POS_SIZE = 3;
