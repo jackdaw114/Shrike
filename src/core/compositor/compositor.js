@@ -1,4 +1,4 @@
-import {compositorFragmentShader, compositorVertexShader} from "../../assent-manager/shader/compositor";
+import {compositorFragmentShader, compositorVertexShader} from "../../asset-manager/shader/compositor";
 import {createFramebuffer} from "../../gpu/framebuffer";
 import Shader from "../../gpu/shaders";
 

@@ -1,5 +1,5 @@
 import {glMatrix, mat4} from "gl-matrix";
-import { pickerFrag, pickerVert } from "../../assent-manager/shader-assets";
+import { pickerFrag, pickerVert } from "../../asset-manager/shader-assets";
 import { System } from "../../ecs/classes";
 import Shader from "../shaders";
 
