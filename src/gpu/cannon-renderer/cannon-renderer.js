@@ -1,5 +1,5 @@
 import { parseOBJ } from "../../../lib/parse-obj";
-import { testFrag, testVert } from "../../assent-manager/shader-assets";
+import { testFrag, testVert } from "../../asset-manager/shader-assets";
 import { System } from "../../ecs/classes";
 import { createFramebuffer } from "../framebuffer";
 import Shader from "../shaders";
@@ -75,10 +75,10 @@ export class CannonRenderer extends System {
             this.COLOR_OFFSET
         );
 
-        component.eboID = this.#context.createBuffer();
+        this.sphereEBOID = this.#context.createBuffer();
         this.#context.bindBuffer(
             this.#context.ELEMENT_ARRAY_BUFFER,
-            component.eboID
+            this.sphereEBOID
         );
         this.#context.bufferData(
             this.#context.ELEMENT_ARRAY_BUFFER,
