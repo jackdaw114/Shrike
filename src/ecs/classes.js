@@ -144,6 +144,12 @@ export class System {
         this.scene = scene;
         // prolly call its init funciton here create a destructor like deinit first ig
     }
+    start() {
+        throw new Error("Method 'start' must be implemented.");
+    }
+    stop() {
+        throw new Error("Method 'stop' must be implemented.");
+    }
 }
 
 // TODO: move this into some other file

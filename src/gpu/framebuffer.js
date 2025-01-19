@@ -17,9 +17,10 @@ export function createFramebuffer(gl, customOptions = {}) {
         throw new Error('Invalid WebGL2 context');
     }
 
+    const pixelRatio = window.devicePixelRatio || 1;
     const defaultOptions = {
-        width: window.innerWidth,
-        height: window.innerHeight,
+        width: window.innerWidth * pixelRatio,
+        height: window.innerHeight *pixelRatio,
         depth: true,
         float: false,
         linear: true,
@@ -37,10 +38,6 @@ export function createFramebuffer(gl, customOptions = {}) {
 
     const options = { ...defaultOptions, ...customOptions };
     
-    // Adjust for device pixel ratio
-    const pixelRatio = window.devicePixelRatio || 1;
-    const width = options.width * pixelRatio;
-    const height = options.height * pixelRatio;
 
     // Handle floating point textures if requested
     if (options.float) {
@@ -64,8 +61,8 @@ export function createFramebuffer(gl, customOptions = {}) {
         gl.TEXTURE_2D,
         0,
         options.texInternalFormat,
-        width,
-        height,
+        options.width,
+        options.height,
         options.texBorder,
         options.texFormat,
         options.texType,
@@ -94,8 +91,8 @@ export function createFramebuffer(gl, customOptions = {}) {
         gl.renderbufferStorage(
             gl.RENDERBUFFER,
             options.depthInternalFormat,
-            width,
-            height
+            options.width,
+            options.height 
         );
         gl.framebufferRenderbuffer(
             gl.FRAMEBUFFER,

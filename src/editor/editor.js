@@ -10,7 +10,8 @@ import { DebugSystem } from "../gpu/debug-graphics/debug-helper";
 import { Renderer } from "../gpu/renderer/renderer";
 import { ScriptSystem } from "../script-system/script-system";
 import { PickingSystem } from "../gpu/picker/picker";
-
+import { CannonRenderer } from "../gpu/cannon-renderer/cannon-renderer";
+import { CannonPhysicsSystem } from "../physics/cannon-physics-system";
 
 let canvas = document.getElementById("canvas1");
 const CANVAS_WIDTH = (canvas.width = window.innerWidth);
@@ -29,6 +30,21 @@ const renderer = engine.createSystem(
     CANVAS_WIDTH / CANVAS_HEIGHT,
     CANVAS_WIDTH,
     CANVAS_HEIGHT
+);
+
+const cannonRenderer = engine.createSystem(
+    CannonRenderer,
+    gameScene,
+    canvas.getContext("webgl2"),
+    CANVAS_WIDTH / CANVAS_HEIGHT,
+    CANVAS_WIDTH,
+    CANVAS_HEIGHT
+);
+
+const cannonPhysicsSystem = engine.createSystem(CannonPhysicsSystem,
+    gameScene,
+    1.0 / 60.,
+    3
 );
 
 const editorRenderer = engine.createSystem(
@@ -57,7 +73,7 @@ const debugSystem = engine.createSystem(
     canvas.getContext("webgl2"),
     CANVAS_WIDTH / CANVAS_HEIGHT
 );
-engine.compositor.addFramebuffer(renderer.framebuffer, {})
+engine.compositor.addFramebuffer(renderer.framebuffer, {});
 const entity1 = engine.createEntity(gameScene);
 const entity2 = engine.createEntity(gameScene);
 const debugLineEntity = engine.createEntity(gameScene);
@@ -71,6 +87,8 @@ gameScene.attachSystem(debugSystem);
 gameScene.attachSystem(pickingSystem);
 gameScene.attachSystem(scriptSystem);
 
+gameScene.attachSystem(cannonPhysicsSystem);
+gameScene.attachSystem(cannonRenderer);
 
 editorScene.attachSystem(editorRenderer);
 editorRenderer.options.clear = false;
@@ -109,7 +127,6 @@ mat4.scale(
     yArrowTransformation.getMatrix(),
     [0.5, 0.5, 0.5]
 );
-
 
 mat4.rotate(
     yArrowTransformation.getMatrix(),
@@ -251,13 +268,12 @@ if (import.meta.env.DEV) {
         var groundShape = new CANNON.Plane();
         var groundBody = new CANNON.Body({ mass: 0, material: groundMaterial });
 
-
         groundBody.addShape(groundShape);
         world.addBody(groundBody);
 
         var mass = 10;
         var sphereShape = new CANNON.Sphere(size);
-
+        console.log("sphere details",sphereShape)
         // Shape on plane
         var mat1 = new CANNON.Material();
         var shapeBody1 = new CANNON.Body({
@@ -265,20 +281,20 @@ if (import.meta.env.DEV) {
             material: mat1,
             position: new CANNON.Vec3(3 * size, size, height),
         });
-        shapeBody1.addShape(sphereShape);
+        //shapeBody1.addShape(sphereShape);
         shapeBody1.linearDamping = damping;
-        world.addBody(shapeBody1);
+        //world.addBody(shapeBody1);
 
-        console.log(shapeBody1)
+        console.log(shapeBody1);
         var mat2 = new CANNON.Material();
         var shapeBody2 = new CANNON.Body({
             mass: mass,
             material: mat2,
             position: new CANNON.Vec3(0, size, height),
         });
-        shapeBody2.addShape(sphereShape);
-        shapeBody2.linearDamping = damping;
-        world.addBody(shapeBody2);
+        //shapeBody2.addShape(sphereShape);
+        //shapeBody2.linearDamping = damping;
+        //world.addBody(shapeBody2);
 
         var mat3 = new CANNON.Material();
         var shapeBody3 = new CANNON.Body({
@@ -289,7 +305,7 @@ if (import.meta.env.DEV) {
         shapeBody3.addShape(sphereShape);
         shapeBody3.linearDamping = damping;
         world.addBody(shapeBody3);
-
+        shapeBody3.velocity = new CANNON.Vec3(1, 0, 0);
         // Create contact material behaviour
         var mat1_ground = new CANNON.ContactMaterial(groundMaterial, mat1, {
             friction: 0.0,
@@ -307,6 +323,10 @@ if (import.meta.env.DEV) {
         world.addContactMaterial(mat1_ground);
         world.addContactMaterial(mat2_ground);
         world.addContactMaterial(mat3_ground);
+        console.log("shapebody3",shapeBody3)
+        shapeBody3.addEventListener("collide", (e) => {
+            console.log(e);
+        });
 
         let oldGameLoop = engine.gameLoop;
 
@@ -315,11 +335,12 @@ if (import.meta.env.DEV) {
             if (engine.lastFrameTime) {
                 world.step(1.0 / 60.0, e - engine.lastFrameTime, 3);
             }
-            //console.log("sphere position z =",shapeBody2.position.z);
-            entity1.getComponent("Transformation").matrix[13] = shapeBody3.position.z;
+            //console.log(world.collisionMatrix.matrix[0])
+            entity1.getComponent("Transformation").matrix[13] =
+                shapeBody3.position.z;
+            entity1.getComponent("Transformation").matrix[12] =
+                shapeBody3.position.x;
         };
-
-
     });
 }
 // ********************* END *************************

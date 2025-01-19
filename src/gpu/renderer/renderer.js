@@ -34,6 +34,7 @@ export class Renderer extends System {
      */
     constructor(scene, context, aspect_ratio, width, height) {
         super(scene);
+        
         this.aspect_ratio = aspect_ratio;
         this.width = width;
         this.height = height;
@@ -42,7 +43,7 @@ export class Renderer extends System {
         this.#context.enable(this.#context.CULL_FACE);
         this.#context.frontFace(this.#context.CCW);
         this.#context.cullFace(this.#context.BACK);
-
+        console.log("this is aspect_ratio",aspect_ratio)
         this.shader = new Shader(this.#context, testVert, testFrag, [
             "mWorld",
             "mView",
@@ -54,12 +55,11 @@ export class Renderer extends System {
             "lightPosition",
         ]);
 
-        this.framebuffer = createFramebuffer(this.#context)
+        this.framebuffer = createFramebuffer(this.#context, {
+            width: window.devicePixelRatio * width,
+            height: window.devicePixelRatio * height
 
-        this.texturebuffer = this.#context.createTexture();
-        this.#context.bindTexture(this.#context.TEXTURE_2D, this.texturebuffer)
-
-
+        })
 
         console.log(this.framebuffer)
         this.options = {
@@ -145,6 +145,10 @@ export class Renderer extends System {
             this.framebuffer.fbo
             //null  // once compositor is doen use frame buffer herer
         );
+
+
+        this.#context.viewport(0, 0, this.framebuffer.width, this.framebuffer.height)
+
         this.#context.bindTexture(this.#context.TEXTURE_2D, this.framebuffer.texture);
         if (this.options.clear) {
             this.#context.clear(

@@ -28,12 +28,12 @@ export class Compositor{
 
         const vertexArray = new Float32Array([
             // Positions (xy)    // Texture coords (uv)
-            -1, -1,             0, 0,    // Bottom left
-             1, -1,             1, 0,    // Bottom right
-            -1,  1,             0, 1,    // Top left
-            -1,  1,             0, 1,    // Top left
-             1, -1,             1, 0,    // Bottom right
-             1,  1,             1, 1     // Top right
+            -1.0, -1.0,             0, 0,    // Bottom left
+             1.0, -1.0,             1, 0,    // Bottom right
+            -1.0,  1.0,             0, 1,    // Top left
+            -1.0,  1.0,             0, 1,    // Top left
+             1.0, -1.0,             1, 0,    // Bottom right
+             1.0,  1.0,             1, 1     // Top right
         ]);
         this.vaoID = this.#context.createVertexArray();
         this.vboID = this.#context.createBuffer();
@@ -44,7 +44,7 @@ export class Compositor{
         this.#context.vertexAttribPointer(0, this.POS_SIZE, this.#context.FLOAT, false, this.VERTEX_SIZE_IN_BYTES, this.POS_OFFSET)
         this.#context.vertexAttribPointer(1,this.UV_SIZE, this.#context.FLOAT, false, this.VERTEX_SIZE_IN_BYTES, this.UV_OFFSET)
 
-
+        //this.#context.deleteVertexArray(this.vaoID)
         this.#context.enableVertexAttribArray(0);
         this.#context.enableVertexAttribArray(1);
     }
@@ -58,6 +58,7 @@ export class Compositor{
     
 
     render() {
+        this.#context.viewport(0, 0, this.width, this.height)
         this.#context.bindFramebuffer(this.#context.FRAMEBUFFER,null)
         this.#context.clear(this.#context.COLOR_BUFFER_BIT) 
         this.#context.useProgram(this.shader.getProgram())
@@ -67,9 +68,9 @@ export class Compositor{
         this.#context.enableVertexAttribArray(1);
         this.#context.uniform1i(this.shader.getUniform("uSampler"),0)
         for (const framebuffer of this.framebuffers){
-            console.log(framebuffer.framebuffer)
+            //console.log(framebuffer.framebuffer)
             this.#context.activeTexture(this.#context.TEXTURE0)
-            console.log(framebuffer)
+            //console.log(framebuffer)
             this.#context.bindTexture(this.#context.TEXTURE_2D, framebuffer.framebuffer.texture)
             this.#context.drawArrays(this.#context.TRIANGLES, 0, 6)
         }
