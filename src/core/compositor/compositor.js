@@ -67,9 +67,7 @@ export class Compositor{
         this.#context.enableVertexAttribArray(1);
         this.#context.uniform1i(this.shader.getUniform("uSampler"),0)
         for (const framebuffer of this.framebuffers){
-            console.log(framebuffer.framebuffer)
             this.#context.activeTexture(this.#context.TEXTURE0)
-            console.log(framebuffer)
             this.#context.bindTexture(this.#context.TEXTURE_2D, framebuffer.framebuffer.texture)
             this.#context.drawArrays(this.#context.TRIANGLES, 0, 6)
         }
