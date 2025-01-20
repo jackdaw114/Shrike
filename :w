@@ -111,17 +111,6 @@ export function createFramebuffer(gl, customOptions = {}) {
 
         depthTexture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, depthTexture);
-        gl.texImage2D(
-            gl.TEXTURE_2D,
-            0,
-            options.depthInternalFormat,
-            options.width,
-            options.height,
-            0,
-            gl.DEPTH_COMPONENT,
-            gl.UNSIGNED_INT,
-            null
-        );
 
         // Set texture filtering
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);

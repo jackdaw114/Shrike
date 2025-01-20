@@ -22,9 +22,8 @@ export class Compositor{
         this.width = width
         this.height = height
         this.shader = new Shader(this.#context, compositorVertexShader, compositorFragmentShader, [
-           "uSampler" 
+            "uSampler",
         ])
-        
 
         const vertexArray = new Float32Array([
             // Positions (xy)    // Texture coords (uv)
@@ -58,6 +57,7 @@ export class Compositor{
     
 
     render() {
+        this.#context.clearColor(0.3, 0.3, 0.3, 1.)
         this.#context.viewport(0, 0, this.width, this.height)
         this.#context.bindFramebuffer(this.#context.FRAMEBUFFER,null)
         this.#context.clear(this.#context.COLOR_BUFFER_BIT) 
@@ -68,9 +68,7 @@ export class Compositor{
         this.#context.enableVertexAttribArray(1);
         this.#context.uniform1i(this.shader.getUniform("uSampler"),0)
         for (const framebuffer of this.framebuffers){
-            //console.log(framebuffer.framebuffer)
             this.#context.activeTexture(this.#context.TEXTURE0)
-            //console.log(framebuffer)
             this.#context.bindTexture(this.#context.TEXTURE_2D, framebuffer.framebuffer.texture)
             this.#context.drawArrays(this.#context.TRIANGLES, 0, 6)
         }

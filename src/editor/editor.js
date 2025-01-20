@@ -36,14 +36,16 @@ const cannonRenderer = engine.createSystem(
     CannonRenderer,
     gameScene,
     canvas.getContext("webgl2"),
+    renderer.framebuffer,
     CANVAS_WIDTH / CANVAS_HEIGHT,
     CANVAS_WIDTH,
     CANVAS_HEIGHT
 );
 
-const cannonPhysicsSystem = engine.createSystem(CannonPhysicsSystem,
+const cannonPhysicsSystem = engine.createSystem(
+    CannonPhysicsSystem,
     gameScene,
-    1.0 / 60.,
+    1.0 / 60,
     3
 );
 
@@ -71,8 +73,10 @@ const debugSystem = engine.createSystem(
     DebugSystem,
     gameScene,
     canvas.getContext("webgl2"),
-    CANVAS_WIDTH / CANVAS_HEIGHT
+    CANVAS_WIDTH / CANVAS_HEIGHT,
+    renderer.framebuffer
 );
+engine.compositor.addFramebuffer(editorRenderer.framebuffer, {});
 engine.compositor.addFramebuffer(renderer.framebuffer, {});
 const entity1 = engine.createEntity(gameScene);
 const entity2 = engine.createEntity(gameScene);
@@ -82,16 +86,9 @@ const arrowZAxis = engine.createEntity(editorScene);
 const arrowXAxis = engine.createEntity(gameScene);
 const arrowYAxis = engine.createEntity(gameScene);
 
-gameScene.attachSystem(renderer);
-gameScene.attachSystem(debugSystem);
-gameScene.attachSystem(pickingSystem);
-gameScene.attachSystem(scriptSystem);
 
-gameScene.attachSystem(cannonPhysicsSystem);
-gameScene.attachSystem(cannonRenderer);
 
-editorScene.attachSystem(editorRenderer);
-editorRenderer.options.clear = false;
+//editorRenderer.options.clear = false;
 
 const { indices, vertices } = parseOBJ(monke);
 const { indices: arrowInd, vertices: arrowVert } = parseOBJ(arrow);
@@ -273,7 +270,7 @@ if (import.meta.env.DEV) {
 
         var mass = 10;
         var sphereShape = new CANNON.Sphere(size);
-        console.log("sphere details",sphereShape)
+        console.log("sphere details", sphereShape);
         // Shape on plane
         var mat1 = new CANNON.Material();
         var shapeBody1 = new CANNON.Body({
@@ -323,7 +320,7 @@ if (import.meta.env.DEV) {
         world.addContactMaterial(mat1_ground);
         world.addContactMaterial(mat2_ground);
         world.addContactMaterial(mat3_ground);
-        console.log("shapebody3",shapeBody3)
+        console.log("shapebody3", shapeBody3);
         shapeBody3.addEventListener("collide", (e) => {
             console.log(e);
         });
@@ -348,3 +345,80 @@ if (import.meta.env.DEV) {
 console.log(window.devicePixelRatio);
 engine.init();
 engine.start();
+
+export class Editor {
+    activeObjects = [];
+    #engine;
+    cannonMaxSubSteps = 5;
+    constructor(context, gameSpeed, width, height) {
+        this.context = canvas;
+        this.gameSpeed = gameSpeed;
+        this.#engine = new Shrike(context, width, height);
+        this.editorScene = this.#engine.createScene();
+        this.#engine.activateScene(editorScene);
+        this.editorRenderer = engine.createSystem(
+            Renderer,
+            this.editorScene,
+            width / height,
+            width,
+            height
+        );
+
+        this.gameScene - this.#engine.createScene();
+        this.gameRenderer = engine.createSystem(
+            Renderer,
+            this.gameScene,
+            width / height,
+            width,
+            height
+        );
+        this.cannonPhysicsSystem = this.#engine.createSystem(
+            CannonPhysicsSystem,
+            this.gameScene,
+            gameSpeed,
+            this.cannonMaxSubSteps
+        );
+        this.cannonRenderer = engine.createSystem(
+            CannonRenderer,
+            this.gameScene,
+            context,
+            width / height,
+            width,
+            height
+        );
+        this.scriptSystem = this.#engine.createSystem(ScriptSystem, gameScene);
+
+        this.pickingSystem = engine.createSystem(
+            PickingSystem,
+            this.gameScene,
+            context,
+            width,
+            height
+        );
+        this.debugSystem = engine.createSystem(
+            DebugSystem,
+            this.gameScene,
+            context,
+            width / height,
+            this.gameRenderer.framebuffer
+        );
+    }
+    initEditor() {
+        const arrow = parseOBJ(arrow);
+        this.moveWidget = {
+            x: {
+                geometry: new Geometry(...arrow),
+                transformation: new Transformation()
+            },
+            y: {
+                geometry: new Geometry(...arrow),
+                transformation: new Transformation()
+            },
+            z: {
+                geometry: new Geometry(...arrow),
+                transformation: new Transformation()
+            }
+        }
+         
+    }
+}

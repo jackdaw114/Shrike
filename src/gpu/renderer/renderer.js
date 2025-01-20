@@ -6,8 +6,8 @@ import {
     compositorFragmentShader,
     compositorVertexShader,
 } from "../../asset-manager/shader/compositor.js";
-import {createFramebuffer} from "../framebuffer.js";
-import {testFrag, testVert} from "../../asset-manager/shader-assets";
+import { createFramebuffer } from "../framebuffer.js";
+import { testFrag, testVert } from "../../asset-manager/shader-assets";
 
 export class Renderer extends System {
     POS_SIZE = 3;
@@ -34,7 +34,7 @@ export class Renderer extends System {
      */
     constructor(scene, context, aspect_ratio, width, height) {
         super(scene);
-        
+
         this.aspect_ratio = aspect_ratio;
         this.width = width;
         this.height = height;
@@ -43,7 +43,7 @@ export class Renderer extends System {
         this.#context.enable(this.#context.CULL_FACE);
         this.#context.frontFace(this.#context.CCW);
         this.#context.cullFace(this.#context.BACK);
-        console.log("this is aspect_ratio",aspect_ratio)
+        console.log("this is aspect_ratio", aspect_ratio);
         this.shader = new Shader(this.#context, testVert, testFrag, [
             "mWorld",
             "mView",
@@ -56,12 +56,11 @@ export class Renderer extends System {
         ]);
 
         this.framebuffer = createFramebuffer(this.#context, {
-            width: window.devicePixelRatio * width,
-            height: window.devicePixelRatio * height
+            width: width,
+            height:height,
+        });
 
-        })
-
-        console.log(this.framebuffer)
+        console.log(this.framebuffer);
         this.options = {
             clear: true,
         };
@@ -70,13 +69,11 @@ export class Renderer extends System {
     update(deltaTime) {
         // octree culling here then provide updated array to the loop below
 
-
         this.tempFun();
-
     }
 
     getFramebuffer() {
-        return this.framebuffer
+        return this.framebuffer;
     }
 
     init() {
@@ -139,17 +136,24 @@ export class Renderer extends System {
 
     tempFun() {
         this.#context.useProgram(this.shader.getProgram());
-        this.#context.clearColor(0.3, 0.3, 0.3, 1.0);
+        //this.#context.clearColor(0.3, 0.3, 0.3, 1.0);
         this.#context.bindFramebuffer(
             this.#context.FRAMEBUFFER,
             this.framebuffer.fbo
             //null  // once compositor is doen use frame buffer herer
         );
 
+        this.#context.viewport(
+            0,
+            0,
+            this.framebuffer.width,
+            this.framebuffer.height
+        );
 
-        this.#context.viewport(0, 0, this.framebuffer.width, this.framebuffer.height)
-
-        this.#context.bindTexture(this.#context.TEXTURE_2D, this.framebuffer.texture);
+        this.#context.bindTexture(
+            this.#context.TEXTURE_2D,
+            this.framebuffer.texture
+        );
         if (this.options.clear) {
             this.#context.clear(
                 this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT
@@ -173,7 +177,10 @@ export class Renderer extends System {
      */
     render(component) {
         //console.log(this.framebuffer)
-        this.#context.bindFramebuffer(this.#context.FRAMEBUFFER, this.framebuffer.fbo)
+        this.#context.bindFramebuffer(
+            this.#context.FRAMEBUFFER,
+            this.framebuffer.fbo
+        );
         this.#context.bindVertexArray(component.vaoID);
         this.#context.bindBuffer(this.#context.ARRAY_BUFFER, component.vboID);
 
@@ -183,23 +190,13 @@ export class Renderer extends System {
             component.vertices
         );
 
-        this.#context.enableVertexAttribArray(
-            this.#context.getAttribLocation(
-                this.shader.getProgram(),
-                "a_normal"
-            )
-        );
-        this.#context.enableVertexAttribArray(
-            this.#context.getAttribLocation(
-                this.shader.getProgram(),
-                "a_position"
-            )
-        );
+        //this.#context.enableVertexAttribArray(0);
+        //this.#context.enableVertexAttribArray(1);
 
-        this.#context.bindBuffer(
-            this.#context.ELEMENT_ARRAY_BUFFER,
-            component.eboID
-        );
+        //        this.#context.bindBuffer(
+        //           this.#context.ELEMENT_ARRAY_BUFFER,
+        //         component.eboID
+        //      );
 
         let identityMatrix = new Float32Array(16);
         mat4.identity(identityMatrix);

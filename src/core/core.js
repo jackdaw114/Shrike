@@ -48,10 +48,14 @@ export class Shrike {
     activateScene(scene) {
         this.activeScenes.push(scene)
     }
-
+    /**
+     *
+     * @param {Scene} scene 
+     * @returns 
+     */
     createSystem(Constructor,scene, ...args) {
         const system = new Constructor(scene, ...args);
-
+        scene.attachSystem(system)
         this.systems[this.system_uid] = system;
         this.system_uid++;
         return system;

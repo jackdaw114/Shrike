@@ -2,8 +2,8 @@
 export const testVert = `#version 300 es
         precision mediump float;
 
-        in vec3 a_position;
-        in vec3 a_normal;
+        layout(location=0)in vec3 a_position;
+        layout(location=1)in vec3 a_normal;
 
         uniform mat4 mWorld;
         uniform mat4 mView;

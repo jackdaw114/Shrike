@@ -23,16 +23,17 @@ export class DebugSystem extends System {
     vboID;
     started = false;
     MAX_LINES = 500;
+    active = true;
 
     /**
      * @param {WebGL2RenderingContext} canvas
      */
-    constructor(scene, context, aspect_ratio) {
+    constructor(scene, context, aspect_ratio,framebuffer) {
         // TODO: Add input for framebuffer attachment here
         super(scene);
+        this.framebuffer = framebuffer
         this.aspect_ratio = aspect_ratio;
         this.#context = context;
-
         this.#context.enable(this.#context.DEPTH_TEST);
         this.#context.enable(this.#context.CULL_FACE);
         this.#context.frontFace(this.#context.CCW);
@@ -95,8 +96,11 @@ export class DebugSystem extends System {
     }
 
     update(deltaTime) {
+        if (this.active) {
         for (const component of this.scene.componentRegister["DebugLine"]) {
             this.render(component);
+        }
+
         }
     }
 
@@ -104,6 +108,7 @@ export class DebugSystem extends System {
         if (component.arrayBuffer.length == 0) {
             return;
         }
+        this.#context.bindFramebuffer(this.#context.FRAMEBUFFER, this.framebuffer.fbo)
         this.#context.bindVertexArray(this.vaoID);
         this.#context.bindBuffer(this.#context.ARRAY_BUFFER, this.vboID);
 
