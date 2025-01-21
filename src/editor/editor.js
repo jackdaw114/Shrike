@@ -17,14 +17,37 @@ export class Editor {
     activeObjects = [];
     #engine;
     cannonMaxSubSteps = 5;
+    isNavigating = false;
 
     constructor(canvas, gameSpeed, width, height) {
         this.canvas = canvas;
         this.context = canvas.getContext("webgl2");
+        this.width = width;
+        this.height = height;
         this.gameSpeed = gameSpeed;
         this.#engine = new Shrike(canvas, width, height);
+        this.initSystems();
+        this.initEventListeners();
+        this.initEditor();
+        this.editorCameraSetup();
+
+        const arrowZAxis = this.#engine.createEntity(this.editorScene);
+        const arrowXAxis = this.#engine.createEntity(this.editorScene);
+        const arrowYAxis = this.#engine.createEntity(this.editorScene);
+    
+        this.editorScene.addComponent(arrowXAxis, this.moveWidget.x.geometry)
+        this.editorScene.addComponent(arrowYAxis, this.moveWidget.y.geometry)
+        this.editorScene.addComponent(arrowZAxis, this.moveWidget.z.geometry)
+
+        this.editorScene.addComponent(arrowXAxis, this.moveWidget.x.transformation)
+        this.editorScene.addComponent(arrowYAxis, this.moveWidget.y.transformation)
+        this.editorScene.addComponent(arrowZAxis, this.moveWidget.z.transformation)
+    }
+    initSystems() {
+        const width = this.width;
+        const height = this.height;
+        const gameSpeed = this.gameSpeed;
         this.editorScene = this.#engine.createScene();
-        //this.#engine.activateScene(this.editorScene);
         this.editorRenderer = this.#engine.createSystem(
             Renderer,
             this.editorScene,
@@ -35,7 +58,6 @@ export class Editor {
         );
 
         this.gameScene = this.#engine.createScene();
-        this.#engine.activateScene(this.gameScene);
         this.gameRenderer = this.#engine.createSystem(
             Renderer,
             this.gameScene,
@@ -44,6 +66,10 @@ export class Editor {
             width,
             height
         );
+        this.#engine.activateScene(this.gameScene);
+        this.#engine.activateScene(this.editorScene);
+        console.log(this.#engine.scenes)
+
         this.cannonPhysicsSystem = this.#engine.createSystem(
             CannonPhysicsSystem,
             this.gameScene,
@@ -65,7 +91,7 @@ export class Editor {
         this.gameScenePickingSystem = this.#engine.createSystem(
             PickingSystem,
             this.gameScene,
-            canvas,
+            this.canvas,
             this.context,
             width,
             height
@@ -74,7 +100,7 @@ export class Editor {
         this.editorPickingSystem = this.#engine.createSystem(
             PickingSystem,
             this.editorScene,
-            canvas,
+            this.canvas,
             this.context,
             width,
             height
@@ -86,35 +112,26 @@ export class Editor {
             width / height,
             this.gameRenderer.framebuffer
         );
-        this.initEventListeners();
-        this.initEditor();
-        this.editorCameraSetup();
     }
     initEditor() {
         const arrowGeo = parseOBJ(arrow);
+        console.log(arrowGeo)
         this.moveWidget = {
             x: {
-                geometry: new Geometry(arrowGeo),
+                geometry: new Geometry(arrowGeo.vertices,arrowGeo.indices),
                 transformation: new Transformation(),
             },
             y: {
-                geometry: new Geometry(arrowGeo),
+                geometry: new Geometry(arrowGeo.vertices,arrowGeo.indices),
                 transformation: new Transformation(),
             },
             z: {
-                geometry: new Geometry(arrowGeo),
+                geometry: new Geometry(arrowGeo.vertices,arrowGeo.indices),
                 transformation: new Transformation(),
             },
         };
-        this.#engine.compositor.addFramebuffer(
-            this.gameRenderer.framebuffer,
-            {}
-        );
-        this.#engine.compositor.addFramebuffer(
-            this.editorRenderer.framebuffer,
-            {}
-        );
-        const widget = this.#engine.createEntity(this.editorScene);
+        //const widget = this.#engine.createEntity(this.editorScene);
+
 
         const debugLineEntity = this.#engine.createEntity(this.gameScene);
         this.gameScene.addComponent(debugLineEntity, new DebugLine());
@@ -124,22 +141,20 @@ export class Editor {
         const editorCamera = this.editorScene.activeCamera;
         this.gameScene.activeCamera = editorCamera;
         editorCamera.zoom(-20);
-        //editorCamera.orbitX(100)
+
         this.canvas.addEventListener("wheel", (e) => {
-            console.log(e);
             const rate = 1000;
             editorCamera.zoom(e.wheelDeltaY / rate);
         });
         this.canvas.addEventListener("drag", (e) => {
+            this.isNavigating = true;
             const rate = 1000;
             if (e.detail.button == 1) {
-                console.log(e.detail.dispX)
                 editorCamera.panHorizontal(e.detail.dispX / rate);
                 editorCamera.panVertical(e.detail.dispY / rate);
             } else if (e.detail.button == 4) {
                 editorCamera.orbitX((e.detail.dispX / rate) * 100);
                 editorCamera.orbitY((e.detail.dispY / rate) * 100);
-                console.log(editorCamera.right);
             }
         });
     }
@@ -167,17 +182,20 @@ export class Editor {
     initEventListeners() {
         this.mouseEvent = new MouseEvent(this.canvas);
         this.canvas.addEventListener("game-object-selection", (e) => {
-            console.log(e)
-            if (e.detail.scene === this.editorScene) {
+            if (!this.isNavigating) {
+                console.log("selecting");
+
+                if (e.detail.scene === this.editorScene) {
+                } else {
+                    this.activeObjects = [e.detail.entity];
+                }
             } else {
-                this.activeObjects = [e.detail.entity];
+                this.isNavigating = false;
             }
         });
     }
     addGameObject(objectInfo) {
         const gameObject = this.#engine.createEntity(this.gameScene);
-        console.log(this.#engine.entities)
-        console.log(this.gameScene.entities)
         if (objectInfo.geometry) {
             const geometry = new Geometry(
                 objectInfo.geometry.vertices,
@@ -188,19 +206,27 @@ export class Editor {
             this.gameRenderer.initGeometry(geometry);
         }
     }
-    
-    updateActiveMaterial(diffuseColor,ambientColor,specularColor,shininess) {
+
+    updateActiveMaterial(diffuseColor, ambientColor, specularColor, shininess) {
         if (this.activeObjects.length === 1) {
             this.activeObjects[0].getComponent("Geometry").materialOptions({
                 diffuseColor,
                 ambientColor,
                 specularColor,
-                shininess
-            })
+                shininess,
+            });
         }
     }
 
     start() {
+        this.#engine.compositor.addFramebuffer(
+            this.gameRenderer.framebuffer,
+            {}
+        );
+        this.#engine.compositor.addFramebuffer(
+            this.editorRenderer.framebuffer,
+            {}
+        );
         this.#engine.init();
         this.#engine.start();
     }
