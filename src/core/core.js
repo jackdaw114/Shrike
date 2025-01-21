@@ -82,9 +82,10 @@ export class Shrike {
 
     start() {
         if (!Object.keys(this.activeScenes).length) {
-            throw new Error(
+            console.warn(
                 "No active scene found. Please create a scene or set an existing one as active."
             );
+            return
         }
         // do checks hreer brefore starting game loop
         requestAnimationFrame(this.gameLoop);
