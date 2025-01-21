@@ -171,14 +171,20 @@
     /* pointer-events: none; */
     opacity: 0;
     transition: all 0.3s ease;
-    border-right: 2px dashed rgba(255, 255, 255, 0);  /* Invisible by default */
 }
 
 .docking-zone-overlay.active {
     pointer-events: auto;
     opacity: 1;
     background: rgba(33, 39, 48, 0.8);  /* Darker when active */
-    border-right: 2px dashed rgba(255, 0, 0, 0.5);  /* Visible when active */
+    border: 1px dashed rgba(255, 0, 0, 0.5);  /* Visible when active */
+}
+.docking-zone-overlay.docked {
+    pointer-events: auto;
+    opacity: 1;
+    background: rgba(33, 39, 48, 0.8);  /* Darker when active */
+    justify-content: flex-start;
+    align-items: start;
 }
 
 .docking-zone-content {
@@ -196,4 +202,17 @@
 
 .docking-zone-overlay.active .docking-zone-content {
     opacity: 1;
+}
+
+.unstyled-list {
+    list-style: none; /* Remove bullet points */
+    margin: 0;        /* Remove margin */
+    padding: 0;       /* Remove padding */
+}
+
+.unstyled-item {
+    margin: 0;        /* Remove margin */
+    padding: 0;       /* Remove padding */
+    display: flex;    /* Optional: Align contents as needed */
+    align-items: center; /* Center contents vertically */
 }

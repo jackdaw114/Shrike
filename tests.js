@@ -21,15 +21,16 @@ import "./src/editor/editor.js"
 customElements.define("s-gui", SGui)
 const sguiInstance = new SGui();
 
-const handle = sguiInstance.createWindow("test", true)
-let controller = {
-    r: 0,
-    g: 0,
-    b: 0
-}
-handle.appendColorPicker(controller)
+// const handle = sguiInstance.createWindow("test", true)
+// let controller = {
+//     r: 0,
+//     g: 0,
+//     b: 0
+// }
+// handle.appendColorPicker(controller)
 
 let panelHandler = sguiInstance.createWindow("panel", true)
+let panelHandler2 = sguiInstance.createWindow("panel", true)
 let filePanelController = {
     _files: [],
     _currentContext: null,
@@ -49,7 +50,8 @@ let filePanelController = {
 }
 
 panelHandler.appendFilePanel(filePanelController);
-
+panelHandler2.appendFilePanel(filePanelController);
+// sguiInstance.destroy();
 
 
 // ********************* END *************************
