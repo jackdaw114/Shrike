@@ -43,7 +43,6 @@ export class Renderer extends System {
         this.#context.enable(this.#context.CULL_FACE);
         this.#context.frontFace(this.#context.CCW);
         this.#context.cullFace(this.#context.BACK);
-        console.log("this is aspect_ratio", aspect_ratio);
         this.shader = new Shader(this.#context, testVert, testFrag, [
             "mWorld",
             "mView",
@@ -60,10 +59,6 @@ export class Renderer extends System {
             height:height,
         });
 
-        console.log(this.framebuffer);
-        this.options = {
-            clear: true,
-        };
     }
 
     update(deltaTime) {
@@ -78,12 +73,15 @@ export class Renderer extends System {
 
     init() {
         if (!this.scene.componentRegister.hasOwnProperty("Geometry")) {
-            throw new Error(
+            console.warn(
                 "The current scene is missing a Geometry component. Please add a Geometry component to enable the renderer, or detach the renderer."
             );
+            return
         }
         for (const component of this.scene.componentRegister["Geometry"]) {
-            this.initGeometry(component);
+            if (!component.vaoID) {
+                this.initGeometry(component);
+            }
         }
     }
 
@@ -135,8 +133,11 @@ export class Renderer extends System {
     }
 
     tempFun() {
+        if (!this.scene.componentRegister.hasOwnProperty("Geometry")) {
+            return
+        }
+
         this.#context.useProgram(this.shader.getProgram());
-        //this.#context.clearColor(0.3, 0.3, 0.3, 1.0);
         this.#context.bindFramebuffer(
             this.#context.FRAMEBUFFER,
             this.framebuffer.fbo
@@ -149,16 +150,14 @@ export class Renderer extends System {
             this.framebuffer.width,
             this.framebuffer.height
         );
+            this.#context.clear(
+                this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT
+            );
 
         this.#context.bindTexture(
             this.#context.TEXTURE_2D,
             this.framebuffer.texture
         );
-        if (this.options.clear) {
-            this.#context.clear(
-                this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT
-            );
-        }
         for (const component of this.scene.componentRegister["Geometry"]) {
             if (component.render) {
                 if (!component.depthTest) {
@@ -176,7 +175,6 @@ export class Renderer extends System {
      * @param {Geometry} component
      */
     render(component) {
-        //console.log(this.framebuffer)
         this.#context.bindFramebuffer(
             this.#context.FRAMEBUFFER,
             this.framebuffer.fbo
@@ -206,6 +204,7 @@ export class Renderer extends System {
             .getMatrix();
 
         let viewMatrix = this.scene.getCamera();
+        //console.log(viewMatrix)
         let projMatrix = new Float32Array(16);
         mat4.perspective(
             projMatrix,

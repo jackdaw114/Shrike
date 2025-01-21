@@ -29,19 +29,16 @@ export class Shrike {
         this.activeScenes = [];
         this.gameLoop = this.gameLoop.bind(this);
         this.compositor = new Compositor(canvas.getContext("webgl2"), width / height, width, height)
-        console.log(this.compositor)
     }
 
     /**
      * @param {Scene} scene
      */
     createScene() {
+        console.log(this.activeScenes)
         const scene = new Scene();
         this.scenes[this.scene_uid] = scene;
 
-        if (!Object.keys(this.activeScenes).length) {
-            this.activeScenes.push(this.scenes[this.scene_uid]);
-        }
         this.scene_uid++;
         return scene;
     }
@@ -67,7 +64,7 @@ export class Shrike {
     createEntity(scene) {
         const entity = new Entity(this.entity_uid);
         this.entities[this.entity_uid] = entity;
-        scene.addEntity(entity);
+        scene.addEntity(this.entity_uid,entity);
         this.entity_uid++;
         return entity;
     }
@@ -94,7 +91,6 @@ export class Shrike {
     }
     init() {
         for (const scene of Object.values(this.scenes)) {
-            console.log(scene);
             scene.init();
         }
     }

@@ -13,11 +13,11 @@ import { PickingSystem } from "../gpu/picker/picker";
 import { CannonRenderer } from "../gpu/cannon-renderer/cannon-renderer";
 import { CannonPhysicsSystem } from "../physics/cannon-physics-system";
 
-
 let canvas = document.getElementById("canvas1");
 const CANVAS_WIDTH = (canvas.width = window.innerWidth);
 const CANVAS_HEIGHT = (canvas.height = window.innerHeight);
 const engine = new Shrike(canvas, CANVAS_WIDTH, CANVAS_HEIGHT);
+
 const gameScene = engine.createScene();
 const editorScene = engine.createScene();
 engine.activateScene(editorScene);
@@ -342,7 +342,109 @@ if (import.meta.env.DEV) {
     });
 }
 // ********************* END *************************
+
 console.log(window.devicePixelRatio);
 engine.init();
 engine.start();
 
+export class Editor {
+    activeObjects = [];
+    #engine;
+    cannonMaxSubSteps = 5;
+
+    constructor(canvas, gameSpeed, width, height) {
+        this.canvas = canvas;
+        this.context = canvas.getContext("webgl2");
+        this.gameSpeed = gameSpeed;
+        this.#engine = new Shrike(context, width, height);
+        this.editorScene = this.#engine.createScene();
+        this.#engine.activateScene(editorScene);
+        this.editorRenderer = engine.createSystem(
+            Renderer,
+            this.editorScene,
+            width / height,
+            width,
+            height
+        );
+
+        this.gameScene = this.#engine.createScene();
+        this.gameRenderer = engine.createSystem(
+            Renderer,
+            this.gameScene,
+            width / height,
+            width,
+            height
+        );
+        this.cannonPhysicsSystem = this.#engine.createSystem(
+            CannonPhysicsSystem,
+            this.gameScene,
+            gameSpeed,
+            this.cannonMaxSubSteps
+        );
+        this.cannonRenderer = engine.createSystem(
+            CannonRenderer,
+            this.gameScene,
+            context,
+            width / height,
+            width,
+            height
+        );
+        this.scriptSystem = this.#engine.createSystem(ScriptSystem, gameScene);
+
+        this.gameScenePickingSystem = engine.createSystem(
+            PickingSystem,
+            this.gameScene,
+            context,
+            width,
+            height
+        );
+
+        this.editorPickingSystem = engine.createSystem(
+            PickingSystem,
+            this.editorScene,
+            context,
+            width,
+            height
+        );
+
+        this.debugSystem = engine.createSystem(
+            DebugSystem,
+            this.gameScene,
+            context,
+            width / height,
+            this.gameRenderer.framebuffer
+        );
+    }
+    initEditor() {
+        const arrow = parseOBJ(arrow);
+        this.moveWidget = {
+            x: {
+                geometry: new Geometry(...arrow),
+                transformation: new Transformation(),
+            },
+            y: {
+                geometry: new Geometry(...arrow),
+                transformation: new Transformation(),
+            },
+            z: {
+                geometry: new Geometry(...arrow),
+                transformation: new Transformation(),
+            },
+        };
+    }
+    initEventListeners() {
+        this.canvas.addEventListener("game-object-selection", (e) => {
+            if (e.detail.scene === this.editorScene) {
+
+            } else {
+                this.activeObjects = [e.detail.entity];
+            }
+        });
+    }
+    addGameObject(objectInfo) {
+        const gameObject = this.#engine.createEntity(this.gameScene)
+        if (objectInfo.geometry) {
+            this.gameScene.addComponent(gameObject, new Geometry(objectInfo.geometry.indices,objectInfo.geometry.vertices))
+        }
+    }
+}

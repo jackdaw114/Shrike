@@ -42,7 +42,6 @@ export class CannonRenderer extends System {
         this.#context.enable(this.#context.CULL_FACE);
         this.#context.frontFace(this.#context.CCW);
         this.#context.cullFace(this.#context.BACK);
-        console.log("this is aspect_ratio", aspect_ratio);
 
         this.sphereVAOID = this.#context.createVertexArray();
         this.sphereVBOID = this.#context.createBuffer();
@@ -101,10 +100,6 @@ export class CannonRenderer extends System {
         this.framebuffer =framebuffer 
     }
     init() {
-        console.log(
-            "systems in scene from cannonPhysics",
-            this.scene.systems["CannonPhysicsSystem"]
-        );
     }
     /**
      *

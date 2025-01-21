@@ -113,8 +113,9 @@ export class MouseEvent {
 
     handleScroll(e) {
         e.preventDefault()
-        this.scrollCallback(e)
-        
+        this.element.dispatchEvent(new CustomEvent("u_scroll",  {
+            detail:e
+        })) 
 
     }
     handleMouseMove(e) {
@@ -122,8 +123,8 @@ export class MouseEvent {
             const dispX = e.clientX - this.lastX;
             const dispY = e.clientY - this.lastY;
             
-
-            this.dragCallback({
+        this.element.dispatchEvent(new CustomEvent("drag", {
+            detail: {
                 button: this.mouseDown,
                 originalEvent: e,
                 dispX,
@@ -132,23 +133,15 @@ export class MouseEvent {
                 currentY: e.clientY,
                 startX: this.lastX,
                 startY: this.lastY
-            });
+            }
+        }))    
         }
 
         this.lastX = e.clientX;
         this.lastY = e.clientY;
     }
 
-    addEventListener(type, callback) {
-        if (type === 'drag') {
-            this.dragCallback = callback;
-        }
-        if (type === 'scroll') {
-            this.scrollCallback = callback;
-        }
-    }
 
-    // Clean up method to remove event listeners
     destroy() {
         this.element.removeEventListener('mousedown', this.handleMouseDown);
         this.element.removeEventListener('mouseup', this.handleMouseUp);
