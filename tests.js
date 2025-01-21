@@ -1,6 +1,4 @@
-import { mat4 } from "gl-matrix";
-import { parseOBJ } from "./lib/parse-obj";
-import { monke } from "./monke";
+
 // import { Shrike } from "./src/core/core";
 // import Camera from "./src/ecs/camera";
 // import { Transformation } from "./src/ecs/classes";
@@ -21,16 +19,12 @@ import "./src/editor/editor.js"
 customElements.define("s-gui", SGui)
 const sguiInstance = new SGui();
 
-// const handle = sguiInstance.createWindow("test", true)
-// let controller = {
-//     r: 0,
-//     g: 0,
-//     b: 0
-// }
-// handle.appendColorPicker(controller)
 
-let panelHandler = sguiInstance.createWindow("panel", true)
-let panelHandler2 = sguiInstance.createWindow("panel", true)
+
+
+let panelHandler = sguiInstance.createWindow("panel1", true)
+let panelHandler2 = sguiInstance.createWindow("panel2", true)
+let sliderHandler2 = sguiInstance.createWindow("slider", true)
 let filePanelController = {
     _files: [],
     _currentContext: null,
@@ -49,8 +43,16 @@ let filePanelController = {
     }
 }
 
+
+const sliderController = {
+        value: 75,
+    };
+
 panelHandler.appendFilePanel(filePanelController);
 panelHandler2.appendFilePanel(filePanelController);
+sliderHandler2.appendSlider(sliderController)
+
+
 // sguiInstance.destroy();
 
 
