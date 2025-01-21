@@ -69,7 +69,9 @@ export class Scene {
         this.removeComponents(entity);
         this.entities.delete(entity.id);
     }
-
+    getEntityById(id) {
+        return this.entities[id]
+    }
     addComponent(entity, component) {
         const componentClass = component.constructor.name;
         if (!entity.hasOwnProperty(componentClass)) {

@@ -64,11 +64,14 @@ const scriptSystem = engine.createSystem(ScriptSystem, gameScene);
 const pickingSystem = engine.createSystem(
     PickingSystem,
     gameScene,
+    canvas,
     context,
     CANVAS_WIDTH,
     CANVAS_HEIGHT
 );
-
+canvas.addEventListener("game-object-selection", (e) => {
+    console.log(e);
+});
 const debugSystem = engine.createSystem(
     DebugSystem,
     gameScene,
@@ -85,8 +88,6 @@ const debugLineEntity = engine.createEntity(gameScene);
 const arrowZAxis = engine.createEntity(editorScene);
 const arrowXAxis = engine.createEntity(gameScene);
 const arrowYAxis = engine.createEntity(gameScene);
-
-
 
 //editorRenderer.options.clear = false;
 
@@ -215,12 +216,12 @@ function drawGrid(lineComponent, numberOfLines, spacing) {
 
 drawGrid(lineObj, 15, 0.5);
 
-canvas.addEventListener("click", (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = rect.height - (e.clientY - rect.top); // flip Y
-    console.log(pickingSystem.readColor(x, y));
-});
+//canvas.addEventListener("click", (e) => {
+//    const rect = canvas.getBoundingClientRect();
+//    const x = e.clientX - rect.left;
+//    const y = rect.height - (e.clientY - rect.top); // flip Y
+//    console.log(pickingSystem.readColor(x, y));
+//});
 
 const mouseEvents = new MouseEvent(canvas);
 // camera class stuff to do (initalizaton)
@@ -350,8 +351,10 @@ export class Editor {
     activeObjects = [];
     #engine;
     cannonMaxSubSteps = 5;
-    constructor(context, gameSpeed, width, height) {
-        this.context = canvas;
+
+    constructor(canvas, gameSpeed, width, height) {
+        this.canvas = canvas;
+        this.context = canvas.getContext("webgl2");
         this.gameSpeed = gameSpeed;
         this.#engine = new Shrike(context, width, height);
         this.editorScene = this.#engine.createScene();
@@ -364,7 +367,7 @@ export class Editor {
             height
         );
 
-        this.gameScene - this.#engine.createScene();
+        this.gameScene = this.#engine.createScene();
         this.gameRenderer = engine.createSystem(
             Renderer,
             this.gameScene,
@@ -388,13 +391,22 @@ export class Editor {
         );
         this.scriptSystem = this.#engine.createSystem(ScriptSystem, gameScene);
 
-        this.pickingSystem = engine.createSystem(
+        this.gameScenePickingSystem = engine.createSystem(
             PickingSystem,
             this.gameScene,
             context,
             width,
             height
         );
+
+        this.editorPickingSystem = engine.createSystem(
+            PickingSystem,
+            this.editorScene,
+            context,
+            width,
+            height
+        );
+
         this.debugSystem = engine.createSystem(
             DebugSystem,
             this.gameScene,
@@ -408,17 +420,31 @@ export class Editor {
         this.moveWidget = {
             x: {
                 geometry: new Geometry(...arrow),
-                transformation: new Transformation()
+                transformation: new Transformation(),
             },
             y: {
                 geometry: new Geometry(...arrow),
-                transformation: new Transformation()
+                transformation: new Transformation(),
             },
             z: {
                 geometry: new Geometry(...arrow),
-                transformation: new Transformation()
+                transformation: new Transformation(),
+            },
+        };
+    }
+    initEventListeners() {
+        this.canvas.addEventListener("game-object-selection", (e) => {
+            if (e.detail.scene === this.editorScene) {
+
+            } else {
+                this.activeObjects = [e.detail.entity];
             }
+        });
+    }
+    addGameObject(objectInfo) {
+        const gameObject = this.#engine.createEntity(this.gameScene)
+        if (objectInfo.geometry) {
+            this.gameScene.addComponent(gameObject, new Geometry(objectInfo.geometry.indices,objectInfo.geometry.vertices))
         }
-         
     }
 }

@@ -2,15 +2,24 @@ import { glMatrix, mat4 } from "gl-matrix";
 import { pickerFrag, pickerVert } from "../../asset-manager/shader-assets";
 import { System } from "../../ecs/classes";
 import Shader from "../shaders";
+import { Scene } from "three";
 
 export class PickingSystem extends System {
     /**
      * @type {WebGL2RenderingContext}
      */
     #context;
-
-    constructor(scene, context, width, height) {
+    /**
+     *
+     * @param {Scene} scene
+     * @param {HTMLElement} element
+     * @param {WebGL2RenderingContext} context
+     * @param {Number} width
+     * @param {Number} height
+     */
+    constructor(scene, element, context, width, height) {
         super(scene);
+        this.element = element;
         this.aspect_ratio = width / height;
         this.width = width;
         this.height = height;
@@ -30,6 +39,25 @@ export class PickingSystem extends System {
         this.initTexture(width, height);
         this.#context.bindFramebuffer(this.#context.FRAMEBUFFER, null);
         this.#context.bindTexture(this.#context.TEXTURE_2D, null);
+        this.element.addEventListener("click", (e) => {
+            const rect = element.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = rect.height - (e.clientY - rect.top); // flip Y
+            const objectId = this.readColor(x, y)[0]
+            if (objectId !== 0){
+            this.element.dispatchEvent(
+                new CustomEvent("game-object-selection", {
+                    detail: {
+                        e,
+                        objectId,
+                        entity: this.scene.getEntityById(objectId),
+                        scene: this.scene
+                    },
+                })
+            );
+
+            }
+        });
     }
 
     initTexture(width, height) {
