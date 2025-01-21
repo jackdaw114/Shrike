@@ -220,11 +220,11 @@ export class Editor {
 
     start() {
         this.#engine.compositor.addFramebuffer(
-            this.gameRenderer.framebuffer,
+            this.editorRenderer.framebuffer,
             {}
         );
         this.#engine.compositor.addFramebuffer(
-            this.editorRenderer.framebuffer,
+            this.gameRenderer.framebuffer,
             {}
         );
         this.#engine.init();

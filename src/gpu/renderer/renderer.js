@@ -152,6 +152,7 @@ export class Renderer extends System {
             this.#context.TEXTURE_2D,
             this.framebuffer.texture
         );
+        this.#context.clearColor(0., 0.,0., 0.)
         this.#context.clear(
             this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT
         );
@@ -161,19 +162,19 @@ export class Renderer extends System {
                 this.render(component);
             }
         }
+        this.#context.bindBuffer(this.#context.ARRAY_BUFFER, null)
+        this.#context.bindBuffer(this.#context.ELEMENT_ARRAY_BUFFER, null)
+        this.#context.bindRenderbuffer(this.#context.RENDERBUFFER, null)
+        this.#context.bindTexture(this.#context.TEXTURE_2D, null)
     }
 
     /**
      * @param {Geometry} component
      */
     render(component) {
-        this.#context.bindFramebuffer(
-            this.#context.FRAMEBUFFER,
-            this.framebuffer.fbo
-        );
         this.#context.bindVertexArray(component.vaoID);
         this.#context.bindBuffer(this.#context.ARRAY_BUFFER, component.vboID);
-
+        this.#context.bindBuffer(this.#context.ELEMENT_ARRAY_BUFFER, component.eboID)
         this.#context.bufferSubData(
             this.#context.ARRAY_BUFFER,
             0,
@@ -247,14 +248,6 @@ export class Renderer extends System {
             this.shader.getUniform("lightPosition"),
             [10, 10, 0]
         );
-        this.#context.uniform1f(
-            this.#context.getUniformLocation(
-                this.shader.getProgram(),
-                "shininess"
-            ),
-            component.material.getShininess()
-        );
-        //this.#context.uniform3fv(this.#context.getUniform, data)
 
         // ************************** END *******************************
         this.#context.drawElements(
@@ -263,5 +256,13 @@ export class Renderer extends System {
             this.#context.UNSIGNED_SHORT,
             0
         );
+    }
+
+}
+
+function checkGLError(gl, operation) {
+    const error = gl.getError();
+    if (error !== gl.NO_ERROR) {
+        console.error(`WebGL error after ${operation}: ${error}`);
     }
 }

@@ -185,5 +185,6 @@ export class DebugSystem extends System {
             component.arrayBuffer.length / 6 //TODO: constafiy
         );
         // TODO: this.#context.disableVertexAttribArray()
+        this.#context.bindFramebuffer(this.#context.FRAMEBUFFER, null)
     }
 }
