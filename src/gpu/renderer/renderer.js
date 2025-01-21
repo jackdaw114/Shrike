@@ -56,9 +56,8 @@ export class Renderer extends System {
 
         this.framebuffer = createFramebuffer(this.#context, {
             width: width,
-            height:height,
+            height: height,
         });
-
     }
 
     update(deltaTime) {
@@ -76,7 +75,7 @@ export class Renderer extends System {
             console.warn(
                 "The current scene is missing a Geometry component. Please add a Geometry component to enable the renderer, or detach the renderer."
             );
-            return
+            return;
         }
         for (const component of this.scene.componentRegister["Geometry"]) {
             if (!component.vaoID) {
@@ -134,14 +133,13 @@ export class Renderer extends System {
 
     tempFun() {
         if (!this.scene.componentRegister.hasOwnProperty("Geometry")) {
-            return
+            return;
         }
 
         this.#context.useProgram(this.shader.getProgram());
         this.#context.bindFramebuffer(
             this.#context.FRAMEBUFFER,
             this.framebuffer.fbo
-            //null  // once compositor is doen use frame buffer herer
         );
 
         this.#context.viewport(
@@ -150,23 +148,17 @@ export class Renderer extends System {
             this.framebuffer.width,
             this.framebuffer.height
         );
-            this.#context.clear(
-                this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT
-            );
-
         this.#context.bindTexture(
             this.#context.TEXTURE_2D,
             this.framebuffer.texture
         );
+        this.#context.clear(
+            this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT
+        );
+
         for (const component of this.scene.componentRegister["Geometry"]) {
             if (component.render) {
-                if (!component.depthTest) {
-                    this.#context.disable(this.#context.DEPTH_TEST);
-                }
                 this.render(component);
-                if (!component.depthTest) {
-                    this.#context.enable(this.#context.DEPTH_TEST);
-                }
             }
         }
     }

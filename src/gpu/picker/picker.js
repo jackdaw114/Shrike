@@ -155,7 +155,6 @@ export class PickingSystem extends System {
         for (const component of this.scene.componentRegister["Geometry"]) {
             this.render(component);
         }
-        this.#context.bindFramebuffer(this.#context.FRAMEBUFFER, null);
         this.#context.enable(this.#context.BLEND);
         this.#context.bindTexture(this.#context.TEXTURE_2D, null);
     }

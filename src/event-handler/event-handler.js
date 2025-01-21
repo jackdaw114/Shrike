@@ -92,7 +92,6 @@ export class MouseEvent {
     }
 
     handleMouseDown(e) {
-        console.log(e)
         this.mouseDown = e.buttons;
         this.lastX = e.clientX;
         this.lastY = e.clientY;
@@ -104,11 +103,9 @@ export class MouseEvent {
     
     handleKeyDown(e) {
         this.activeKeys[e.key] = true
-        console.log(this.activeKeys)
     }
     handleKeyUp(e) {
         delete this.activeKeys[e.key]
-        console.log(this.activeKeys)
     }
 
     handleScroll(e) {

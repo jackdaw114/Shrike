@@ -35,7 +35,6 @@ export class Shrike {
      * @param {Scene} scene
      */
     createScene() {
-        console.log(this.activeScenes)
         const scene = new Scene();
         this.scenes[this.scene_uid] = scene;
 
@@ -45,6 +44,7 @@ export class Shrike {
     activateScene(scene) {
         this.activeScenes.push(scene)
     }
+
     /**
      *
      * @param {Scene} scene 
@@ -74,8 +74,9 @@ export class Shrike {
         for (const scene of this.activeScenes) {
             scene.update(deltaTime);
         }
+
+
         this.lastFrameTime = currentTime;
-        // use compositor here to render to screen 
         this.compositor.render()
         requestAnimationFrame(this.gameLoop);
     }
@@ -85,7 +86,7 @@ export class Shrike {
             console.warn(
                 "No active scene found. Please create a scene or set an existing one as active."
             );
-            return
+            return;
         }
         // do checks hreer brefore starting game loop
         requestAnimationFrame(this.gameLoop);

@@ -224,7 +224,6 @@ drawGrid(lineObj, 15, 0.5);
 //});
 
 const mouseEvents = new MouseEvent(canvas);
-// camera class stuff to do (initalizaton)
 const tempCamera = gameScene.activeCamera;
 editorScene.activeCamera = gameScene.activeCamera;
 

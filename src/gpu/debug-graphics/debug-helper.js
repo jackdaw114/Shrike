@@ -103,7 +103,6 @@ export class DebugSystem extends System {
         for (const component of this.scene.componentRegister["DebugLine"]) {
             this.render(component);
         }
-
         }
     }
 

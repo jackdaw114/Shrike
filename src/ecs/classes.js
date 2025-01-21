@@ -62,7 +62,6 @@ export class Scene {
         return entity;
     }
     addEntity(id, entity) {
-        console.log("adding entity",id,entity)
         this.entities[id] = entity;
     }
 
