@@ -249,7 +249,6 @@ export class Renderer extends System {
             [10, 10, 0]
         );
 
-        // ************************** END *******************************
         this.#context.drawElements(
             this.#context.TRIANGLES,
             component.indices.length,
