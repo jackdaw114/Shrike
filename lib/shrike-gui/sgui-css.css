@@ -169,7 +169,6 @@
     align-items: center;
     z-index: 10000;
     opacity: 0;
-    border-right: 1px solid #ccc; /* Optional for visual separation */
     overflow: hidden; /* Prevent overflow content */
 
     /* Transition styles for non-width properties */
@@ -182,7 +181,7 @@
     right: 0; /* Align to the right edge */
     width: 5px; /* Resize handle width */
     height: 100%;
-    background-color: #aaa; /* Handle color */
+    background-color: #212730; /* Handle color */
     cursor: col-resize; /* Cursor changes to resize */
 }
 
