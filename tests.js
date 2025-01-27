@@ -50,7 +50,7 @@ const sliderController = {
 
 panelHandler.appendFilePanel(filePanelController);
 panelHandler2.appendFilePanel(filePanelController);
-sliderHandler2.appendSlider(sliderController)
+sliderHandler2.appendSlider(sliderController,"Hello")
 
 
 // sguiInstance.destroy();

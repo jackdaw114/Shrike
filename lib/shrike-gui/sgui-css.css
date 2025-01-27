@@ -11,11 +11,12 @@
     left: 100px;
     width: auto;
     min-width: 20em;
-    min-height: 5em;
+    min-height: 1.2em;
     border: 2px solid #101216;
     border-radius: 0.2em;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-    z-index: 10000;
+    background-color: rgba(0, 0, 0, 1);
+    z-index: 10001;
     overflow: hidden;
     color: #fff;
     resize: both;
@@ -160,7 +161,6 @@
 .docking-zone-overlay {
     position: fixed;
     top: 0;
-    left: 0;
     min-width: 160px; /* Minimum width for the dock */
     height: 100%;
     background: rgba(33, 39, 48, 0.5); /* Using your theme colors */
@@ -174,15 +174,29 @@
     /* Transition styles for non-width properties */
     transition: all 0.3s ease;
 }
+
+.left-dock{
+    left: 0;
+}
+.right-dock{
+    right: 0;
+}
+
 .resize-handle {
     transition: 0s;
     position: absolute;
     top: 0;
-    right: 0; /* Align to the right edge */
     width: 5px; /* Resize handle width */
     height: 100%;
     background-color: #212730; /* Handle color */
     cursor: col-resize; /* Cursor changes to resize */
+}
+
+.left-handle{
+    right: 0;
+}
+.right-handle{
+    left: 0;
 }
 
 .docking-zone-overlay.active {
