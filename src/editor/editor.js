@@ -12,6 +12,8 @@ import { ScriptSystem } from "../script-system/script-system";
 import { PickingSystem } from "../gpu/picker/picker";
 import { CannonRenderer } from "../gpu/cannon-renderer/cannon-renderer";
 import { CannonPhysicsSystem } from "../physics/cannon-physics-system";
+import { SGui, SGuiSlider } from "../../lib/shrike-gui/sgui";
+import {SGuiText} from "../../lib/shrike-gui/sgui-child-elements";
 
 export class Editor {
     activeObjects = [];
@@ -27,21 +29,31 @@ export class Editor {
         this.gameSpeed = gameSpeed;
         this.#engine = new Shrike(canvas, width, height);
         this.initSystems();
-        this.initEventListeners();
         this.initEditor();
         this.editorCameraSetup();
+        this.sguiSetup();
 
+        this.initEventListeners();
         const arrowZAxis = this.#engine.createEntity(this.editorScene);
         const arrowXAxis = this.#engine.createEntity(this.editorScene);
         const arrowYAxis = this.#engine.createEntity(this.editorScene);
-    
-        this.editorScene.addComponent(arrowXAxis, this.moveWidget.x.geometry)
-        this.editorScene.addComponent(arrowYAxis, this.moveWidget.y.geometry)
-        this.editorScene.addComponent(arrowZAxis, this.moveWidget.z.geometry)
 
-        this.editorScene.addComponent(arrowXAxis, this.moveWidget.x.transformation)
-        this.editorScene.addComponent(arrowYAxis, this.moveWidget.y.transformation)
-        this.editorScene.addComponent(arrowZAxis, this.moveWidget.z.transformation)
+        this.editorScene.addComponent(arrowXAxis, this.moveWidget.x.geometry);
+        this.editorScene.addComponent(arrowYAxis, this.moveWidget.y.geometry);
+        this.editorScene.addComponent(arrowZAxis, this.moveWidget.z.geometry);
+
+        this.editorScene.addComponent(
+            arrowXAxis,
+            this.moveWidget.x.transformation
+        );
+        this.editorScene.addComponent(
+            arrowYAxis,
+            this.moveWidget.y.transformation
+        );
+        this.editorScene.addComponent(
+            arrowZAxis,
+            this.moveWidget.z.transformation
+        );
     }
     initSystems() {
         const width = this.width;
@@ -68,7 +80,7 @@ export class Editor {
         );
         this.#engine.activateScene(this.gameScene);
         this.#engine.activateScene(this.editorScene);
-        console.log(this.#engine.scenes)
+        console.log(this.#engine.scenes);
 
         this.cannonPhysicsSystem = this.#engine.createSystem(
             CannonPhysicsSystem,
@@ -115,28 +127,46 @@ export class Editor {
     }
     initEditor() {
         const arrowGeo = parseOBJ(arrow);
-        console.log(arrowGeo)
+        console.log(arrowGeo);
         this.moveWidget = {
             x: {
-                geometry: new Geometry(arrowGeo.vertices,arrowGeo.indices),
+                geometry: new Geometry(arrowGeo.vertices, arrowGeo.indices),
                 transformation: new Transformation(),
             },
             y: {
-                geometry: new Geometry(arrowGeo.vertices,arrowGeo.indices),
+                geometry: new Geometry(arrowGeo.vertices, arrowGeo.indices),
                 transformation: new Transformation(),
             },
             z: {
-                geometry: new Geometry(arrowGeo.vertices,arrowGeo.indices),
+                geometry: new Geometry(arrowGeo.vertices, arrowGeo.indices),
                 transformation: new Transformation(),
             },
         };
         //const widget = this.#engine.createEntity(this.editorScene);
 
-
         const debugLineEntity = this.#engine.createEntity(this.gameScene);
         this.gameScene.addComponent(debugLineEntity, new DebugLine());
         this.generateDebugGrid(debugLineEntity.getComponent("DebugLine"));
     }
+    sguiSetup() {
+        this.SGui = new SGui();
+        this.propertyWindow = {
+            mainWindow: this.SGui.createWindow("properties", true),
+            x: new SGuiSlider({ value: 0 }, this.canvas),
+            y: new SGuiSlider({ value: 0 }, this.canvas),
+            z: new SGuiSlider({ value: 0 }, this.canvas),
+            text: new SGuiText(this.canvas, {
+                text:"hello"
+            })
+        };
+        this.materialWindow = {
+            mainWindow: this.SGui.createWindow("Material", true),
+            r: new SGuiSlider({ value: 0 }, this.canvas),
+            g: new SGuiSlider({ value: 0 }, this.canvas),
+            b: new SGuiSlider({ value: 0 }, this.canvas),
+        };
+    }
+
     editorCameraSetup() {
         const editorCamera = this.editorScene.activeCamera;
         this.gameScene.activeCamera = editorCamera;
@@ -181,17 +211,35 @@ export class Editor {
 
     initEventListeners() {
         this.mouseEvent = new MouseEvent(this.canvas);
-        this.canvas.addEventListener("game-object-selection", (e) => {
+        this.canvas.addEventListener("picker-selection", (e) => {
             if (!this.isNavigating) {
-                console.log("selecting");
-
+                //console.log("selecting");
+                console.log(e.detail);
                 if (e.detail.scene === this.editorScene) {
                 } else {
                     this.activeObjects = [e.detail.entity];
+                    console.log(this.activeObjects);
+                    this.canvas.dispatchEvent(
+                        new CustomEvent("select-object", {
+                            detail: {},
+                        })
+                    );
                 }
             } else {
                 this.isNavigating = false;
             }
+        });
+        this.canvas.addEventListener("select-object", (e) => {
+            this.propertyWindow.mainWindow.appendChild(this.propertyWindow.text);
+            this.propertyWindow.mainWindow.appendChild(this.propertyWindow.x);
+            this.propertyWindow.mainWindow.appendChild(this.propertyWindow.y);
+            this.propertyWindow.mainWindow.appendChild(this.propertyWindow.z);
+        });
+        this.canvas.addEventListener("slider-change", (e) => {
+            console.log(this.activeObjects[0].getComponent("Transformation"));
+            this.activeObjects[0]
+                .getComponent("Transformation")
+                .setXPos(e.detail.value);
         });
     }
     addGameObject(objectInfo) {

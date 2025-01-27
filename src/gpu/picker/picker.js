@@ -46,7 +46,7 @@ export class PickingSystem extends System {
             const objectId = this.readColor(x, y)[0]
             if (objectId !== 0){
             this.element.dispatchEvent(
-                new CustomEvent("game-object-selection", {
+                new CustomEvent("picker-selection", {
                     detail: {
                         e,
                         objectId,

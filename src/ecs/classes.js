@@ -174,4 +174,7 @@ export class Transformation extends Component {
     getMatrix() {
         return this.matrix;
     }
+    setXPos(value) {
+        this.matrix[12] = value
+    }
 }
