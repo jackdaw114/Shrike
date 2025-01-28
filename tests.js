@@ -31,7 +31,7 @@ let filePanel2 = new SGuiFilePanel(panelWindow2);
 
 
 panelWindow.appendChild(filePanel);
-panelWindow2.appendFilePanel(filePanel2);
+panelWindow2.appendChild(filePanel2);
 sliderWindow.appendChild(slider)
 
 
