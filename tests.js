@@ -26,21 +26,13 @@ let panelHandler = sguiInstance.createWindow("panel1", true)
 let panelHandler2 = sguiInstance.createWindow("panel2", true)
 let sliderHandler2 = sguiInstance.createWindow("slider", true)
 let filePanelController = {
-    _files: [],
-    _currentContext: null,
+    files: [],
+    currentContext: null,
+}
 
-    get files() {
-        return this._files;
-    },
-
-    
-    get currentContext() {
-        return this._currentContext;
-    },
-
-    set currentContext(newContext) {
-        this._currentContext = newContext;
-    }
+let filePanelController2 = {
+    files: [],
+    currentContext: null,
 }
 
 
@@ -49,7 +41,7 @@ const sliderController = {
     };
 
 panelHandler.appendFilePanel(filePanelController);
-panelHandler2.appendFilePanel(filePanelController);
+panelHandler2.appendFilePanel(filePanelController2);
 sliderHandler2.appendSlider(sliderController,"Hello")
 
 
