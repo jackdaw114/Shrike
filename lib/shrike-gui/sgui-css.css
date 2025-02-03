@@ -171,7 +171,7 @@
     align-items: center;
     z-index: 10000;
     opacity: 0;
-    overflow: hidden; /* Prevent overflow content */
+    overflow: hidden; 
 
     /* Transition styles for non-width properties */
     transition: all 0.3s ease;
