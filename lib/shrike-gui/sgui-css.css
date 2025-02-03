@@ -20,6 +20,8 @@
     overflow: hidden;
     color: #fff;
     resize: both;
+    display: flex;
+    flex-direction: column;
 }
 .sgui-base{
     background-color: rgba(0, 0, 0, 1);
