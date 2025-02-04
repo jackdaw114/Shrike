@@ -19,9 +19,9 @@
     overflow: hidden;
     color: #fff;
     resize: both;
+    background-color: rgba(0, 0, 0, 1);
 }
 .sgui-base{
-    background-color: rgba(0, 0, 0, 1);
     display: grid;
     justify-items: center;
 }

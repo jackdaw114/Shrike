@@ -2,8 +2,9 @@ import { mat4, quat } from "gl-matrix";
 import Camera from "./camera";
 
 export class Entity {
-    constructor(id) {
+    constructor(id,name) {
         this.id = id;
+        this.name = name;
         /**
          * @type {Object}
          */
@@ -119,7 +120,7 @@ export class Scene {
         }
     }
     getCamera() {
-        return this.activeCamera.matrix;
+        return this.activeCamera;
     }
 }
 

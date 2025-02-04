@@ -8,6 +8,10 @@ import {
 } from "../../asset-manager/shader/compositor.js";
 import { createFramebuffer } from "../framebuffer.js";
 import { testFrag, testVert } from "../../asset-manager/shader-assets";
+import {
+    shadowFragmentShader,
+    shadowVertexShader,
+} from "../../asset-manager/shader/shadow.js";
 
 export class Renderer extends System {
     POS_SIZE = 3;
@@ -58,16 +62,26 @@ export class Renderer extends System {
             width: width,
             height: height,
         });
+        this.createShadowDepthBuffer();
     }
 
     update(deltaTime) {
         // octree culling here then provide updated array to the loop below
 
-        this.tempFun();
+        this.renderPass();
     }
 
     getFramebuffer() {
         return this.framebuffer;
+    }
+
+    createShadowDepthBuffer() {
+        this.shadowBuffer = createFramebuffer(this.#context, {
+            width: this.width,
+            height: this.height,
+            depth: true,
+        });
+        this.shadowProgram; //= new Shader(this.#context,shadowVertexShader,shadowFragmentShader,[])
     }
 
     init() {
@@ -131,41 +145,65 @@ export class Renderer extends System {
         );
     }
 
-    tempFun() {
+    renderPass() {
         if (!this.scene.componentRegister.hasOwnProperty("Geometry")) {
             return;
         }
-
-        this.#context.useProgram(this.shader.getProgram());
-        this.#context.bindFramebuffer(
-            this.#context.FRAMEBUFFER,
-            this.framebuffer.fbo
-        );
-
+        // render pass
         this.#context.viewport(
             0,
             0,
             this.framebuffer.width,
             this.framebuffer.height
         );
+        this.#context.bindFramebuffer(
+            this.#context.FRAMEBUFFER,
+            this.framebuffer.fbo
+        );
+        this.#context.useProgram(this.shader.getProgram());
+
         this.#context.bindTexture(
             this.#context.TEXTURE_2D,
             this.framebuffer.texture
         );
-        this.#context.clearColor(0., 0.,0., 0.)
+        this.#context.clearColor(0, 0, 0, 0);
         this.#context.clear(
             this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT
         );
-
         for (const component of this.scene.componentRegister["Geometry"]) {
             if (component.render) {
                 this.render(component);
             }
         }
-        this.#context.bindBuffer(this.#context.ARRAY_BUFFER, null)
-        this.#context.bindBuffer(this.#context.ELEMENT_ARRAY_BUFFER, null)
-        this.#context.bindRenderbuffer(this.#context.RENDERBUFFER, null)
-        this.#context.bindTexture(this.#context.TEXTURE_2D, null)
+        this.#context.bindBuffer(this.#context.ARRAY_BUFFER, null);
+        this.#context.bindBuffer(this.#context.ELEMENT_ARRAY_BUFFER, null);
+        this.#context.bindRenderbuffer(this.#context.RENDERBUFFER, null);
+        this.#context.bindTexture(this.#context.TEXTURE_2D, null);
+    }
+
+    shadowPass(component) {
+        let worldMatrix = component.entity
+            .getComponent("Transformation")
+            .getMatrix();
+        let lightView;
+
+        this.#context.bindFramebuffer(
+            this.#context.DRAW_FRAMEBUFFER,
+            this.shadowBuffer.fbo
+        );
+        this.#context.viewport(
+            0,
+            0,
+            this.shadowBuffer.width,
+            this.shadowBuffer.height
+        );
+        this.#context.clear(this.#context.DEPTH_BUFFER_BIT);
+        this.#context.useProgram(this.shadowProgram);
+        for (const component of this.scene.componentRegister["Geometry"]) {
+            if (component.render) {
+                this.shadowPass(component);
+            }
+        }
     }
 
     /**
@@ -174,7 +212,10 @@ export class Renderer extends System {
     render(component) {
         this.#context.bindVertexArray(component.vaoID);
         this.#context.bindBuffer(this.#context.ARRAY_BUFFER, component.vboID);
-        this.#context.bindBuffer(this.#context.ELEMENT_ARRAY_BUFFER, component.eboID)
+        this.#context.bindBuffer(
+            this.#context.ELEMENT_ARRAY_BUFFER,
+            component.eboID
+        );
         this.#context.bufferSubData(
             this.#context.ARRAY_BUFFER,
             0,
@@ -196,8 +237,8 @@ export class Renderer extends System {
             .getComponent("Transformation")
             .getMatrix();
 
-        let viewMatrix = this.scene.getCamera();
-        //console.log(viewMatrix)
+        const camera = this.scene.getCamera();
+        let viewMatrix = this.scene.getCamera().matrix;
         let projMatrix = new Float32Array(16);
         mat4.perspective(
             projMatrix,
@@ -206,8 +247,6 @@ export class Renderer extends System {
             0.1, // get from camera
             1000.0 // get from camera
         );
-        // ************************** setUniforms *******************************
-        //TODO: create some sort of Uniform location holder
 
         this.#context.uniformMatrix4fv(
             this.shader.getUniform("mWorld"),
@@ -246,9 +285,8 @@ export class Renderer extends System {
         );
         this.#context.uniform3fv(
             this.shader.getUniform("lightPosition"),
-            [10, 10, 0]
+            [0, 10, 0]
         );
-
         this.#context.drawElements(
             this.#context.TRIANGLES,
             component.indices.length,
@@ -256,7 +294,6 @@ export class Renderer extends System {
             0
         );
     }
-
 }
 
 function checkGLError(gl, operation) {

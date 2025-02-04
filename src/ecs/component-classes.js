@@ -16,13 +16,14 @@ export class Geometry extends Component {
         this.texture = 0;
         this.render = true;
         this.depthTest = true;
-        this.material = new Material(new Float32Array([1.,1.,1.]),new Float32Array([1.,1.,1.]) , new Float32Array([1.,1.,1.]), 0);
+        this.material = new Material(new Float32Array([0.6,0.6,0.6]),new Float32Array([0.2,0.2,0.2]) , new Float32Array([0.9,0.9,0.9]), 99);
     }
     materialOptions(params) {
         const {diffuseColor=new Float32Array([1.0,1.0,1.0]), ambientColor=new Float32Array([1.0,1.0,1.0]), specularColor=new Float32Array([1.0,1.0,1.0]), shininess = 0.} = params;
         this.material = new Material(diffuseColor,ambientColor,specularColor,shininess)
     }
 }
+
 
 export class GuiComponent extends Component {
     /**

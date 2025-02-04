@@ -226,7 +226,7 @@ export class PickingSystem extends System {
         let worldMatrix = component.entity
             .getComponent("Transformation")
             .getMatrix();
-        let viewMatrix = this.scene.getCamera();
+        let viewMatrix = this.scene.getCamera().matrix;
         let projMatrix = new Float32Array(16);
 
         mat4.perspective(

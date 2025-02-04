@@ -13,7 +13,7 @@ import { PickingSystem } from "../gpu/picker/picker";
 import { CannonRenderer } from "../gpu/cannon-renderer/cannon-renderer";
 import { CannonPhysicsSystem } from "../physics/cannon-physics-system";
 import { SGui, SGuiSlider } from "../../lib/shrike-gui/sgui";
-import {SGuiText} from "../../lib/shrike-gui/sgui-child-elements";
+import { SGuiContainer, SGuiText } from "../../lib/shrike-gui/sgui-child-elements";
 
 export class Editor {
     activeObjects = [];
@@ -156,15 +156,17 @@ export class Editor {
             y: new SGuiSlider({ value: 0 }, this.canvas),
             z: new SGuiSlider({ value: 0 }, this.canvas),
             text: new SGuiText(this.canvas, {
-                text:"hello"
-            })
+                text: "hello",
+            }),
         };
         this.materialWindow = {
             mainWindow: this.SGui.createWindow("Material", true),
             r: new SGuiSlider({ value: 0 }, this.canvas),
             g: new SGuiSlider({ value: 0 }, this.canvas),
             b: new SGuiSlider({ value: 0 }, this.canvas),
+            diffusePanel: new SGuiContainer({heading:"diffuse color:"})
         };
+        this.materialWindow.diffusePanel.append(this.materialWindow.r,this.materialWindow.g,this.materialWindow.b)
     }
 
     editorCameraSetup() {
@@ -188,6 +190,7 @@ export class Editor {
             }
         });
     }
+
     generateDebugGrid(lineObj) {
         //let lineObj = debugLineEntity.getComponent("DebugLine");
         function drawGrid(lineComponent, numberOfLines, spacing) {
@@ -221,7 +224,7 @@ export class Editor {
                     console.log(this.activeObjects);
                     this.canvas.dispatchEvent(
                         new CustomEvent("select-object", {
-                            detail: {},
+                            detail: e.detail,
                         })
                     );
                 }
@@ -230,20 +233,61 @@ export class Editor {
             }
         });
         this.canvas.addEventListener("select-object", (e) => {
-            this.propertyWindow.mainWindow.appendChild(this.propertyWindow.text);
+            this.propertyWindow.mainWindow.appendChild(
+                this.propertyWindow.text
+            );
             this.propertyWindow.mainWindow.appendChild(this.propertyWindow.x);
             this.propertyWindow.mainWindow.appendChild(this.propertyWindow.y);
             this.propertyWindow.mainWindow.appendChild(this.propertyWindow.z);
+            this.propertyWindow.mainWindow.appendFilePanel({
+                files: [],
+                currentContext: null,
+            });
+            //this.materialWindow.diffusePanel.appendChild(this.materialWindow.r)
+            this.materialWindow.mainWindow.appendChild(this.materialWindow.diffusePanel)
+
+            console.log(e);
+            this.propertyWindow.text.textContent = e.detail.entity.id
         });
         this.canvas.addEventListener("slider-change", (e) => {
-            console.log(this.activeObjects[0].getComponent("Transformation"));
-            this.activeObjects[0]
-                .getComponent("Transformation")
-                .setXPos(e.detail.value);
+            console.log(e)
+            console.log(e.detail.id)
+            switch (e.detail.id) {
+                case this.materialWindow.r.id:
+                    console.log("form here")
+                    console.log(this.activeObjects[0].getComponent("Geometry").material)
+                    this.activeObjects[0].getComponent("Geometry").material.diffuseColor[0] = e.detail.value / 100;
+                    
+                    break;
+                case this.materialWindow.g.id:
+                    console.log("form here")
+                    console.log(this.activeObjects[0].getComponent("Geometry").material)
+                    this.activeObjects[0].getComponent("Geometry").material.diffuseColor[1] = e.detail.value / 100; 
+                    break;
+                case this.materialWindow.b.id:
+                    console.log("form here")
+                    console.log(this.activeObjects[0].getComponent("Geometry").material)
+                    this.activeObjects[0].getComponent("Geometry").material.diffuseColor[2] = e.detail.value / 100; 
+                    break;
+                default:
+            }
         });
+
+        this.canvas.addEventListener("drop", (e) => {
+            e.preventDefault();
+            const file_reader = new FileReader();
+            file_reader.onload = function (event) {
+                console.log(event.target.result);
+            };
+            let test = file_reader.readAsText(e.dataTransfer.files[0]);
+        });
+        this.canvas.ondragover = function (e) {
+            return false;
+        };
     }
     addGameObject(objectInfo) {
         const gameObject = this.#engine.createEntity(this.gameScene);
+
         if (objectInfo.geometry) {
             const geometry = new Geometry(
                 objectInfo.geometry.vertices,

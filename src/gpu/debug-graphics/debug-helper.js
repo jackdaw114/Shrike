@@ -152,7 +152,7 @@ export class DebugSystem extends System {
         mat4.identity(identityMatrix);
 
         let worldMatrix = mat4.create();
-        let viewMatrix = this.scene.getCamera();
+        let viewMatrix = this.scene.getCamera().matrix;
         let projMatrix = new Float32Array(16);
 
         mat4.perspective(
