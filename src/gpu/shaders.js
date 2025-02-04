@@ -19,7 +19,6 @@ export default class Shader {
 
     initUniforms(uniforms) {
         for (const uniform of uniforms) {
-            console.log(uniform);
             this.uniforms[uniform] = this.#context.getUniformLocation(
                 this.program,
                 uniform

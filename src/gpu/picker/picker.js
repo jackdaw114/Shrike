@@ -1,21 +1,35 @@
-import {glMatrix, mat4} from "gl-matrix";
+import { glMatrix, mat4 } from "gl-matrix";
 import { pickerFrag, pickerVert } from "../../asset-manager/shader-assets";
 import { System } from "../../ecs/classes";
 import Shader from "../shaders";
+import { Scene } from "three";
 
 export class PickingSystem extends System {
     /**
      * @type {WebGL2RenderingContext}
      */
     #context;
-
-    constructor(scene,context, width, height) {
+    /**
+     *
+     * @param {Scene} scene
+     * @param {HTMLElement} element
+     * @param {WebGL2RenderingContext} context
+     * @param {Number} width
+     * @param {Number} height
+     */
+    constructor(scene, element, context, width, height) {
         super(scene);
-        this.aspect_ratio = width/height
+        this.element = element;
+        this.aspect_ratio = width / height;
         this.width = width;
-        this.height = height
+        this.height = height;
         this.#context = context;
-        this.shader = new Shader(context,pickerVert,pickerFrag,["id","mWorld","mView","mProj"])
+        this.shader = new Shader(context, pickerVert, pickerFrag, [
+            "id",
+            "mWorld",
+            "mView",
+            "mProj",
+        ]);
         this.pickerFramebuffer = this.#context.createFramebuffer();
         this.pickerDepthTexture = this.#context.createTexture();
         this.#context.bindFramebuffer(
@@ -25,6 +39,25 @@ export class PickingSystem extends System {
         this.initTexture(width, height);
         this.#context.bindFramebuffer(this.#context.FRAMEBUFFER, null);
         this.#context.bindTexture(this.#context.TEXTURE_2D, null);
+        this.element.addEventListener("click", (e) => {
+            const rect = element.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = rect.height - (e.clientY - rect.top); // flip Y
+            const objectId = this.readColor(x, y)[0]
+            if (objectId !== 0){
+            this.element.dispatchEvent(
+                new CustomEvent("picker-selection", {
+                    detail: {
+                        e,
+                        objectId,
+                        entity: this.scene.getEntityById(objectId),
+                        scene: this.scene
+                    },
+                })
+            );
+
+            }
+        });
     }
 
     initTexture(width, height) {
@@ -102,48 +135,53 @@ export class PickingSystem extends System {
         }
     }
 
-    init() {
-    }
-    
-
+    init() {}
 
     update(deltaTime) {
         // octree culling here then provide updated array to the loop below
-
-        this.#context.useProgram(this.shader.getProgram())
+        this.#context.viewport(0, 0, this.width, this.height);
+        this.#context.useProgram(this.shader.getProgram());
         this.#context.bindFramebuffer(
             this.#context.FRAMEBUFFER,
             this.pickerFramebuffer
         );
         this.#context.bindTexture(this.#context.TEXTURE_2D, this.pickerTexture);
-        this.#context.disable(this.#context.BLEND)
-        this.#context.clearColor(0.0,0.0,0.0 ,0.0 ) 
-        this.#context.clear(this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT)
+        this.#context.disable(this.#context.BLEND);
+        this.#context.clearColor(0.0, 0.0, 0.0, 0.0);
+        this.#context.clear(
+            this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT
+        );
 
         for (const component of this.scene.componentRegister["Geometry"]) {
             this.render(component);
         }
+        this.#context.enable(this.#context.BLEND);
+        this.#context.bindTexture(this.#context.TEXTURE_2D, null);
+    }
+
+    readColor(x, y) {
         this.#context.bindFramebuffer(
             this.#context.FRAMEBUFFER,
-            null
+            this.pickerFramebuffer
         );
-        this.#context.enable(this.#context.BLEND)
-        this.#context.bindTexture(this.#context.TEXTURE_2D, null);
-
-    }
-    
-    readColor(x, y) {
-        this.#context.bindFramebuffer(this.#context.FRAMEBUFFER, this.pickerFramebuffer)
-        this.#context.readBuffer(this.#context.COLOR_ATTACHMENT0)
+        this.#context.readBuffer(this.#context.COLOR_ATTACHMENT0);
         this.#context.bindTexture(this.#context.TEXTURE_2D, this.pickerTexture);
-        
-        let pixels = new Float32Array(4)
-        this.#context.readPixels(x, y, 1, 1, this.#context.RGBA, this.#context.FLOAT, pixels)
 
-        this.#context.bindFramebuffer(this.#context.FRAMEBUFFER, null)
+        let pixels = new Float32Array(4);
+        this.#context.readPixels(
+            x,
+            y,
+            1,
+            1,
+            this.#context.RGBA,
+            this.#context.FLOAT,
+            pixels
+        );
+
+        this.#context.bindFramebuffer(this.#context.FRAMEBUFFER, null);
         this.#context.bindTexture(this.#context.TEXTURE_2D, null);
-        this.#context.readBuffer(this.#context.BACK)
-        return pixels
+        this.#context.readBuffer(this.#context.BACK);
+        return pixels;
     }
 
     render(component) {
@@ -156,11 +194,8 @@ export class PickingSystem extends System {
             component.vertices
         );
 
-
-
         this.#context.enableVertexAttribArray(0);
         this.#context.enableVertexAttribArray(1);
-        
 
         this.#context.bindBuffer(
             this.#context.ELEMENT_ARRAY_BUFFER,
@@ -179,14 +214,19 @@ export class PickingSystem extends System {
             this.shader.getProgram(),
             "mProj"
         );
-            
-        const idLocation = this.#context.getUniformLocation(this.shader.getProgram(), "id")
+
+        const idLocation = this.#context.getUniformLocation(
+            this.shader.getProgram(),
+            "id"
+        );
 
         let identityMatrix = new Float32Array(16);
         mat4.identity(identityMatrix);
 
-        let worldMatrix = component.entity.getComponent("Transformation").getMatrix();
-        let viewMatrix = this.scene.getCamera();
+        let worldMatrix = component.entity
+            .getComponent("Transformation")
+            .getMatrix();
+        let viewMatrix = this.scene.getCamera().matrix;
         let projMatrix = new Float32Array(16);
 
         mat4.perspective(
@@ -212,7 +252,7 @@ export class PickingSystem extends System {
             false,
             viewMatrix
         );
-        this.#context.uniform1f(idLocation, component.entity.id)
+        this.#context.uniform1f(idLocation, component.entity.id);
 
         this.#context.drawElements(
             this.#context.TRIANGLES,
@@ -222,6 +262,5 @@ export class PickingSystem extends System {
         );
     }
 
-    renderPlugin(){
-    }
+    renderPlugin() {}
 }

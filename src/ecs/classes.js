@@ -2,8 +2,9 @@ import { mat4, quat } from "gl-matrix";
 import Camera from "./camera";
 
 export class Entity {
-    constructor(id) {
+    constructor(id,name) {
         this.id = id;
+        this.name = name;
         /**
          * @type {Object}
          */
@@ -69,7 +70,9 @@ export class Scene {
         this.removeComponents(entity);
         this.entities.delete(entity.id);
     }
-
+    getEntityById(id) {
+        return this.entities[id]
+    }
     addComponent(entity, component) {
         const componentClass = component.constructor.name;
         if (!entity.hasOwnProperty(componentClass)) {
@@ -107,7 +110,6 @@ export class Scene {
 
     init() {
         for (const system of Object.values(this.systems)) {
-            console.log("initializing :", system);
             system.init();
         }
         this.isRunning = true;
@@ -118,7 +120,7 @@ export class Scene {
         }
     }
     getCamera() {
-        return this.activeCamera.matrix;
+        return this.activeCamera;
     }
 }
 
@@ -144,6 +146,12 @@ export class System {
         this.scene = scene;
         // prolly call its init funciton here create a destructor like deinit first ig
     }
+    start() {
+        throw new Error("Method 'start' must be implemented.");
+    }
+    stop() {
+        throw new Error("Method 'stop' must be implemented.");
+    }
 }
 
 // TODO: move this into some other file
@@ -166,5 +174,8 @@ export class Transformation extends Component {
     }
     getMatrix() {
         return this.matrix;
+    }
+    setXPos(value) {
+        this.matrix[12] = value
     }
 }

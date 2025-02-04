@@ -29,7 +29,6 @@ export class Shrike {
         this.activeScenes = [];
         this.gameLoop = this.gameLoop.bind(this);
         this.compositor = new Compositor(canvas.getContext("webgl2"), width / height, width, height)
-        console.log(this.compositor)
     }
 
     /**
@@ -39,9 +38,6 @@ export class Shrike {
         const scene = new Scene();
         this.scenes[this.scene_uid] = scene;
 
-        if (!Object.keys(this.activeScenes).length) {
-            this.activeScenes.push(this.scenes[this.scene_uid]);
-        }
         this.scene_uid++;
         return scene;
     }
@@ -49,9 +45,14 @@ export class Shrike {
         this.activeScenes.push(scene)
     }
 
+    /**
+     *
+     * @param {Scene} scene 
+     * @returns 
+     */
     createSystem(Constructor,scene, ...args) {
         const system = new Constructor(scene, ...args);
-
+        scene.attachSystem(system)
         this.systems[this.system_uid] = system;
         this.system_uid++;
         return system;
@@ -63,7 +64,7 @@ export class Shrike {
     createEntity(scene) {
         const entity = new Entity(this.entity_uid);
         this.entities[this.entity_uid] = entity;
-        scene.addEntity(entity);
+        scene.addEntity(this.entity_uid,entity);
         this.entity_uid++;
         return entity;
     }
@@ -73,24 +74,25 @@ export class Shrike {
         for (const scene of this.activeScenes) {
             scene.update(deltaTime);
         }
+
+
         this.lastFrameTime = currentTime;
-        // use compositor here to render to screen 
         this.compositor.render()
         requestAnimationFrame(this.gameLoop);
     }
 
     start() {
         if (!Object.keys(this.activeScenes).length) {
-            throw new Error(
+            console.warn(
                 "No active scene found. Please create a scene or set an existing one as active."
             );
+            return;
         }
         // do checks hreer brefore starting game loop
         requestAnimationFrame(this.gameLoop);
     }
     init() {
         for (const scene of Object.values(this.scenes)) {
-            console.log(scene);
             scene.init();
         }
     }

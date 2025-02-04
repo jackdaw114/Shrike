@@ -7,9 +7,10 @@ export class ScriptSystem extends System {
     }
     init() {
         if (!this.scene.componentRegister.hasOwnProperty("Script")) {
-            throw new Error(
+            console.warn(
                 "The current scene is missing a Script component. Please add a Script component to enable the script system, or detach the script system."
             );
+            return
         }
         for (const script in this.scene.componentRegister["Script"]) {
             // some script optimization potential

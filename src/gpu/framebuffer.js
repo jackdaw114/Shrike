@@ -1,6 +1,6 @@
 /**
  * Creates and configures a WebGL2 framebuffer with optional color and depth attachments.
- * 
+ *
  * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context
  * @param {Object} customOptions - Custom configuration options
  * @param {number} [customOptions.width] - Framebuffer width (default: window.innerWidth)
@@ -14,12 +14,13 @@
 export function createFramebuffer(gl, customOptions = {}) {
     // Validate GL context
     if (!(gl instanceof WebGL2RenderingContext)) {
-        throw new Error('Invalid WebGL2 context');
+        throw new Error("Invalid WebGL2 context");
     }
 
+    const pixelRatio = window.devicePixelRatio || 1;
     const defaultOptions = {
-        width: window.innerWidth,
-        height: window.innerHeight,
+        width: window.innerWidth * pixelRatio,
+        height: window.innerHeight * pixelRatio,
         depth: true,
         float: false,
         linear: true,
@@ -36,16 +37,11 @@ export function createFramebuffer(gl, customOptions = {}) {
     };
 
     const options = { ...defaultOptions, ...customOptions };
-    
-    // Adjust for device pixel ratio
-    const pixelRatio = window.devicePixelRatio || 1;
-    const width = options.width * pixelRatio;
-    const height = options.height * pixelRatio;
 
     // Handle floating point textures if requested
     if (options.float) {
-        if (!gl.getExtension('EXT_color_buffer_float')) {
-            throw new Error('Floating point textures not supported');
+        if (!gl.getExtension("EXT_color_buffer_float")) {
+            throw new Error("Floating point textures not supported");
         }
         options.texInternalFormat = gl.RGBA32F;
         options.texType = gl.FLOAT;
@@ -55,17 +51,19 @@ export function createFramebuffer(gl, customOptions = {}) {
     const framebuffer = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
 
+
+// option for no texture
     // Create and configure color attachment
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    
+
     // Handle texture storage and data
     gl.texImage2D(
         gl.TEXTURE_2D,
         0,
         options.texInternalFormat,
-        width,
-        height,
+        options.width,
+        options.height,
         options.texBorder,
         options.texFormat,
         options.texType,
@@ -73,8 +71,16 @@ export function createFramebuffer(gl, customOptions = {}) {
     );
 
     // Configure texture parameters
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, options.texMinFilter);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, options.texMagFilter);
+    gl.texParameteri(
+        gl.TEXTURE_2D,
+        gl.TEXTURE_MIN_FILTER,
+        options.texMinFilter
+    );
+    gl.texParameteri(
+        gl.TEXTURE_2D,
+        gl.TEXTURE_MAG_FILTER,
+        options.texMagFilter
+    );
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, options.texWrapS);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, options.texWrapT);
 
@@ -88,20 +94,50 @@ export function createFramebuffer(gl, customOptions = {}) {
     );
 
     let depthBuffer = null;
+    let depthTexture = null;
     if (options.depth) {
         depthBuffer = gl.createRenderbuffer();
         gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
         gl.renderbufferStorage(
             gl.RENDERBUFFER,
             options.depthInternalFormat,
-            width,
-            height
+            options.width,
+            options.height
         );
         gl.framebufferRenderbuffer(
             gl.FRAMEBUFFER,
             gl.DEPTH_ATTACHMENT,
             gl.RENDERBUFFER,
             depthBuffer
+        );
+
+        depthTexture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, depthTexture);
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            options.depthInternalFormat,
+            options.width,
+            options.height,
+            0,
+            gl.DEPTH_COMPONENT,
+            gl.UNSIGNED_INT,
+            null
+        );
+
+        // Set texture filtering
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+
+        // Attach the depth texture to the framebuffer
+        gl.framebufferTexture2D(
+            gl.FRAMEBUFFER,
+            gl.DEPTH_ATTACHMENT,
+            gl.TEXTURE_2D,
+            depthTexture,
+            0
         );
     }
 
@@ -112,8 +148,13 @@ export function createFramebuffer(gl, customOptions = {}) {
         gl.deleteFramebuffer(framebuffer);
         gl.deleteTexture(texture);
         if (depthBuffer) gl.deleteRenderbuffer(depthBuffer);
-        
-        throw new Error(`Framebuffer creation failed: ${getFramebufferStatusMessage(gl, status)}`);
+
+        throw new Error(
+            `Framebuffer creation failed: ${getFramebufferStatusMessage(
+                gl,
+                status
+            )}`
+        );
     }
 
     // Clean up bindings
@@ -132,7 +173,7 @@ export function createFramebuffer(gl, customOptions = {}) {
             gl.deleteFramebuffer(framebuffer);
             gl.deleteTexture(texture);
             if (depthBuffer) gl.deleteRenderbuffer(depthBuffer);
-        }
+        },
     };
 }
 
@@ -142,13 +183,13 @@ export function createFramebuffer(gl, customOptions = {}) {
 function getFramebufferStatusMessage(gl, status) {
     switch (status) {
         case gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-            return 'Incomplete attachment';
+            return "Incomplete attachment";
         case gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
-            return 'Inconsistent dimensions';
+            return "Inconsistent dimensions";
         case gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-            return 'Missing attachment';
+            return "Missing attachment";
         case gl.FRAMEBUFFER_UNSUPPORTED:
-            return 'Unsupported format combination';
+            return "Unsupported format combination";
         default:
             return `Unknown error: ${status}`;
     }

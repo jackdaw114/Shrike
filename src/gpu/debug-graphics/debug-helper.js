@@ -23,16 +23,17 @@ export class DebugSystem extends System {
     vboID;
     started = false;
     MAX_LINES = 500;
+    active = true;
 
     /**
      * @param {WebGL2RenderingContext} canvas
      */
-    constructor(scene, context, aspect_ratio) {
+    constructor(scene, context, aspect_ratio,framebuffer) {
         // TODO: Add input for framebuffer attachment here
         super(scene);
+        this.framebuffer = framebuffer
         this.aspect_ratio = aspect_ratio;
         this.#context = context;
-
         this.#context.enable(this.#context.DEPTH_TEST);
         this.#context.enable(this.#context.CULL_FACE);
         this.#context.frontFace(this.#context.CCW);
@@ -88,15 +89,20 @@ export class DebugSystem extends System {
 
     init() {
         if (!this.scene.componentRegister.hasOwnProperty("DebugLine")) {
-            throw new Error(
+            console.warn(
                 "The current scene is missing a DebugLine component. Please add a DebugLine component to enable the debug line system, or detach the debug line system."
             );
         }
     }
 
     update(deltaTime) {
+        if (!this.scene.componentRegister.hasOwnProperty("DebugLine")) {
+            return
+        }
+        if (this.active) {
         for (const component of this.scene.componentRegister["DebugLine"]) {
             this.render(component);
+        }
         }
     }
 
@@ -104,6 +110,7 @@ export class DebugSystem extends System {
         if (component.arrayBuffer.length == 0) {
             return;
         }
+        this.#context.bindFramebuffer(this.#context.FRAMEBUFFER, this.framebuffer.fbo)
         this.#context.bindVertexArray(this.vaoID);
         this.#context.bindBuffer(this.#context.ARRAY_BUFFER, this.vboID);
 
@@ -145,7 +152,7 @@ export class DebugSystem extends System {
         mat4.identity(identityMatrix);
 
         let worldMatrix = mat4.create();
-        let viewMatrix = this.scene.getCamera();
+        let viewMatrix = this.scene.getCamera().matrix;
         let projMatrix = new Float32Array(16);
 
         mat4.perspective(
@@ -178,5 +185,6 @@ export class DebugSystem extends System {
             component.arrayBuffer.length / 6 //TODO: constafiy
         );
         // TODO: this.#context.disableVertexAttribArray()
+        this.#context.bindFramebuffer(this.#context.FRAMEBUFFER, null)
     }
 }

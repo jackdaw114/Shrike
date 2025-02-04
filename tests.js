@@ -1,4 +1,6 @@
-
+import {parseOBJ} from "./lib/parse-obj";
+import {monke} from "./monke";
+import {Editor} from "./src/editor/editor";
 import SGui, { SGuiFilePanel, SGuiSlider } from "./lib/shrike-gui/sgui";
 
 
@@ -25,9 +27,14 @@ sliderWindow.appendChild(slider)
 sliderWindow.appendChild(slider2)
 
 
-// sguiInstance.destroy();
+let canvas = document.getElementById("canvas1");
+const CANVAS_WIDTH = (canvas.width = window.innerWidth);
+const CANVAS_HEIGHT = (canvas.height = window.innerHeight);
+const editor = new Editor(canvas,1,CANVAS_WIDTH,CANVAS_HEIGHT)
 
+editor.addGameObject({
+        geometry: parseOBJ(monke)
+})
 
-// ********************* END *************************
-
-
+editor.start()
+//import "./src/test/testsTemp"

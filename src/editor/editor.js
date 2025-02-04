@@ -10,320 +10,316 @@ import { DebugSystem } from "../gpu/debug-graphics/debug-helper";
 import { Renderer } from "../gpu/renderer/renderer";
 import { ScriptSystem } from "../script-system/script-system";
 import { PickingSystem } from "../gpu/picker/picker";
+import { CannonRenderer } from "../gpu/cannon-renderer/cannon-renderer";
+import { CannonPhysicsSystem } from "../physics/cannon-physics-system";
+import { SGui, SGuiSlider } from "../../lib/shrike-gui/sgui";
+import { SGuiContainer, SGuiText } from "../../lib/shrike-gui/sgui-child-elements";
 
+export class Editor {
+    activeObjects = [];
+    #engine;
+    cannonMaxSubSteps = 5;
+    isNavigating = false;
 
-let canvas = document.getElementById("canvas1");
-const CANVAS_WIDTH = (canvas.width = window.innerWidth);
-const CANVAS_HEIGHT = (canvas.height = window.innerHeight);
-const engine = new Shrike(canvas, CANVAS_WIDTH, CANVAS_HEIGHT);
+    constructor(canvas, gameSpeed, width, height) {
+        this.canvas = canvas;
+        this.context = canvas.getContext("webgl2");
+        this.width = width;
+        this.height = height;
+        this.gameSpeed = gameSpeed;
+        this.#engine = new Shrike(canvas, width, height);
+        this.initSystems();
+        this.initEditor();
+        this.editorCameraSetup();
+        this.sguiSetup();
 
-const gameScene = engine.createScene();
-const editorScene = engine.createScene();
-engine.activateScene(editorScene);
+        this.initEventListeners();
+        const arrowZAxis = this.#engine.createEntity(this.editorScene);
+        const arrowXAxis = this.#engine.createEntity(this.editorScene);
+        const arrowYAxis = this.#engine.createEntity(this.editorScene);
 
-const context = canvas.getContext("webgl2");
-const renderer = engine.createSystem(
-    Renderer,
-    gameScene,
-    canvas.getContext("webgl2"),
-    CANVAS_WIDTH / CANVAS_HEIGHT,
-    CANVAS_WIDTH,
-    CANVAS_HEIGHT
-);
+        this.editorScene.addComponent(arrowXAxis, this.moveWidget.x.geometry);
+        this.editorScene.addComponent(arrowYAxis, this.moveWidget.y.geometry);
+        this.editorScene.addComponent(arrowZAxis, this.moveWidget.z.geometry);
 
-const editorRenderer = engine.createSystem(
-    Renderer,
-    editorScene,
-    canvas.getContext("webgl2"),
-    CANVAS_WIDTH / CANVAS_HEIGHT,
-    CANVAS_WIDTH,
-    CANVAS_HEIGHT
-);
-
-// ********************* Test Stuff ******************
-
-const scriptSystem = engine.createSystem(ScriptSystem, gameScene);
-const pickingSystem = engine.createSystem(
-    PickingSystem,
-    gameScene,
-    context,
-    CANVAS_WIDTH,
-    CANVAS_HEIGHT
-);
-
-const debugSystem = engine.createSystem(
-    DebugSystem,
-    gameScene,
-    canvas.getContext("webgl2"),
-    CANVAS_WIDTH / CANVAS_HEIGHT
-);
-engine.compositor.addFramebuffer(renderer.framebuffer, {})
-const entity1 = engine.createEntity(gameScene);
-const entity2 = engine.createEntity(gameScene);
-const debugLineEntity = engine.createEntity(gameScene);
-
-const arrowZAxis = engine.createEntity(editorScene);
-const arrowXAxis = engine.createEntity(gameScene);
-const arrowYAxis = engine.createEntity(gameScene);
-
-gameScene.attachSystem(renderer);
-gameScene.attachSystem(debugSystem);
-gameScene.attachSystem(pickingSystem);
-gameScene.attachSystem(scriptSystem);
-
-
-editorScene.attachSystem(editorRenderer);
-editorRenderer.options.clear = false;
-
-const { indices, vertices } = parseOBJ(monke);
-const { indices: arrowInd, vertices: arrowVert } = parseOBJ(arrow);
-
-gameScene.addComponent(entity1, new Geometry(vertices, indices));
-gameScene.addComponent(entity1, new Transformation());
-gameScene.addComponent(entity2, new Geometry(vertices, indices));
-gameScene.addComponent(entity2, new Transformation());
-gameScene.addComponent(debugLineEntity, new DebugLine());
-gameScene.addComponent(entity1, new Script());
-
-editorScene.addComponent(arrowZAxis, new Geometry(arrowVert, arrowInd));
-editorScene.addComponent(arrowZAxis, new Transformation());
-
-editorScene.addComponent(arrowYAxis, new Geometry(arrowVert, arrowInd));
-editorScene.addComponent(arrowYAxis, new Transformation());
-
-editorScene.addComponent(arrowXAxis, new Geometry(arrowVert, arrowInd));
-editorScene.addComponent(arrowXAxis, new Transformation());
-entity1.getComponent("Geometry").materialOptions({
-    diffuseColor: new Float32Array([1.0, 0.6, 0.0]),
-    ambientColor: new Float32Array([0.7, 0.2, 0.2]),
-    specularColor: new Float32Array([0.6, 0.8, 0.8]),
-    shininess: 5,
-});
-
-const arrowTransformation = arrowZAxis.getComponent("Transformation");
-const yArrowTransformation = arrowYAxis.getComponent("Transformation");
-const xArrowTransformation = arrowXAxis.getComponent("Transformation");
-
-mat4.scale(
-    yArrowTransformation.getMatrix(),
-    yArrowTransformation.getMatrix(),
-    [0.5, 0.5, 0.5]
-);
-
-
-mat4.rotate(
-    yArrowTransformation.getMatrix(),
-    yArrowTransformation.getMatrix(),
-    -Math.PI / 2,
-    [1, 0, 0]
-);
-
-mat4.scale(
-    xArrowTransformation.getMatrix(),
-    yArrowTransformation.getMatrix(),
-    [0.5, 0.5, 0.5]
-);
-mat4.rotate(
-    xArrowTransformation.getMatrix(),
-    yArrowTransformation.getMatrix(),
-    -Math.PI / 2,
-    [0, 0, 1]
-);
-
-// IMP
-//arrowZAxis.getComponent('Geometry').depthTest=false
-//arrowYAxis.getComponent('Geometry').depthTest=false
-//arrowXAxis.getComponent('Geometry').depthTest=false
-
-arrowXAxis.getComponent("Geometry").materialOptions({
-    diffuseColor: new Float32Array([1, 0, 0]),
-    specularColor: new Float32Array([1, 0, 0]),
-    ambientColor: new Float32Array([1, 0, 0]),
-    shininess: 0.3,
-});
-
-arrowYAxis.getComponent("Geometry").materialOptions({
-    diffuseColor: new Float32Array([0, 1, 0]),
-    specularColor: new Float32Array([0, 1, 0]),
-    ambientColor: new Float32Array([0, 1, 0]),
-    shininess: 0.3,
-});
-
-arrowZAxis.getComponent("Geometry").materialOptions({
-    diffuseColor: new Float32Array([0, 0, 1]),
-    specularColor: new Float32Array([0, 0, 1]),
-    ambientColor: new Float32Array([0, 0, 1]),
-    shininess: 0.3,
-});
-mat4.scale(
-    arrowTransformation.getMatrix(),
-    arrowTransformation.getMatrix(),
-    [0.5, 0.5, 0.5]
-);
-
-//entity1.getComponent("Geometry").tint = new Float32Array([0,1,0])
-
-const transformation = entity2.getComponent("Transformation");
-const ent1Script = entity1.getComponent("Script");
-ent1Script.update = (deltaTime, components) => {
-    let { Transformation } = components;
-    mat4.translate(Transformation.matrix, Transformation.matrix, [0, 0, 0.01]);
-};
-
-mat4.rotate(
-    transformation.getMatrix(),
-    transformation.getMatrix(),
-    1.4,
-    [0, 1, 0]
-);
-mat4.translate(
-    transformation.getMatrix(),
-    transformation.getMatrix(),
-    [0, 0, 2]
-);
-
-let lineObj = debugLineEntity.getComponent("DebugLine");
-function drawGrid(lineComponent, numberOfLines, spacing) {
-    let size = (numberOfLines * spacing - spacing) / 2;
-    for (let i = 0; i < numberOfLines; i++) {
-        lineComponent.addLine(
-            [-size, 0, spacing * i - size, 0, 0, 0],
-            [size, 0, spacing * i - size, 0, 0, 0]
+        this.editorScene.addComponent(
+            arrowXAxis,
+            this.moveWidget.x.transformation
+        );
+        this.editorScene.addComponent(
+            arrowYAxis,
+            this.moveWidget.y.transformation
+        );
+        this.editorScene.addComponent(
+            arrowZAxis,
+            this.moveWidget.z.transformation
         );
     }
-    for (let i = 0; i < numberOfLines; i++) {
-        lineComponent.addLine(
-            [spacing * i - size, 0, -size, 0, 0, 0],
-            [spacing * i - size, 0, size, 0, 0, 0]
+    initSystems() {
+        const width = this.width;
+        const height = this.height;
+        const gameSpeed = this.gameSpeed;
+        this.editorScene = this.#engine.createScene();
+        this.editorRenderer = this.#engine.createSystem(
+            Renderer,
+            this.editorScene,
+            this.context,
+            width / height,
+            width,
+            height
+        );
+
+        this.gameScene = this.#engine.createScene();
+        this.gameRenderer = this.#engine.createSystem(
+            Renderer,
+            this.gameScene,
+            this.context,
+            width / height,
+            width,
+            height
+        );
+        this.#engine.activateScene(this.gameScene);
+        this.#engine.activateScene(this.editorScene);
+        console.log(this.#engine.scenes);
+
+        this.cannonPhysicsSystem = this.#engine.createSystem(
+            CannonPhysicsSystem,
+            this.gameScene,
+            gameSpeed,
+            this.cannonMaxSubSteps
+        );
+        this.cannonRenderer = this.#engine.createSystem(
+            CannonRenderer,
+            this.gameScene,
+            this.context,
+            width / height,
+            width,
+            height
+        );
+        this.scriptSystem = this.#engine.createSystem(
+            ScriptSystem,
+            this.gameScene
+        );
+        this.gameScenePickingSystem = this.#engine.createSystem(
+            PickingSystem,
+            this.gameScene,
+            this.canvas,
+            this.context,
+            width,
+            height
+        );
+
+        this.editorPickingSystem = this.#engine.createSystem(
+            PickingSystem,
+            this.editorScene,
+            this.canvas,
+            this.context,
+            width,
+            height
+        );
+        this.debugSystem = this.#engine.createSystem(
+            DebugSystem,
+            this.gameScene,
+            this.context,
+            width / height,
+            this.gameRenderer.framebuffer
         );
     }
-}
-
-drawGrid(lineObj, 15, 0.5);
-
-canvas.addEventListener("click", (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = rect.height - (e.clientY - rect.top); // flip Y
-    console.log(pickingSystem.readColor(x, y));
-});
-
-const mouseEvents = new MouseEvent(canvas);
-// camera class stuff to do (initalizaton)
-const tempCamera = gameScene.activeCamera;
-editorScene.activeCamera = gameScene.activeCamera;
-
-tempCamera.zoom(-10);
-tempCamera.setPosition(new Float32Array([0, 10, 10]));
-mouseEvents.addEventListener("drag", (e) => {
-    const rate = 1000;
-    if (e.button == 1) {
-        tempCamera.panHorizontal(e.dispX / rate);
-        tempCamera.panVertical(e.dispY / rate);
-    } else if (e.button == 4) {
-        tempCamera.orbitX((e.dispX / rate) * 100);
-        tempCamera.orbitY((e.dispY / rate) * 100);
-        console.log(tempCamera.right);
-    }
-});
-
-mouseEvents.addEventListener("scroll", (e) => {
-    const rate = 1000;
-    tempCamera.zoom(e.wheelDeltaY / rate);
-});
-
-if (import.meta.env.DEV) {
-    Promise.all([import("three"), import("cannon")]).then(([THREE, CANNON]) => {
-        console.log("Loaded THREE.js for development:", THREE);
-        console.log("Loaded CANNON.js for development:", CANNON);
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-        console.log(geometry);
-        var size = 1;
-        var height = 5;
-        var damping = 0.01;
-        var world = new CANNON.World();
-
-        world.gravity.set(0, 0, -10);
-        world.broadphase = new CANNON.NaiveBroadphase();
-
-        // ground plane
-        var groundMaterial = new CANNON.Material();
-        var groundShape = new CANNON.Plane();
-        var groundBody = new CANNON.Body({ mass: 0, material: groundMaterial });
-
-
-        groundBody.addShape(groundShape);
-        world.addBody(groundBody);
-
-        var mass = 10;
-        var sphereShape = new CANNON.Sphere(size);
-
-        // Shape on plane
-        var mat1 = new CANNON.Material();
-        var shapeBody1 = new CANNON.Body({
-            mass: mass,
-            material: mat1,
-            position: new CANNON.Vec3(3 * size, size, height),
-        });
-        shapeBody1.addShape(sphereShape);
-        shapeBody1.linearDamping = damping;
-        world.addBody(shapeBody1);
-
-        console.log(shapeBody1)
-        var mat2 = new CANNON.Material();
-        var shapeBody2 = new CANNON.Body({
-            mass: mass,
-            material: mat2,
-            position: new CANNON.Vec3(0, size, height),
-        });
-        shapeBody2.addShape(sphereShape);
-        shapeBody2.linearDamping = damping;
-        world.addBody(shapeBody2);
-
-        var mat3 = new CANNON.Material();
-        var shapeBody3 = new CANNON.Body({
-            mass: mass,
-            material: mat3,
-            position: new CANNON.Vec3(-3 * size, size, height),
-        });
-        shapeBody3.addShape(sphereShape);
-        shapeBody3.linearDamping = damping;
-        world.addBody(shapeBody3);
-
-        // Create contact material behaviour
-        var mat1_ground = new CANNON.ContactMaterial(groundMaterial, mat1, {
-            friction: 0.0,
-            restitution: 0.0,
-        });
-        var mat2_ground = new CANNON.ContactMaterial(groundMaterial, mat2, {
-            friction: 0.0,
-            restitution: 0.7,
-        });
-        var mat3_ground = new CANNON.ContactMaterial(groundMaterial, mat3, {
-            friction: 0.0,
-            restitution: 0.9,
-        });
-
-        world.addContactMaterial(mat1_ground);
-        world.addContactMaterial(mat2_ground);
-        world.addContactMaterial(mat3_ground);
-
-        let oldGameLoop = engine.gameLoop;
-
-        engine.gameLoop = (e) => {
-            oldGameLoop(e);
-            if (engine.lastFrameTime) {
-                world.step(1.0 / 60.0, e - engine.lastFrameTime, 3);
-            }
-            //console.log("sphere position z =",shapeBody2.position.z);
-            entity1.getComponent("Transformation").matrix[13] = shapeBody3.position.z;
+    initEditor() {
+        const arrowGeo = parseOBJ(arrow);
+        console.log(arrowGeo);
+        this.moveWidget = {
+            x: {
+                geometry: new Geometry(arrowGeo.vertices, arrowGeo.indices),
+                transformation: new Transformation(),
+            },
+            y: {
+                geometry: new Geometry(arrowGeo.vertices, arrowGeo.indices),
+                transformation: new Transformation(),
+            },
+            z: {
+                geometry: new Geometry(arrowGeo.vertices, arrowGeo.indices),
+                transformation: new Transformation(),
+            },
         };
+        //const widget = this.#engine.createEntity(this.editorScene);
 
+        const debugLineEntity = this.#engine.createEntity(this.gameScene);
+        this.gameScene.addComponent(debugLineEntity, new DebugLine());
+        this.generateDebugGrid(debugLineEntity.getComponent("DebugLine"));
+    }
+    sguiSetup() {
+        this.SGui = new SGui();
+        this.propertyWindow = {
+            mainWindow: this.SGui.createWindow("properties", true),
+            x: new SGuiSlider({ value: 0 }, this.canvas),
+            y: new SGuiSlider({ value: 0 }, this.canvas),
+            z: new SGuiSlider({ value: 0 }, this.canvas),
+            text: new SGuiText(this.canvas, {
+                text: "hello",
+            }),
+        };
+        this.materialWindow = {
+            mainWindow: this.SGui.createWindow("Material", true),
+            r: new SGuiSlider({ value: 0 }, this.canvas),
+            g: new SGuiSlider({ value: 0 }, this.canvas),
+            b: new SGuiSlider({ value: 0 }, this.canvas),
+            diffusePanel: new SGuiContainer({heading:"diffuse color:"})
+        };
+        this.materialWindow.diffusePanel.append(this.materialWindow.r,this.materialWindow.g,this.materialWindow.b)
+    }
 
-    });
+    editorCameraSetup() {
+        const editorCamera = this.editorScene.activeCamera;
+        this.gameScene.activeCamera = editorCamera;
+        editorCamera.zoom(-20);
+
+        this.canvas.addEventListener("wheel", (e) => {
+            const rate = 1000;
+            editorCamera.zoom(e.wheelDeltaY / rate);
+        });
+        this.canvas.addEventListener("drag", (e) => {
+            this.isNavigating = true;
+            const rate = 1000;
+            if (e.detail.button == 1) {
+                editorCamera.panHorizontal(e.detail.dispX / rate);
+                editorCamera.panVertical(e.detail.dispY / rate);
+            } else if (e.detail.button == 4) {
+                editorCamera.orbitX((e.detail.dispX / rate) * 100);
+                editorCamera.orbitY((e.detail.dispY / rate) * 100);
+            }
+        });
+    }
+
+    generateDebugGrid(lineObj) {
+        //let lineObj = debugLineEntity.getComponent("DebugLine");
+        function drawGrid(lineComponent, numberOfLines, spacing) {
+            let size = (numberOfLines * spacing - spacing) / 2;
+            for (let i = 0; i < numberOfLines; i++) {
+                lineComponent.addLine(
+                    [-size, 0, spacing * i - size, 0, 0, 0],
+                    [size, 0, spacing * i - size, 0, 0, 0]
+                );
+            }
+            for (let i = 0; i < numberOfLines; i++) {
+                lineComponent.addLine(
+                    [spacing * i - size, 0, -size, 0, 0, 0],
+                    [spacing * i - size, 0, size, 0, 0, 0]
+                );
+            }
+        }
+
+        drawGrid(lineObj, 15, 0.5);
+    }
+
+    initEventListeners() {
+        this.mouseEvent = new MouseEvent(this.canvas);
+        this.canvas.addEventListener("picker-selection", (e) => {
+            if (!this.isNavigating) {
+                //console.log("selecting");
+                console.log(e.detail);
+                if (e.detail.scene === this.editorScene) {
+                } else {
+                    this.activeObjects = [e.detail.entity];
+                    console.log(this.activeObjects);
+                    this.canvas.dispatchEvent(
+                        new CustomEvent("select-object", {
+                            detail: e.detail,
+                        })
+                    );
+                }
+            } else {
+                this.isNavigating = false;
+            }
+        });
+        this.canvas.addEventListener("select-object", (e) => {
+            this.propertyWindow.mainWindow.appendChild(
+                this.propertyWindow.text
+            );
+            this.propertyWindow.mainWindow.appendChild(this.propertyWindow.x);
+            this.propertyWindow.mainWindow.appendChild(this.propertyWindow.y);
+            this.propertyWindow.mainWindow.appendChild(this.propertyWindow.z);
+            this.propertyWindow.mainWindow.appendFilePanel({
+                files: [],
+                currentContext: null,
+            });
+            //this.materialWindow.diffusePanel.appendChild(this.materialWindow.r)
+            this.materialWindow.mainWindow.appendChild(this.materialWindow.diffusePanel)
+
+            console.log(e);
+            this.propertyWindow.text.textContent = e.detail.entity.id
+        });
+        this.canvas.addEventListener("slider-change", (e) => {
+            console.log(e)
+            console.log(e.detail.id)
+            switch (e.detail.id) {
+                case this.materialWindow.r.id:
+                    console.log("form here")
+                    console.log(this.activeObjects[0].getComponent("Geometry").material)
+                    this.activeObjects[0].getComponent("Geometry").material.diffuseColor[0] = e.detail.value / 100;
+                    
+                    break;
+                case this.materialWindow.g.id:
+                    console.log("form here")
+                    console.log(this.activeObjects[0].getComponent("Geometry").material)
+                    this.activeObjects[0].getComponent("Geometry").material.diffuseColor[1] = e.detail.value / 100; 
+                    break;
+                case this.materialWindow.b.id:
+                    console.log("form here")
+                    console.log(this.activeObjects[0].getComponent("Geometry").material)
+                    this.activeObjects[0].getComponent("Geometry").material.diffuseColor[2] = e.detail.value / 100; 
+                    break;
+                default:
+            }
+        });
+
+        this.canvas.addEventListener("drop", (e) => {
+            e.preventDefault();
+            const file_reader = new FileReader();
+            file_reader.onload = function (event) {
+                console.log(event.target.result);
+            };
+            let test = file_reader.readAsText(e.dataTransfer.files[0]);
+        });
+        this.canvas.ondragover = function (e) {
+            return false;
+        };
+    }
+    addGameObject(objectInfo) {
+        const gameObject = this.#engine.createEntity(this.gameScene);
+
+        if (objectInfo.geometry) {
+            const geometry = new Geometry(
+                objectInfo.geometry.vertices,
+                objectInfo.geometry.indices
+            );
+            this.gameScene.addComponent(gameObject, geometry);
+            this.gameScene.addComponent(gameObject, new Transformation());
+            this.gameRenderer.initGeometry(geometry);
+        }
+    }
+
+    updateActiveMaterial(diffuseColor, ambientColor, specularColor, shininess) {
+        if (this.activeObjects.length === 1) {
+            this.activeObjects[0].getComponent("Geometry").materialOptions({
+                diffuseColor,
+                ambientColor,
+                specularColor,
+                shininess,
+            });
+        }
+    }
+
+    start() {
+        this.#engine.compositor.addFramebuffer(
+            this.editorRenderer.framebuffer,
+            {}
+        );
+        this.#engine.compositor.addFramebuffer(
+            this.gameRenderer.framebuffer,
+            {}
+        );
+        this.#engine.init();
+        this.#engine.start();
+    }
 }
-// ********************* END *************************
-
-console.log(window.devicePixelRatio);
-engine.init();
-engine.start();
