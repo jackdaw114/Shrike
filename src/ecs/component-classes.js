@@ -1,6 +1,5 @@
 import { mat4, vec3 } from "gl-matrix";
 import { Component, Transformation } from "./classes";
-import {SGuiWindowBase} from "../../lib/shrike-gui/sgui";
 import {Material} from "../material/material";
 
 export class Geometry extends Component {
@@ -32,10 +31,6 @@ export class GuiComponent extends Component {
     constructor(title,controller, isOpen) {
         super();
         this.controller = controller;
-        /**
-            * @type {SGuiWindowBase}
-
-            */
         this.handle;
         this.isOpen = isOpen;
         this.title = title

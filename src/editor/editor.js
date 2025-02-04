@@ -248,10 +248,7 @@ export class Editor {
             this.propertyWindow.mainWindow.appendChild(this.propertyWindow.x);
             this.propertyWindow.mainWindow.appendChild(this.propertyWindow.y);
             this.propertyWindow.mainWindow.appendChild(this.propertyWindow.z);
-            this.propertyWindow.mainWindow.appendFilePanel({
-                files: [],
-                currentContext: null,
-            });
+    
             //this.materialWindow.diffusePanel.appendChild(this.materialWindow.r)
             this.materialWindow.mainWindow.appendChild(
                 this.materialWindow.diffusePanel
