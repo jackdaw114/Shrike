@@ -113,9 +113,8 @@
 
 
 .sgui-color-picker{
-    padding: 10px;
-
-    height: 100%;
+    padding: 10px; 
+    height: auto;
 }
 
 
@@ -253,7 +252,7 @@
     align-items: center;
     width: 100%;
     padding-top: 20px;
-    height: 100%;
+    min-height: 40px;
 }
 
 .slider-input {
