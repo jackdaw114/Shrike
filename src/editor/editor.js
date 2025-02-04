@@ -12,8 +12,11 @@ import { ScriptSystem } from "../script-system/script-system";
 import { PickingSystem } from "../gpu/picker/picker";
 import { CannonRenderer } from "../gpu/cannon-renderer/cannon-renderer";
 import { CannonPhysicsSystem } from "../physics/cannon-physics-system";
-import { SGui, SGuiSlider } from "../../lib/shrike-gui/sgui";
-import { SGuiContainer, SGuiText } from "../../lib/shrike-gui/sgui-child-elements";
+import { SGui} from "../../lib/shrike-gui/sgui";
+import SGuiColorPicker from "../../lib/shrike-gui/child-elements/color-picker";
+import SGuiText from "../../lib/shrike-gui/child-elements/text";
+import SGuiContainer from "../../lib/shrike-gui/child-elements/container";
+import SGuiSlider from "../../lib/shrike-gui/child-elements/slider";
 
 export class Editor {
     activeObjects = [];
@@ -152,21 +155,27 @@ export class Editor {
         this.SGui = new SGui();
         this.propertyWindow = {
             mainWindow: this.SGui.createWindow("properties", true),
-            x: new SGuiSlider( this.canvas,{ value: 0 }),
-            y: new SGuiSlider(this.canvas,{ value: 0 }),
-            z: new SGuiSlider(this.canvas,{ value: 0 }),
+            x: new SGuiSlider(this.canvas, { value: 0 }),
+            y: new SGuiSlider(this.canvas, { value: 0 }),
+            z: new SGuiSlider(this.canvas, { value: 0 }),
             text: new SGuiText(this.canvas, {
                 text: "hello",
             }),
         };
         this.materialWindow = {
             mainWindow: this.SGui.createWindow("Material", true),
-            r: new SGuiSlider(this.canvas,{ value: 0 }),
-            g: new SGuiSlider(this.canvas,{ value: 0 }),
-            b: new SGuiSlider(this.canvas,{ value: 0 }),
-            diffusePanel: new SGuiContainer({heading:"diffuse color:"})
+            r: new SGuiSlider(this.canvas, { value: 0 }),
+            g: new SGuiSlider(this.canvas, { value: 0 }),
+            b: new SGuiSlider(this.canvas, { value: 0 }),
+            diffusePanel: new SGuiContainer({ heading: "diffuse color:" }),
+            colorPicker: new SGuiColorPicker(this.canvas, {}),
         };
-        this.materialWindow.diffusePanel.append(this.materialWindow.r,this.materialWindow.g,this.materialWindow.b)
+        this.materialWindow.diffusePanel.append(
+            this.materialWindow.r,
+            this.materialWindow.g,
+            this.materialWindow.b,
+            this.materialWindow.colorPicker
+        );
     }
 
     editorCameraSetup() {
@@ -239,40 +248,69 @@ export class Editor {
             this.propertyWindow.mainWindow.appendChild(this.propertyWindow.x);
             this.propertyWindow.mainWindow.appendChild(this.propertyWindow.y);
             this.propertyWindow.mainWindow.appendChild(this.propertyWindow.z);
-            this.propertyWindow.mainWindow.appendFilePanel({
-                files: [],
-                currentContext: null,
-            });
+    
             //this.materialWindow.diffusePanel.appendChild(this.materialWindow.r)
-            this.materialWindow.mainWindow.appendChild(this.materialWindow.diffusePanel)
+            this.materialWindow.mainWindow.appendChild(
+                this.materialWindow.diffusePanel
+            );
 
             console.log(e);
-            this.propertyWindow.text.textContent = e.detail.entity.id
+            this.propertyWindow.text.textContent = e.detail.entity.id;
         });
         this.canvas.addEventListener("slider-change", (e) => {
-            console.log(e)
-            console.log(e.detail.id)
+            console.log(e);
+            console.log(e.detail.id);
             switch (e.detail.id) {
                 case this.materialWindow.r.id:
-                    console.log("form here")
-                    console.log(this.activeObjects[0].getComponent("Geometry").material)
-                    this.activeObjects[0].getComponent("Geometry").material.diffuseColor[0] = e.detail.value / 100;
-                    
+                    console.log(
+                        this.activeObjects[0].getComponent("Geometry").material
+                    );
+                    this.activeObjects[0].getComponent(
+                        "Geometry"
+                    ).material.diffuseColor[0] = e.detail.value / 100;
+
                     break;
                 case this.materialWindow.g.id:
-                    console.log("form here")
-                    console.log(this.activeObjects[0].getComponent("Geometry").material)
-                    this.activeObjects[0].getComponent("Geometry").material.diffuseColor[1] = e.detail.value / 100; 
+                    console.log(
+                        this.activeObjects[0].getComponent("Geometry").material
+                    );
+                    this.activeObjects[0].getComponent(
+                        "Geometry"
+                    ).material.diffuseColor[1] = e.detail.value / 100;
                     break;
                 case this.materialWindow.b.id:
-                    console.log("form here")
-                    console.log(this.activeObjects[0].getComponent("Geometry").material)
-                    this.activeObjects[0].getComponent("Geometry").material.diffuseColor[2] = e.detail.value / 100; 
+                    console.log(
+                        this.activeObjects[0].getComponent("Geometry").material
+                    );
+                    this.activeObjects[0].getComponent(
+                        "Geometry"
+                    ).material.diffuseColor[2] = e.detail.value / 100;
+                    this.materialWindow.colorPicker.iroRef.color.rgb = {r: e.detail.value / 100,g:1,b:1}
                     break;
                 default:
+                    console.log("invalid window id:", e.detail.id);
+                    break;
             }
         });
-
+        this.canvas.addEventListener("color-change", (e) => {
+            switch (e.detail.id) {
+                case this.materialWindow.colorPicker.id:
+                    this.activeObjects[0].getComponent(
+                        "Geometry"
+                    ).material.diffuseColor = [
+                        e.detail.rgb.r,
+                        e.detail.rgb.g,
+                        e.detail.rgb.b,
+                    ].map((val) => val / 255);
+                    console.log(this.materialWindow.colorPicker.iroRef.color.rgb )
+                    this.materialWindow.r.setValue(e.detail.rgb.r) 
+                    this.materialWindow.g.setValue(e.detail.rgb.g) 
+                    this.materialWindow.b.setValue(e.detail.rgb.b) 
+                    break;
+                default:
+                    console.log("unknown color picker id: ",e.detail.id)
+            }
+        });
         this.canvas.addEventListener("drop", (e) => {
             e.preventDefault();
             const file_reader = new FileReader();
@@ -285,6 +323,7 @@ export class Editor {
             return false;
         };
     }
+
     addGameObject(objectInfo) {
         const gameObject = this.#engine.createEntity(this.gameScene);
 
