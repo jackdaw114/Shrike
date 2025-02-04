@@ -152,18 +152,18 @@ export class Editor {
         this.SGui = new SGui();
         this.propertyWindow = {
             mainWindow: this.SGui.createWindow("properties", true),
-            x: new SGuiSlider({ value: 0 }, this.canvas),
-            y: new SGuiSlider({ value: 0 }, this.canvas),
-            z: new SGuiSlider({ value: 0 }, this.canvas),
+            x: new SGuiSlider( this.canvas,{ value: 0 }),
+            y: new SGuiSlider(this.canvas,{ value: 0 }),
+            z: new SGuiSlider(this.canvas,{ value: 0 }),
             text: new SGuiText(this.canvas, {
                 text: "hello",
             }),
         };
         this.materialWindow = {
             mainWindow: this.SGui.createWindow("Material", true),
-            r: new SGuiSlider({ value: 0 }, this.canvas),
-            g: new SGuiSlider({ value: 0 }, this.canvas),
-            b: new SGuiSlider({ value: 0 }, this.canvas),
+            r: new SGuiSlider(this.canvas,{ value: 0 }),
+            g: new SGuiSlider(this.canvas,{ value: 0 }),
+            b: new SGuiSlider(this.canvas,{ value: 0 }),
             diffusePanel: new SGuiContainer({heading:"diffuse color:"})
         };
         this.materialWindow.diffusePanel.append(this.materialWindow.r,this.materialWindow.g,this.materialWindow.b)
