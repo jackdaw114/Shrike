@@ -303,6 +303,9 @@ export class Editor {
                         e.detail.rgb.b,
                     ].map((val) => val / 255);
                     console.log(this.materialWindow.colorPicker.iroRef.color.rgb )
+                    this.materialWindow.r.setValue(e.detail.rgb.r) 
+                    this.materialWindow.g.setValue(e.detail.rgb.g) 
+                    this.materialWindow.b.setValue(e.detail.rgb.b) 
                     break;
                 default:
                     console.log("unknown color picker id: ",e.detail.id)
@@ -320,6 +323,7 @@ export class Editor {
             return false;
         };
     }
+
     addGameObject(objectInfo) {
         const gameObject = this.#engine.createEntity(this.gameScene);
 
