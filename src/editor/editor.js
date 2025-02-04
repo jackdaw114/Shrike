@@ -12,7 +12,7 @@ import { ScriptSystem } from "../script-system/script-system";
 import { PickingSystem } from "../gpu/picker/picker";
 import { CannonRenderer } from "../gpu/cannon-renderer/cannon-renderer";
 import { CannonPhysicsSystem } from "../physics/cannon-physics-system";
-import { SGui} from "../../lib/shrike-gui/sgui";
+import { SGui } from "../../lib/shrike-gui/sgui";
 import SGuiColorPicker from "../../lib/shrike-gui/child-elements/color-picker";
 import SGuiText from "../../lib/shrike-gui/child-elements/text";
 import SGuiContainer from "../../lib/shrike-gui/child-elements/container";
@@ -155,18 +155,18 @@ export class Editor {
         this.SGui = new SGui();
         this.propertyWindow = {
             mainWindow: this.SGui.createWindow("properties", true),
-            x: new SGuiSlider(this.canvas, { value: 0 }),
-            y: new SGuiSlider(this.canvas, { value: 0 }),
-            z: new SGuiSlider(this.canvas, { value: 0 }),
+            x: new SGuiSlider(this.canvas, { value: 0, max: 255 }),
+            y: new SGuiSlider(this.canvas, { value: 0, max: 255 }),
+            z: new SGuiSlider(this.canvas, { value: 0, max: 255 }),
             text: new SGuiText(this.canvas, {
                 text: "hello",
             }),
         };
         this.materialWindow = {
             mainWindow: this.SGui.createWindow("Material", true),
-            r: new SGuiSlider(this.canvas, { value: 0 }),
-            g: new SGuiSlider(this.canvas, { value: 0 }),
-            b: new SGuiSlider(this.canvas, { value: 0 }),
+            r: new SGuiSlider(this.canvas, { value: 0,max: 255 }),
+            g: new SGuiSlider(this.canvas, { value: 0,max: 255 }),
+            b: new SGuiSlider(this.canvas, { value: 0,max: 255 }),
             diffusePanel: new SGuiContainer({ heading: "diffuse color:" }),
             colorPicker: new SGuiColorPicker(this.canvas, {}),
         };
@@ -248,7 +248,7 @@ export class Editor {
             this.propertyWindow.mainWindow.appendChild(this.propertyWindow.x);
             this.propertyWindow.mainWindow.appendChild(this.propertyWindow.y);
             this.propertyWindow.mainWindow.appendChild(this.propertyWindow.z);
-    
+
             //this.materialWindow.diffusePanel.appendChild(this.materialWindow.r)
             this.materialWindow.mainWindow.appendChild(
                 this.materialWindow.diffusePanel
@@ -269,6 +269,11 @@ export class Editor {
                         "Geometry"
                     ).material.diffuseColor[0] = e.detail.value / 100;
 
+                    this.materialWindow.colorPicker.iroRef.color.rgb = {
+                        r: e.detail.value,
+                        g: this.materialWindow.g.getValue(),
+                        b: this.materialWindow.b.getValue(),
+                    };
                     break;
                 case this.materialWindow.g.id:
                     console.log(
@@ -277,6 +282,11 @@ export class Editor {
                     this.activeObjects[0].getComponent(
                         "Geometry"
                     ).material.diffuseColor[1] = e.detail.value / 100;
+                    this.materialWindow.colorPicker.iroRef.color.rgb = {
+                        r: this.materialWindow.r.getValue(),
+                        g: e.detail.value,
+                        b: this.materialWindow.b.getValue(),
+                    };
                     break;
                 case this.materialWindow.b.id:
                     console.log(
@@ -285,7 +295,11 @@ export class Editor {
                     this.activeObjects[0].getComponent(
                         "Geometry"
                     ).material.diffuseColor[2] = e.detail.value / 100;
-                    this.materialWindow.colorPicker.iroRef.color.rgb = {r: e.detail.value / 100,g:1,b:1}
+                    this.materialWindow.colorPicker.iroRef.color.rgb = {
+                        r: this.materialWindow.r.getValue(),
+                        g: this.materialWindow.g.getValue(),
+                        b: e.detail.value,
+                    };
                     break;
                 default:
                     console.log("invalid window id:", e.detail.id);
@@ -302,13 +316,15 @@ export class Editor {
                         e.detail.rgb.g,
                         e.detail.rgb.b,
                     ].map((val) => val / 255);
-                    console.log(this.materialWindow.colorPicker.iroRef.color.rgb )
-                    this.materialWindow.r.setValue(e.detail.rgb.r) 
-                    this.materialWindow.g.setValue(e.detail.rgb.g) 
-                    this.materialWindow.b.setValue(e.detail.rgb.b) 
+                    console.log(
+                        this.materialWindow.colorPicker.iroRef.color.rgb
+                    );
+                    this.materialWindow.r.setValue(e.detail.rgb.r);
+                    this.materialWindow.g.setValue(e.detail.rgb.g);
+                    this.materialWindow.b.setValue(e.detail.rgb.b);
                     break;
                 default:
-                    console.log("unknown color picker id: ",e.detail.id)
+                    console.log("unknown color picker id: ", e.detail.id);
             }
         });
         this.canvas.addEventListener("drop", (e) => {
