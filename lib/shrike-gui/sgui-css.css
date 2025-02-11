@@ -148,7 +148,7 @@
 
 /* Docking zone styling */
 .docking-zone-overlay {
-    position: fixed;
+    position: absolute;
     min-width: 160px; /* Minimum width for the dock */
     background: rgba(33, 39, 48, 0.5); /* Using your theme colors */
     display: flex;
@@ -156,8 +156,29 @@
     align-items: center;
     z-index: 10000;
     opacity: 0;
+    visibility: hidden; /* Hides it but keeps dimensions */
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.docking-zone-overlay.active {
+    position: fixed;
+    pointer-events: auto;
+    opacity: 1;
+    visibility: visible;
+    background: rgba(33, 39, 48, 0.8); /* Darker when active */
+    border: 1px dashed rgba(255, 0, 0, 0.5); /* Visible when active */
+}
+
+
+.docking-zone-overlay.docked {
+    position: fixed;
+    pointer-events: auto;
+    opacity: 1;
+    visibility: visible;
+    background: rgba(33, 39, 48, 0.8); /* Darker when active */
+    justify-content: flex-start;
+    align-items: start;
 }
 
 .left-dock {
@@ -165,6 +186,7 @@
     top: 0;
     bottom: 0;
     height: 100%;
+    /* position: fixed; */
 }
 
 .right-dock {
@@ -172,17 +194,18 @@
     top: 0;
     bottom: 0;
     height: 100%;
+    /* position: fixed; */
 }
 
 .top-dock {
     top: 0;
     left: 0;
     right: 0;
-    height: 100px; /* Default height for the top dock */
-    min-height: 50px; /* Minimum height */
-    max-height: 300px; /* Maximum height */
-    min-width: 100vw;
+    min-height: 50px;
+    max-height: 300px;
+    width: 100vw;
 }
+
 
 .resize-handle {
     transition: 0s;
@@ -213,20 +236,6 @@
     cursor: row-resize; /* Cursor changes to resize */
 }
 
-.docking-zone-overlay.active {
-    pointer-events: auto;
-    opacity: 1;
-    background: rgba(33, 39, 48, 0.8); /* Darker when active */
-    border: 1px dashed rgba(255, 0, 0, 0.5); /* Visible when active */
-}
-
-.docking-zone-overlay.docked {
-    pointer-events: auto;
-    opacity: 1;
-    background: rgba(33, 39, 48, 0.8); /* Darker when active */
-    justify-content: flex-start;
-    align-items: start;
-}
 
 .docking-zone-content {
     color: #ffffff;
