@@ -113,7 +113,13 @@ export class DebugSystem extends System {
         this.#context.bindFramebuffer(this.#context.FRAMEBUFFER, this.framebuffer.fbo)
         this.#context.bindVertexArray(this.vaoID);
         this.#context.bindBuffer(this.#context.ARRAY_BUFFER, this.vboID);
-
+        
+        this.#context.viewport(
+            0,
+            0,
+            this.framebuffer.width,
+            this.framebuffer.height
+        );
         this.#context.bufferSubData(
             this.#context.ARRAY_BUFFER,
             0,
@@ -153,15 +159,7 @@ export class DebugSystem extends System {
 
         let worldMatrix = mat4.create();
         let viewMatrix = this.scene.getCamera().matrix;
-        let projMatrix = new Float32Array(16);
-
-        mat4.perspective(
-            projMatrix,
-            glMatrix.toRadian(45),
-            this.aspect_ratio,
-            0.1,
-            1000.0
-        );
+        let projMatrix = this.scene.getCamera().getProjMatrix();
 
         this.#context.uniformMatrix4fv(
             matWorldUniformLocation,

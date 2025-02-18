@@ -1,5 +1,6 @@
-import { mat4, quat } from "gl-matrix";
+import { mat4, quat, vec3 } from "gl-matrix";
 import Camera from "./camera";
+import {Vec3} from "cannon";
 
 export class Entity {
     constructor(id,name) {
@@ -35,12 +36,15 @@ export class Component {
 }
 
 export class Scene {
-    constructor() {
+    constructor(width,height) {
+
         this.entities = {};
         this.systems = {};
         this.componentRegister = {};
         this.isRunning = false;
         this.activeCamera = new Camera();
+        this.width = width;
+        this.height =height
     }
     setCamera(camera) {
         this.activeCamera = camera;
@@ -89,13 +93,13 @@ export class Scene {
         }
         let components = this.componentRegister[componentClass];
         components.push(component);
-        if (this.isRunning) {
-            for (const [system, system_component] of this.systems) {
-                if (componentClass in system_component) {
-                    system.addComponent(componentClass);
-                }
-            }
-        }
+       // if (this.isRunning) {
+       //     for (const [system, system_component] of this.systems) {
+       //         if (componentClass in system_component) {
+       //             system.addComponent(componentClass);
+       //         }
+       //     }
+       // }
     }
 
     removeComponents(entity) {
@@ -156,26 +160,54 @@ export class System {
 
 // TODO: move this into some other file
 export class Transformation extends Component {
-    constructor() {
+    constructor(u_values = {}) {
         super();
+        const defaultValues = {
+            Tx: 0,
+            Ty: 0,
+            Tz: 0,
+            Rx:0,
+            Ry:0,
+            Rz:0,
+            Sx:1,
+            Sy:1,
+            Sz:1,
+        }
+
+        const values= {...defaultValues,...u_values}
         this.matrix = mat4.create();
         this.quaternion = quat.create();
+        quat.fromEuler(this.quaternion, values.Rx,values.Ry,values.Rz)
         this.position = {
-            x: 0,
-            y: 0,
-            z: 0,
+            x: values.Tx,
+            y: values.Ty,
+            z: values.Tz,
         };
         this.scale = {
-            x: 1,
-            y: 1,
-            z: 1,
+            x: values.Sx,
+            y: values.Sy,
+            z: values.Sz,
         };
         this.dirtyTransform = false;
+        this.updateMatrix()
     }
     getMatrix() {
         return this.matrix;
     }
-    setXPos(value) {
-        this.matrix[12] = value
+    
+    setScale(x = 1, y = 1, z = 1) {
+        const newScale = {x,y,z}
+        const keys = Object.keys(this.scale)
+        if (keys.every(key => this.scale[key] === newScale[key])) {
+            return
+        }
+        mat4.scale(this.matrix,this.matrix,[x/this.scale.x,y/this.scale.y,z/this.scale.z]) 
+        this.scale = {
+            x,y,z
+        }
+    }
+
+    updateMatrix() {
+        mat4.fromRotationTranslationScale(this.matrix, this.quaternion, vec3.fromValues(this.position.x, this.position.y, this.position.z), vec3.fromValues(this.scale.x, this.scale.y, this.scale.z))
     }
 }

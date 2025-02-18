@@ -21,7 +21,7 @@ export class ScriptSystem extends System {
             return
         }
         for (const script of this.scene.componentRegister["Script"]) {
-            script.update(deltaTime, script.entity.components);
+            script.update(deltaTime,script.entity.components,this.scene);
         }
     }
     start() {

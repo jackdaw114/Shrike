@@ -94,8 +94,20 @@ export class Compositor {
     addFramebuffer(framebuffer, compositionOptions) {
         this.framebuffers.push({
             framebuffer: framebuffer,
+            priority:999,
             ...compositionOptions,
         });
+        this.sortFramebuffers()
+    }
+
+    removeFramebuffer(framebuffer) {
+        this.framebuffers = this.framebuffers.filter(value => value.framebuffer !== framebuffer)
+        console.log(this.framebuffers)
+        this.sortFramebuffers()
+    }
+
+    sortFramebuffers() {
+        this.framebuffers.sort((a,b)=>a.priority-b.priority)
     }
 
     render() {

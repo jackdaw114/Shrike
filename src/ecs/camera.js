@@ -1,14 +1,52 @@
 import { glMatrix, mat4, quat, vec3 } from "gl-matrix";
 
 export default class Camera {
-    constructor() {
+    constructor(
+        type = "perspective",
+        customOptions = {  }
+    ) {
+        const defaultOptions = {
+            fov: 55,
+            aspect_ratio: 1,
+            near: 0.1,
+            far: 1000,
+            left: -1,
+            right: 1,
+            top: 1,
+            bottom: -1
+        }
+        const options = {...defaultOptions,...customOptions}
+        this.fov = options.fov 
+        this.type = type;
         this.matrix = mat4.create();
         this.position = [0, 0, 1];
         this.target = [0, 0, 0];
         this.up = [0, 1, 0];
         this.forward = vec3.create();
         this.right = vec3.create();
+        this.zoomVal = 1
         this.calculateRight();
+        this.dirtyProj;
+        this.dirtyMat;
+        this.projectionMatrix = mat4.create();
+        switch (type) {
+            case "perspective":
+                mat4.perspective(
+                    this.projectionMatrix,
+                    glMatrix.toRadian(options.fov),
+                    options.aspect_ratio,
+                    options.near,
+                    options.far
+                );
+                break;
+            case "orthographic":
+                mat4.ortho(this.projectionMatrix,options.left, options.right, options.bottom, options.top, options.near, options.far)
+            default:
+                throw new Error("invalid camera Type")
+        }
+    }
+    getProjMatrix() {
+        return this.projectionMatrix;
     }
     calculateRight() {
         this.calculateForward();
@@ -83,6 +121,7 @@ export default class Camera {
     }
     zoom(amount) {
         let tempVec = vec3.create();
+        this.zoomVal += amount
         //vec3.add(this.target,this.forward.map(e=>e*amount),this.target)
         vec3.add(
             tempVec,
@@ -115,5 +154,11 @@ export default class Camera {
         vec3.transformQuat(tempVec, this.position, quaternion);
 
         this.setPosition(tempVec);
-    }   
+    }
+    distFromTarget() {
+        return vec3.dist(this.position, this.target);
+    }
+    dist(vec) {
+        return vec3.dist(this.position, vec)
+    }
 }

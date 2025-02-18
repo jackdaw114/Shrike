@@ -8,9 +8,9 @@ const CANVAS_WIDTH = (canvas.width = window.innerWidth);
 const CANVAS_HEIGHT = (canvas.height = window.innerHeight);
 const editor = new Editor(canvas,1,CANVAS_WIDTH,CANVAS_HEIGHT)
 
-editor.addGameObject({
-        geometry: parseOBJ(monke)
-})
 
 editor.start()
 //import "./src/test/testsTemp"
+//editor.addGameObject({
+//        geometry: parseOBJ(monke)
+//})

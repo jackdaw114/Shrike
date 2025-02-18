@@ -1,10 +1,7 @@
 import { Shrike } from "../core/core";
 import { parseOBJ } from "../../lib/parse-obj";
-import { monke } from "../../monke";
-import { arrow } from "./editor-assets";
 import { DebugLine, Geometry, Script } from "../ecs/component-classes";
 import { Transformation } from "../ecs/classes";
-import { glMatrix, mat4 } from "gl-matrix";
 import { MouseEvent } from "../event-handler/event-handler";
 import { DebugSystem } from "../gpu/debug-graphics/debug-helper";
 import { Renderer } from "../gpu/renderer/renderer";
@@ -17,10 +14,15 @@ import SGuiColorPicker from "../../lib/shrike-gui/child-elements/color-picker";
 import SGuiText from "../../lib/shrike-gui/child-elements/text";
 import SGuiContainer from "../../lib/shrike-gui/child-elements/container";
 import SGuiSlider from "../../lib/shrike-gui/child-elements/slider";
+import SGuiInputBox from "../../lib/shrike-gui/child-elements/input-box";
+import { createResourceWindow } from "./widgets/resourceWindow";
+import { createMenuBar } from "./widgets/menuBar";
+import { createEditorGizmos } from "./editor-overlay/gizmos";
+import Camera from "../ecs/camera";
 
 export class Editor {
     activeObjects = [];
-    #engine;
+    engine;
     cannonMaxSubSteps = 5;
     isNavigating = false;
 
@@ -30,40 +32,24 @@ export class Editor {
         this.width = width;
         this.height = height;
         this.gameSpeed = gameSpeed;
-        this.#engine = new Shrike(canvas, width, height);
+        this.engine = new Shrike(canvas, width, height);
+        this.editorOverlays = {};
         this.initSystems();
         this.initEditor();
         this.editorCameraSetup();
         this.sguiSetup();
+        this.initWidgets();
 
         this.initEventListeners();
-        const arrowZAxis = this.#engine.createEntity(this.editorScene);
-        const arrowXAxis = this.#engine.createEntity(this.editorScene);
-        const arrowYAxis = this.#engine.createEntity(this.editorScene);
 
-        this.editorScene.addComponent(arrowXAxis, this.moveWidget.x.geometry);
-        this.editorScene.addComponent(arrowYAxis, this.moveWidget.y.geometry);
-        this.editorScene.addComponent(arrowZAxis, this.moveWidget.z.geometry);
-
-        this.editorScene.addComponent(
-            arrowXAxis,
-            this.moveWidget.x.transformation
-        );
-        this.editorScene.addComponent(
-            arrowYAxis,
-            this.moveWidget.y.transformation
-        );
-        this.editorScene.addComponent(
-            arrowZAxis,
-            this.moveWidget.z.transformation
-        );
+        this.gizmos = createEditorGizmos(this.engine, this,this.editorScene);
     }
     initSystems() {
         const width = this.width;
         const height = this.height;
         const gameSpeed = this.gameSpeed;
-        this.editorScene = this.#engine.createScene();
-        this.editorRenderer = this.#engine.createSystem(
+        this.editorScene = this.engine.createScene(width,height);
+        this.editorRenderer = this.engine.createSystem(
             Renderer,
             this.editorScene,
             this.context,
@@ -72,8 +58,11 @@ export class Editor {
             height
         );
 
-        this.gameScene = this.#engine.createScene();
-        this.gameRenderer = this.#engine.createSystem(
+        this.editorOverlays.editorRenderer = {
+            active: true,
+        };
+        this.gameScene = this.engine.createScene(width,height);
+        this.gameRenderer = this.engine.createSystem(
             Renderer,
             this.gameScene,
             this.context,
@@ -81,17 +70,16 @@ export class Editor {
             width,
             height
         );
-        this.#engine.activateScene(this.gameScene);
-        this.#engine.activateScene(this.editorScene);
-        console.log(this.#engine.scenes);
+        this.engine.activateScene(this.gameScene);
+        this.engine.activateScene(this.editorScene);
 
-        this.cannonPhysicsSystem = this.#engine.createSystem(
+        this.cannonPhysicsSystem = this.engine.createSystem(
             CannonPhysicsSystem,
             this.gameScene,
             gameSpeed,
             this.cannonMaxSubSteps
         );
-        this.cannonRenderer = this.#engine.createSystem(
+        this.cannonRenderer = this.engine.createSystem(
             CannonRenderer,
             this.gameScene,
             this.context,
@@ -99,11 +87,16 @@ export class Editor {
             width,
             height
         );
-        this.scriptSystem = this.#engine.createSystem(
+        this.scriptSystem = this.engine.createSystem(
             ScriptSystem,
             this.gameScene
         );
-        this.gameScenePickingSystem = this.#engine.createSystem(
+        this.editorScriptSystem = this.engine.createSystem(
+            ScriptSystem,
+            this.editorScene
+        );
+        this.editorScriptSystem.start()
+        this.gameScenePickingSystem = this.engine.createSystem(
             PickingSystem,
             this.gameScene,
             this.canvas,
@@ -112,7 +105,7 @@ export class Editor {
             height
         );
 
-        this.editorPickingSystem = this.#engine.createSystem(
+        this.editorPickingSystem = this.engine.createSystem(
             PickingSystem,
             this.editorScene,
             this.canvas,
@@ -120,7 +113,7 @@ export class Editor {
             width,
             height
         );
-        this.debugSystem = this.#engine.createSystem(
+        this.debugSystem = this.engine.createSystem(
             DebugSystem,
             this.gameScene,
             this.context,
@@ -129,25 +122,7 @@ export class Editor {
         );
     }
     initEditor() {
-        const arrowGeo = parseOBJ(arrow);
-        console.log(arrowGeo);
-        this.moveWidget = {
-            x: {
-                geometry: new Geometry(arrowGeo.vertices, arrowGeo.indices),
-                transformation: new Transformation(),
-            },
-            y: {
-                geometry: new Geometry(arrowGeo.vertices, arrowGeo.indices),
-                transformation: new Transformation(),
-            },
-            z: {
-                geometry: new Geometry(arrowGeo.vertices, arrowGeo.indices),
-                transformation: new Transformation(),
-            },
-        };
-        //const widget = this.#engine.createEntity(this.editorScene);
-
-        const debugLineEntity = this.#engine.createEntity(this.gameScene);
+        const debugLineEntity = this.engine.createEntity(this.gameScene);
         this.gameScene.addComponent(debugLineEntity, new DebugLine());
         this.generateDebugGrid(debugLineEntity.getComponent("DebugLine"));
     }
@@ -155,18 +130,18 @@ export class Editor {
         this.SGui = new SGui();
         this.propertyWindow = {
             mainWindow: this.SGui.createWindow("properties", true),
-            x: new SGuiSlider(this.canvas, { value: 0, max: 255 }),
-            y: new SGuiSlider(this.canvas, { value: 0, max: 255 }),
-            z: new SGuiSlider(this.canvas, { value: 0, max: 255 }),
+            x: new SGuiInputBox(this.canvas, { type: "number" }),
+            y: new SGuiInputBox(this.canvas, { type: "number" }),
+            z: new SGuiInputBox(this.canvas, { type: "number" }),
             text: new SGuiText(this.canvas, {
                 text: "hello",
             }),
         };
         this.materialWindow = {
             mainWindow: this.SGui.createWindow("Material", true),
-            r: new SGuiSlider(this.canvas, { value: 0,max: 255 }),
-            g: new SGuiSlider(this.canvas, { value: 0,max: 255 }),
-            b: new SGuiSlider(this.canvas, { value: 0,max: 255 }),
+            r: new SGuiSlider(this.canvas, { value: 0, max: 255 }),
+            g: new SGuiSlider(this.canvas, { value: 0, max: 255 }),
+            b: new SGuiSlider(this.canvas, { value: 0, max: 255 }),
             diffusePanel: new SGuiContainer({ heading: "diffuse color:" }),
             colorPicker: new SGuiColorPicker(this.canvas, {}),
         };
@@ -179,12 +154,19 @@ export class Editor {
     }
 
     editorCameraSetup() {
+        this.editorScene.activeCamera = new Camera("perspective", {
+            aspect_ratio: this.width / this.height,
+        });
+        this.gameScene.activeCamera = new Camera("perspective", {
+            aspect_ratio: this.width / this.height,
+        });
         const editorCamera = this.editorScene.activeCamera;
-        this.gameScene.activeCamera = editorCamera;
-        editorCamera.zoom(-20);
-
+        const gameCamera = this.gameScene.activeCamera;
+        editorCamera.zoom(-50);
+        gameCamera.zoom(-50);
         this.canvas.addEventListener("wheel", (e) => {
             const rate = 1000;
+            gameCamera.zoom(e.wheelDeltaY / rate);
             editorCamera.zoom(e.wheelDeltaY / rate);
         });
         this.canvas.addEventListener("drag", (e) => {
@@ -193,9 +175,13 @@ export class Editor {
             if (e.detail.button == 1) {
                 editorCamera.panHorizontal(e.detail.dispX / rate);
                 editorCamera.panVertical(e.detail.dispY / rate);
+                gameCamera.panHorizontal(e.detail.dispX / rate);
+                gameCamera.panVertical(e.detail.dispY / rate);
             } else if (e.detail.button == 4) {
                 editorCamera.orbitX((e.detail.dispX / rate) * 100);
                 editorCamera.orbitY((e.detail.dispY / rate) * 100);
+                gameCamera.orbitX((e.detail.dispX / rate) * 100);
+                gameCamera.orbitY((e.detail.dispY / rate) * 100);
             }
         });
     }
@@ -224,9 +210,20 @@ export class Editor {
     initEventListeners() {
         this.mouseEvent = new MouseEvent(this.canvas);
         this.canvas.addEventListener("picker-selection", (e) => {
+            switch (e.detail.scene) {
+                case this.editorScene:
+                    switch (e.detail.objectId) {
+                        case this.gizmos.moveGizmo.x.entity.id:
+                            console.log(this.gizmos.moveGizmo.x)
+                            break;
+                    }
+                    break;
+                case this.gameScene:
+                    console.log("game Scenen")
+                    break;
+            }
             if (!this.isNavigating) {
                 //console.log("selecting");
-                console.log(e.detail);
                 if (e.detail.scene === this.editorScene) {
                 } else {
                     this.activeObjects = [e.detail.entity];
@@ -257,18 +254,12 @@ export class Editor {
             console.log(e);
             this.propertyWindow.text.textContent = e.detail.entity.id;
         });
+
         this.canvas.addEventListener("slider-change", (e) => {
             console.log(e);
             console.log(e.detail.id);
             switch (e.detail.id) {
                 case this.materialWindow.r.id:
-                    console.log(
-                        this.activeObjects[0].getComponent("Geometry").material
-                    );
-                    this.activeObjects[0].getComponent(
-                        "Geometry"
-                    ).material.diffuseColor[0] = e.detail.value / 100;
-
                     this.materialWindow.colorPicker.iroRef.color.rgb = {
                         r: e.detail.value,
                         g: this.materialWindow.g.getValue(),
@@ -276,12 +267,6 @@ export class Editor {
                     };
                     break;
                 case this.materialWindow.g.id:
-                    console.log(
-                        this.activeObjects[0].getComponent("Geometry").material
-                    );
-                    this.activeObjects[0].getComponent(
-                        "Geometry"
-                    ).material.diffuseColor[1] = e.detail.value / 100;
                     this.materialWindow.colorPicker.iroRef.color.rgb = {
                         r: this.materialWindow.r.getValue(),
                         g: e.detail.value,
@@ -289,12 +274,6 @@ export class Editor {
                     };
                     break;
                 case this.materialWindow.b.id:
-                    console.log(
-                        this.activeObjects[0].getComponent("Geometry").material
-                    );
-                    this.activeObjects[0].getComponent(
-                        "Geometry"
-                    ).material.diffuseColor[2] = e.detail.value / 100;
                     this.materialWindow.colorPicker.iroRef.color.rgb = {
                         r: this.materialWindow.r.getValue(),
                         g: this.materialWindow.g.getValue(),
@@ -327,13 +306,12 @@ export class Editor {
                     console.log("unknown color picker id: ", e.detail.id);
             }
         });
-        this.canvas.addEventListener("drop", (e) => {
-            e.preventDefault();
-            const file_reader = new FileReader();
-            file_reader.onload = function (event) {
-                console.log(event.target.result);
-            };
-            let test = file_reader.readAsText(e.dataTransfer.files[0]);
+        this.canvas.addEventListener("file-drop", (e) => {
+            console.log(parseOBJ(e.detail.content));
+
+            this.addGameObject({
+                geometry: parseOBJ(e.detail.content),
+            });
         });
         this.canvas.ondragover = function (e) {
             return false;
@@ -341,8 +319,7 @@ export class Editor {
     }
 
     addGameObject(objectInfo) {
-        const gameObject = this.#engine.createEntity(this.gameScene);
-
+        const gameObject = this.engine.createEntity(this.gameScene);
         if (objectInfo.geometry) {
             const geometry = new Geometry(
                 objectInfo.geometry.vertices,
@@ -366,15 +343,25 @@ export class Editor {
     }
 
     start() {
-        this.#engine.compositor.addFramebuffer(
+        this.engine.compositor.addFramebuffer(
             this.editorRenderer.framebuffer,
             {}
         );
-        this.#engine.compositor.addFramebuffer(
+        this.engine.compositor.addFramebuffer(
             this.gameRenderer.framebuffer,
             {}
         );
-        this.#engine.init();
-        this.#engine.start();
+        this.engine.init();
+        this.engine.start();
+    }
+
+    overlay(obj, newState, callback = () => {}) {
+        obj.state = { ...obj.state, ...newState };
+        callback();
+    }
+
+    initWidgets() {
+        this.resourceWindow = createResourceWindow(this.canvas, this.SGui);
+        this.menuBar = createMenuBar(this, this.canvas, this.SGui);
     }
 }

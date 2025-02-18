@@ -2,20 +2,19 @@ import { mat4, vec3 } from "gl-matrix";
 import { Component, Transformation } from "./classes";
 import {Material} from "../material/material";
 
-export class Geometry extends Component {
+export class Geometry{
     /**
      * @param {Float32Array} vertices
      * @param {Uint16Array} indices
      * @param {Transformation} transformation
      */
-    constructor(vertices, indices) {
-        super();
+    constructor(vertices, indices,material=new Material(new Float32Array([0.6,0.6,0.6]),new Float32Array([0.2,0.2,0.2]) , new Float32Array([0.9,0.9,0.9]), 99)) {
         this.vertices = vertices;
         this.indices = indices;
         this.texture = 0;
         this.render = true;
         this.depthTest = true;
-        this.material = new Material(new Float32Array([0.6,0.6,0.6]),new Float32Array([0.2,0.2,0.2]) , new Float32Array([0.9,0.9,0.9]), 99);
+        this.material = material;
     }
     materialOptions(params) {
         const {diffuseColor=new Float32Array([1.0,1.0,1.0]), ambientColor=new Float32Array([1.0,1.0,1.0]), specularColor=new Float32Array([1.0,1.0,1.0]), shininess = 0.} = params;
@@ -56,15 +55,15 @@ export class Picker extends Component{
 }
 
 export class Script extends Component{
-    constructor() {
+    constructor(scripts) {
         super();
+        if (scripts.update) {
+            this.update = scripts.update
+        }
     }
 
-    update(deltaTime,components) {
+    update(deltaTime,components,scene) {
         console.log("update script not Overridden \nscript attached to entity: -",this.entity.id,"\navailable components are:-",components)
-        
         this.update = () => {}
-        
-        //to override
     }
 }

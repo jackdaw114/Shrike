@@ -146,9 +146,6 @@ export class Renderer extends System {
     }
 
     renderPass() {
-        if (!this.scene.componentRegister.hasOwnProperty("Geometry")) {
-            return;
-        }
         // render pass
         this.#context.viewport(
             0,
@@ -170,6 +167,9 @@ export class Renderer extends System {
         this.#context.clear(
             this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT
         );
+        if (!this.scene.componentRegister.hasOwnProperty("Geometry")) {
+            return;
+        }
         for (const component of this.scene.componentRegister["Geometry"]) {
             if (component.render) {
                 this.render(component);
@@ -222,14 +222,6 @@ export class Renderer extends System {
             component.vertices
         );
 
-        //this.#context.enableVertexAttribArray(0);
-        //this.#context.enableVertexAttribArray(1);
-
-        //        this.#context.bindBuffer(
-        //           this.#context.ELEMENT_ARRAY_BUFFER,
-        //         component.eboID
-        //      );
-
         let identityMatrix = new Float32Array(16);
         mat4.identity(identityMatrix);
 
@@ -239,14 +231,7 @@ export class Renderer extends System {
 
         const camera = this.scene.getCamera();
         let viewMatrix = this.scene.getCamera().matrix;
-        let projMatrix = new Float32Array(16);
-        mat4.perspective(
-            projMatrix,
-            glMatrix.toRadian(45),
-            this.aspect_ratio,
-            0.1, // get from camera
-            1000.0 // get from camera
-        );
+        let projMatrix = camera.getProjMatrix();
 
         this.#context.uniformMatrix4fv(
             this.shader.getUniform("mWorld"),
@@ -285,7 +270,7 @@ export class Renderer extends System {
         );
         this.#context.uniform3fv(
             this.shader.getUniform("lightPosition"),
-            [0, 10, 0]
+            camera.position 
         );
         this.#context.drawElements(
             this.#context.TRIANGLES,

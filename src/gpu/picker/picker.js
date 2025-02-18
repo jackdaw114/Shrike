@@ -47,6 +47,7 @@ export class PickingSystem extends System {
             if (objectId !== 0){
             this.element.dispatchEvent(
                 new CustomEvent("picker-selection", {
+                    bubbles:true,
                     detail: {
                         e,
                         objectId,
@@ -138,6 +139,10 @@ export class PickingSystem extends System {
     init() {}
 
     update(deltaTime) {
+        if (this.scene.componentRegister["Geometry"] === undefined) {
+            return
+        }
+
         // octree culling here then provide updated array to the loop below
         this.#context.viewport(0, 0, this.width, this.height);
         this.#context.useProgram(this.shader.getProgram());
