@@ -19,6 +19,7 @@ import { createResourceWindow } from "./widgets/resourceWindow";
 import { createMenuBar } from "./widgets/menuBar";
 import { createEditorGizmos } from "./editor-overlay/gizmos";
 import Camera from "../ecs/camera";
+import { createTransformationWindow } from "./widgets/transformation-window";
 
 export class Editor {
     activeObjects = [];
@@ -49,7 +50,7 @@ export class Editor {
         const height = this.height;
         const gameSpeed = this.gameSpeed;
         this.editorScene = this.engine.createScene(width,height);
-        this.editorRenderer = this.engine.createSystem(
+        this.editorGizmoRenderer = this.engine.createSystem(
             Renderer,
             this.editorScene,
             this.context,
@@ -58,7 +59,7 @@ export class Editor {
             height
         );
 
-        this.editorOverlays.editorRenderer = {
+        this.editorOverlays.editorGizmoRenderer = {
             active: true,
         };
         this.gameScene = this.engine.createScene(width,height);
@@ -128,22 +129,13 @@ export class Editor {
     }
     sguiSetup() {
         this.SGui = new SGui();
-        this.propertyWindow = {
-            mainWindow: this.SGui.createWindow("properties", true),
-            x: new SGuiInputBox(this.canvas, { type: "number" }),
-            y: new SGuiInputBox(this.canvas, { type: "number" }),
-            z: new SGuiInputBox(this.canvas, { type: "number" }),
-            text: new SGuiText(this.canvas, {
-                text: "hello",
-            }),
-        };
         this.materialWindow = {
             mainWindow: this.SGui.createWindow("Material", true),
-            r: new SGuiSlider(this.canvas, { value: 0, max: 255 }),
-            g: new SGuiSlider(this.canvas, { value: 0, max: 255 }),
-            b: new SGuiSlider(this.canvas, { value: 0, max: 255 }),
+            r: new SGuiSlider( this.canvas,{ value: 0, max: 255 }),
+            g: new SGuiSlider( this.canvas,{ value: 0, max: 255 }),
+            b: new SGuiSlider( this.canvas,{ value: 0, max: 255 }),
             diffusePanel: new SGuiContainer({ heading: "diffuse color:" }),
-            colorPicker: new SGuiColorPicker(this.canvas, {}),
+            colorPicker: new SGuiColorPicker(this.canvas ,{}),
         };
         this.materialWindow.diffusePanel.append(
             this.materialWindow.r,
@@ -170,20 +162,40 @@ export class Editor {
             editorCamera.zoom(e.wheelDeltaY / rate);
         });
         this.canvas.addEventListener("drag", (e) => {
-            this.isNavigating = true;
-            const rate = 1000;
-            if (e.detail.button == 1) {
-                editorCamera.panHorizontal(e.detail.dispX / rate);
-                editorCamera.panVertical(e.detail.dispY / rate);
-                gameCamera.panHorizontal(e.detail.dispX / rate);
-                gameCamera.panVertical(e.detail.dispY / rate);
-            } else if (e.detail.button == 4) {
-                editorCamera.orbitX((e.detail.dispX / rate) * 100);
-                editorCamera.orbitY((e.detail.dispY / rate) * 100);
-                gameCamera.orbitX((e.detail.dispX / rate) * 100);
-                gameCamera.orbitY((e.detail.dispY / rate) * 100);
+            if (this.canNavigate){
+                this.isNavigating = true;
+                const rate = 1000;
+                if (e.detail.button == 1) {
+                    editorCamera.panHorizontal(e.detail.dispX / rate);
+                    editorCamera.panVertical(e.detail.dispY / rate);
+                    gameCamera.panHorizontal(e.detail.dispX / rate);
+                    gameCamera.panVertical(e.detail.dispY / rate);
+                } else if (e.detail.button == 4) {
+                    editorCamera.orbitX((e.detail.dispX / rate) * 100);
+                    editorCamera.orbitY((e.detail.dispY / rate) * 100);
+                    gameCamera.orbitX((e.detail.dispX / rate) * 100);
+                    gameCamera.orbitY((e.detail.dispY / rate) * 100);
+                }
             }
         });
+        this.canvas.addEventListener("mousedown",(e)=>{
+            const rect = this.canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = rect.height - (e.clientY - rect.top); // flip Y
+            const gizmoId = this.editorPickingSystem.readColor(x,y)[0]
+            if (gizmoId>0){
+                this.canNavigate = false
+                this.selectedGizmoId = gizmoId 
+            }
+            else{
+                this.canNavigate = true
+                this.selectedGizmoId = 0
+            }
+        })
+        this.canvas.addEventListener("mouseup",(e)=>{
+            this.isNavigating = false
+            this.canNavigate = true
+        })
     }
 
     generateDebugGrid(lineObj) {
@@ -204,7 +216,7 @@ export class Editor {
             }
         }
 
-        drawGrid(lineObj, 15, 0.5);
+        drawGrid(lineObj, 60, 0.5);
     }
 
     initEventListeners() {
@@ -212,11 +224,6 @@ export class Editor {
         this.canvas.addEventListener("picker-selection", (e) => {
             switch (e.detail.scene) {
                 case this.editorScene:
-                    switch (e.detail.objectId) {
-                        case this.gizmos.moveGizmo.x.entity.id:
-                            console.log(this.gizmos.moveGizmo.x)
-                            break;
-                    }
                     break;
                 case this.gameScene:
                     console.log("game Scenen")
@@ -227,7 +234,6 @@ export class Editor {
                 if (e.detail.scene === this.editorScene) {
                 } else {
                     this.activeObjects = [e.detail.entity];
-                    console.log(this.activeObjects);
                     this.canvas.dispatchEvent(
                         new CustomEvent("select-object", {
                             detail: e.detail,
@@ -239,25 +245,16 @@ export class Editor {
             }
         });
         this.canvas.addEventListener("select-object", (e) => {
-            this.propertyWindow.mainWindow.appendChild(
-                this.propertyWindow.text
-            );
-            this.propertyWindow.mainWindow.appendChild(this.propertyWindow.x);
-            this.propertyWindow.mainWindow.appendChild(this.propertyWindow.y);
-            this.propertyWindow.mainWindow.appendChild(this.propertyWindow.z);
 
             //this.materialWindow.diffusePanel.appendChild(this.materialWindow.r)
             this.materialWindow.mainWindow.appendChild(
                 this.materialWindow.diffusePanel
             );
 
-            console.log(e);
-            this.propertyWindow.text.textContent = e.detail.entity.id;
         });
 
         this.canvas.addEventListener("slider-change", (e) => {
-            console.log(e);
-            console.log(e.detail.id);
+            console.log(e)
             switch (e.detail.id) {
                 case this.materialWindow.r.id:
                     this.materialWindow.colorPicker.iroRef.color.rgb = {
@@ -295,9 +292,6 @@ export class Editor {
                         e.detail.rgb.g,
                         e.detail.rgb.b,
                     ].map((val) => val / 255);
-                    console.log(
-                        this.materialWindow.colorPicker.iroRef.color.rgb
-                    );
                     this.materialWindow.r.setValue(e.detail.rgb.r);
                     this.materialWindow.g.setValue(e.detail.rgb.g);
                     this.materialWindow.b.setValue(e.detail.rgb.b);
@@ -307,7 +301,6 @@ export class Editor {
             }
         });
         this.canvas.addEventListener("file-drop", (e) => {
-            console.log(parseOBJ(e.detail.content));
 
             this.addGameObject({
                 geometry: parseOBJ(e.detail.content),
@@ -344,7 +337,7 @@ export class Editor {
 
     start() {
         this.engine.compositor.addFramebuffer(
-            this.editorRenderer.framebuffer,
+            this.editorGizmoRenderer.framebuffer,
             {}
         );
         this.engine.compositor.addFramebuffer(
@@ -361,6 +354,7 @@ export class Editor {
     }
 
     initWidgets() {
+        this.transformationWindow = createTransformationWindow(this,this.SGui,this.canvas) 
         this.resourceWindow = createResourceWindow(this.canvas, this.SGui);
         this.menuBar = createMenuBar(this, this.canvas, this.SGui);
     }

@@ -1,73 +1,5 @@
-export class EventHandler {
-    static instance = null;
-    #batchInterval = 16;
-    #eventListeners = new Map();
-    #eventBatches = new Map();
-    #batchTimeouts = new Map();
-
-    constructor(element) {
-        if (EventHandler.instance) {
-            return EventHandler.instance;
-        }
-        this.canvas = element;
-        this.elementBounds = element.getBoundingClientRect();
-        EventHandler.instance = this;
-    }
-
-    batchHelper(eventType, eventData) {
-        if (!this.#eventBatches.has(eventType)) {
-            this.#eventBatches.set(eventType, []);
-        }
-        this.#eventBatches.get(eventType).push(eventData);
-        if (!this.#batchTimeouts.has(eventType)) {
-            this.#batchTimeouts.set(
-                eventType,
-                setTimeout(() => {
-                    this.dispatchBatchEvent(eventType);
-                }, this.#batchInterval)
-            );
-        }
-    }
-
-    dispatchBatchEvent(eventType) {
-        const batch = this.#eventBatches.get(eventType);
-        if (batch && batch.length > 0) {
-            const lastEvent = batch[batch.length - 1];
-            if (this.#eventListeners.has(eventType)) {
-                for (let callback of this.#eventListeners.get(eventType)) {
-                    callback(lastEvent);
-                }
-            }
-        }
-        this.#eventBatches.delete(eventType);
-        this.#batchTimeouts.delete(eventType);
-    }
-
-    addEventListener(eventType, callback) {
-        if (!this.#eventListeners.has(eventType)) {
-            this.#eventListeners.set(eventType, new Set());
-        }
-        this.#eventListeners.get(eventType).add(callback);
-    }
-
-    removeEventListener(eventType, callback) {
-        if (this.#eventListeners.has(eventType)) {
-            this.#eventListeners.get(eventType).delete(callback);
-        }
-    }
-
-    dispatchEvent(shrikeEvent) {
-        if (this.#eventListeners.has(shrikeEvent.type)) {
-            for (let callback of this.#eventListeners.get(shrikeEvent.type)) {
-                callback(shrikeEvent);
-            }
-        }
-    }
-}
-
-
-
 export class MouseEvent {
+    DRAG_THRESHOLD = 20
     constructor(element) {
         this.element = element;
         this.mouseX = 0;
@@ -78,7 +10,16 @@ export class MouseEvent {
         this.mouseDown = false;
         this.dragCallback = () => {};
         this.activeKeys ={}
-
+        this.isDragging = false
+        this.dragStartPos={
+            x:0,
+            y:0
+        }
+        this.dragEndPos = {
+            x:0,
+            y:0
+        }// relative to start
+        this.rect = element.getBoundingClientRect();
         element.addEventListener('mousedown', (e)=>this.handleMouseDown(e));
         element.addEventListener('mouseup', (e) =>this.handleMouseUp(e));
         element.addEventListener('mousemove',(e)=>this.handleMouseMove(e))
@@ -89,16 +30,43 @@ export class MouseEvent {
         element.addEventListener('mouseleave', (e) => {
             this.mouseDown =false
         })
+        document.addEventListener('mouseout',(e)=>{
+            this.activeKeys ={}
+        })
+        document.addEventListener('blur',(e)=>{
+            this.activeKeys ={}
+        })
     }
 
     handleMouseDown(e) {
+        this.isDragging = true
         this.mouseDown = e.buttons;
-        this.lastX = e.clientX;
-        this.lastY = e.clientY;
+        this.lastX = e.clientX-this.rect.left;
+        this.lastY = e.clientY-this.rect.top;
+        this.dragStartPos = {
+            x:e.clientX-this.rect.left,
+            y:e.clientY-this.rect.top 
+        };
+        this.element.dispatchEvent(new CustomEvent("u_mousedown",{
+            detail:{
+                ...e,
+                ...this.dragStartPos
+            }
+        }))
     }
 
     handleMouseUp(e) {
         this.mouseDown = false;
+        this.dragEndPos={
+            x:0,
+            y:0
+        }
+        
+        if (Math.hypot(this.dragEndPos.x,this.dragEndPos.y)<this.DRAG_THRESHOLD){
+            this.element.dispatchEvent(new CustomEvent("click",{
+                detail:e
+            }))
+        }
     }
     
     handleKeyDown(e) {
@@ -116,23 +84,28 @@ export class MouseEvent {
 
     }
     handleMouseMove(e) {
-    if (this.mouseDown && !Object.keys(this.activeKeys).length) {
-            const dispX = e.clientX - this.lastX;
-            const dispY = e.clientY - this.lastY;
-            
-        this.element.dispatchEvent(new CustomEvent("drag", {
-            detail: {
-                button: this.mouseDown,
-                originalEvent: e,
-                dispX,
-                dispY,
-                currentX: e.clientX,
-                currentY: e.clientY,
-                startX: this.lastX,
-                startY: this.lastY
-            }
-        }))    
+        const dispX = e.clientX - this.lastX;
+        const dispY = e.clientY - this.lastY;
+        this.dragEndPos = {
+            x:this.dragEndPos.x+dispX,
+            y:this.dragEndPos.y+dispY
         }
+        if (this.mouseDown && !Object.keys(this.activeKeys).length && Math.hypot(this.dragEndPos.x,this.dragEndPos.y)>this.DRAG_THRESHOLD) {
+            this.element.dispatchEvent(new CustomEvent("drag", {
+                detail: {
+                    button: this.mouseDown,
+                    originalEvent: e,
+                    dispX,
+                    dispY,
+                    currentX: e.clientX,
+                    currentY: e.clientY,
+                    startX: this.lastX,
+                    startY: this.lastY,
+                    dragStartPos:this.dragStartPos,
+                    dragEndPos:this.dragEndPos
+                }
+            }))    
+            }
 
         this.lastX = e.clientX;
         this.lastY = e.clientY;

@@ -176,6 +176,12 @@ export class Transformation extends Component {
 
         const values= {...defaultValues,...u_values}
         this.matrix = mat4.create();
+        this.rotation = {
+            x: values.Rx,
+            y: values.Ry,
+            z: values.Rz,
+        };
+
         this.quaternion = quat.create();
         quat.fromEuler(this.quaternion, values.Rx,values.Ry,values.Rz)
         this.position = {
@@ -206,7 +212,21 @@ export class Transformation extends Component {
             x,y,z
         }
     }
-
+    translate(x,y,z){
+        this.position = {
+            x:this.position.x+x,
+            y:this.position.y+y,
+            z:this.position.z+z,
+        }
+        this.updateMatrix()
+    }
+    setPosition(position){
+        this.position = position
+        this.updateMatrix()
+    }
+    updateRotation(){
+        quat.fromEuler(this.quaternion,this.rotation.x,this.rotation.y,this.rotation.z)
+    }
     updateMatrix() {
         mat4.fromRotationTranslationScale(this.matrix, this.quaternion, vec3.fromValues(this.position.x, this.position.y, this.position.z), vec3.fromValues(this.scale.x, this.scale.y, this.scale.z))
     }

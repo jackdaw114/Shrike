@@ -172,6 +172,7 @@ export class PickingSystem extends System {
         this.#context.readBuffer(this.#context.COLOR_ATTACHMENT0);
         this.#context.bindTexture(this.#context.TEXTURE_2D, this.pickerTexture);
 
+        this.#context.viewport(0, 0, this.width, this.height);
         let pixels = new Float32Array(4);
         this.#context.readPixels(
             x,
@@ -189,6 +190,7 @@ export class PickingSystem extends System {
         return pixels;
     }
 
+    getElementID = this.readColor 
     render(component) {
         this.#context.bindVertexArray(component.vaoID);
 
@@ -231,16 +233,10 @@ export class PickingSystem extends System {
         let worldMatrix = component.entity
             .getComponent("Transformation")
             .getMatrix();
+        const camera = this.scene.getCamera()
         let viewMatrix = this.scene.getCamera().matrix;
-        let projMatrix = new Float32Array(16);
+        let projMatrix = camera.getProjMatrix();
 
-        mat4.perspective(
-            projMatrix,
-            glMatrix.toRadian(45),
-            this.aspect_ratio, // get from camera
-            0.1, // get from camera
-            1000.0 // get from camera
-        );
 
         this.#context.uniformMatrix4fv(
             matWorldUniformLocation,

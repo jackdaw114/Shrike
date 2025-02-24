@@ -19,13 +19,13 @@ export const createMenuBar = (editor,element,sgui) => {
         console.log(menuBar.buttons.transformationWidgetToggle)
         switch (e.detail.button) {
             case menuBar.buttons.transformationWidgetToggle:
-                if (editor.editorOverlays.editorRenderer.active) {
-                    editor.engine.compositor.removeFramebuffer(editor.editorRenderer.framebuffer)
-                    editor.editorOverlays.editorRenderer.active = false;
+                if (editor.editorOverlays.editorGizmoRenderer.active) {
+                    editor.engine.compositor.removeFramebuffer(editor.editorGizmoRenderer.framebuffer)
+                    editor.editorOverlays.editorGizmoRenderer.active = false;
                 }
                 else {
-                    editor.engine.compositor.addFramebuffer(editor.editorRenderer.framebuffer,{priority:0})
-                    editor.editorOverlays.editorRenderer.active = true;
+                    editor.engine.compositor.addFramebuffer(editor.editorGizmoRenderer.framebuffer,{priority:0})
+                    editor.editorOverlays.editorGizmoRenderer.active = true;
                 }
                 break;
             default:

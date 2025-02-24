@@ -3,6 +3,7 @@
 
 *{
     font-family: "Helvetica";
+    font-size: 0.8rem;
 }
 
 .sgui-window {
@@ -30,7 +31,6 @@
 }
 
 .sgui-input-box{
-    width:85%;
     color: #fff;
     background-color: #212730;
     border-radius: 4.5px;
@@ -127,8 +127,8 @@
 .top-bar{
     display: flex;
     color: #fff;
-    height:1.5rem;
-    font-size: 0.8rem;
+    height:1.6em;
+    font-size: 0.7rem;
     background-color: #212730;
     justify-content: space-between;
     align-content: center;

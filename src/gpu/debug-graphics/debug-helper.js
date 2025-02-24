@@ -1,7 +1,7 @@
 import { mat4, glMatrix } from "gl-matrix";
 import { System } from "../../ecs/classes";
 import Shader from "../shaders.js";
-import { testFrag, testVert } from "../../asset-manager/shader-assets.js";
+import { Vert,Frag } from "../../asset-manager/shader/debug-line.js";
 
 export class DebugSystem extends System {
     POS_SIZE = 3;
@@ -22,7 +22,7 @@ export class DebugSystem extends System {
     vaoID;
     vboID;
     started = false;
-    MAX_LINES = 500;
+    MAX_LINES = 50000;
     active = true;
 
     /**
@@ -40,7 +40,7 @@ export class DebugSystem extends System {
         this.#context.cullFace(this.#context.BACK);
 
         // TODO:- change this to some other function prolly called in init and has some sort of dynamic override maybe
-        this.shader = new Shader(this.#context, testVert, testFrag, [
+        this.shader = new Shader(this.#context, Vert, Frag, [
             "mView",
             "mProj",
             "mWorld",
