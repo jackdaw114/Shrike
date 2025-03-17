@@ -143,6 +143,7 @@ export class Renderer extends System {
             component.indices,
             this.#context.STATIC_DRAW
         );
+        component.initialized =true
     }
 
     renderPass() {
@@ -210,6 +211,7 @@ export class Renderer extends System {
      * @param {Geometry} component
      */
     render(component) {
+        if (!component.initialized) return;
         this.#context.bindVertexArray(component.vaoID);
         this.#context.bindBuffer(this.#context.ARRAY_BUFFER, component.vboID);
         this.#context.bindBuffer(

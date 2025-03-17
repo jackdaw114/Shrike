@@ -10,3 +10,6 @@ export const createResourceWindow = (element,sgui) => {
     resourceWindow.mainWindow.append(resourceWindow.filePanel)
     return resourceWindow;
 }
+
+
+

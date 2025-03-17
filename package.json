@@ -19,6 +19,7 @@
     "@jaames/iro": "^5.5.2",
     "cannon": "^0.6.2",
     "gl-matrix": "^3.4.3",
+    "jstree": "^3.3.17",
     "style-loader": "^4.0.0"
   }
 }

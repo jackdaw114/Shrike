@@ -20,6 +20,8 @@ import { createMenuBar } from "./widgets/menuBar";
 import { createEditorGizmos } from "./editor-overlay/gizmos";
 import Camera from "../ecs/camera";
 import { createTransformationWindow } from "./widgets/transformation-window";
+import {createSceneGraphWindow} from "./widgets/scene-graph";
+import {createPropertiesWindow} from "./widgets/properties-window";
 
 export class Editor {
     activeObjects = [];
@@ -311,6 +313,13 @@ export class Editor {
         };
     }
 
+    addEditorObject(objectInfo) {
+        const editorObject = this.engine.createEntity(this.editorScene)
+        for (const component of objectInfo.components) {
+            this.editorScene.addComponent(editorObject, component)
+        }
+    }
+
     addGameObject(objectInfo) {
         const gameObject = this.engine.createEntity(this.gameScene);
         if (objectInfo.geometry) {
@@ -354,8 +363,13 @@ export class Editor {
     }
 
     initWidgets() {
-        this.transformationWindow = createTransformationWindow(this,this.SGui,this.canvas) 
+        this.transformationWindow = createTransformationWindow(this,this.SGui,this.canvas)
+        this.sceneGraphWindow = createSceneGraphWindow(this.canvas,this.engine,this.SGui,this.gameScene)
         this.resourceWindow = createResourceWindow(this.canvas, this.SGui);
         this.menuBar = createMenuBar(this, this.canvas, this.SGui);
+        this.propertiesWindow = createPropertiesWindow(this.activeObjects,this.SGui)
     }
 }
+
+
+

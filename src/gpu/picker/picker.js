@@ -192,6 +192,7 @@ export class PickingSystem extends System {
 
     getElementID = this.readColor 
     render(component) {
+        if (!component.initialized) return;
         this.#context.bindVertexArray(component.vaoID);
 
         this.#context.bindBuffer(this.#context.ARRAY_BUFFER, component.vboID);

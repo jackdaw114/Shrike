@@ -9,14 +9,12 @@ import {SGui} from "../../../lib/shrike-gui/sgui";
  */
 export const createMenuBar = (editor,element,sgui) => {
     const menuBar = {};
-    menuBar.mainWindow = sgui.createWindow("Menu Bar")
+    menuBar.mainWindow = sgui.createWindow("Menu Bar",true)
     menuBar.buttons = {
         transformationWidgetToggle: new SGuiButton(element,{})
     };
     menuBar.mainWindow.append(...Object.values(menuBar.buttons))
     element.addEventListener("sgui-button-click", (e)=>{
-        console.log(e.detail.button) 
-        console.log(menuBar.buttons.transformationWidgetToggle)
         switch (e.detail.button) {
             case menuBar.buttons.transformationWidgetToggle:
                 if (editor.editorOverlays.editorGizmoRenderer.active) {

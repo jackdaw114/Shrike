@@ -17,7 +17,7 @@ export class Shrike {
      * @property {number} CANVAS_WIDTH - The fixed canvas width
      * @property {number} CANVAS_HEIGHT - The fixed canvas height
      * @property {Object.<string, Scene>} scenes - Collection of game scenes
-     * @property {Object.<string, Entity>} entities - Collection of game entities
+     * @property {Object} entities - Collection of game entities
      * @property {string} activeScene - The currently active scene identifier
      */
     constructor(canvas, width, height) {
@@ -25,7 +25,7 @@ export class Shrike {
         this.CANVAS_HEIGHT = canvas.height = height;
         this.scenes = {};
         this.systems = {};
-        this.entities = {};
+        this.entities = [];
         this.activeScenes = [];
         this.gameLoop = this.gameLoop.bind(this);
         this.compositor = new Compositor(canvas.getContext("webgl2"), width / height, width, height)
@@ -62,7 +62,7 @@ export class Shrike {
      * @param {Scene} scene
      */
     createEntity(scene) {
-        const entity = new Entity(this.entity_uid);
+        const entity = new Entity(this.entity_uid,"entity-"+this.entity_uid);
         this.entities[this.entity_uid] = entity;
         scene.addEntity(this.entity_uid,entity);
         this.entity_uid++;

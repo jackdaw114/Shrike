@@ -15,6 +15,7 @@ export class Geometry{
         this.render = true;
         this.depthTest = true;
         this.material = material;
+        this.initialized = false
     }
     materialOptions(params) {
         const {diffuseColor=new Float32Array([1.0,1.0,1.0]), ambientColor=new Float32Array([1.0,1.0,1.0]), specularColor=new Float32Array([1.0,1.0,1.0]), shininess = 0.} = params;

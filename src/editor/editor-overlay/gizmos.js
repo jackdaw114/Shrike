@@ -45,6 +45,16 @@ export const createEditorGizmos = (engine, editor, scene) => {
                 updateAxis(deltaTime, components, scene)
             }
         }))
+        editor.addEditorObject({
+            components: [
+                arm.geometry,
+                arm.transformation,
+                new Script({update:updateAxis})
+            ]
+        })
+        //scene.addComponent(arrowAxis,arm.geometry)
+        //scene.addComponent(arrowAxis,arm.transformation)
+        //scene.addComponent(arrowAxis,new Script({update:updateAxis}))
         console.log(scene.componentRegister)
     })
     const rect = editor.canvas.getBoundingClientRect();
