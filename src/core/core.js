@@ -62,7 +62,7 @@ export class Shrike {
      * @param {Scene} scene
      */
     createEntity(scene) {
-        const entity = new Entity(this.entity_uid,"entity-"+this.entity_uid);
+        const entity = new Entity(this.entity_uid,"entity-"+(this.entity_uid-8));
         this.entities[this.entity_uid] = entity;
         scene.addEntity(this.entity_uid,entity);
         this.entity_uid++;
