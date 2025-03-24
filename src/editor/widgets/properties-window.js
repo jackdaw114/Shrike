@@ -15,7 +15,7 @@ export const createPropertiesWindow = (sgui, object) => {
             if (key === "Transformation") continue;
             if (["mainWindow","object"].includes(key)) continue;
             propertiesWindow.mainWindow.appendChild(propertiesWindow[key])
-            propertiesWindow[key].contentDiv.appendChild(new SGuiFilePanel(propertiesWindow[key]));
+            propertiesWindow[key].contentDiv.appendChild(new SGuiFilePanel(propertiesWindow[key],{type:"special"}));
         }
     })
     propertiesWindow.Geometry = new SGuiDropDown({heading:"Geometry"})
