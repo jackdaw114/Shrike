@@ -15,13 +15,9 @@ export class Entity {
         if (this.components.hasOwnProperty(componentName)) {
             return this.components[componentName][index]; // get by id here
         }
-        throw new Error(
-            "Entity",
-            this.id,
-            "Doesnt have",
-            componentName,
-            "Component"
-        );
+        else{
+            return null
+        }
     }
 }
 
