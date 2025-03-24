@@ -109,6 +109,7 @@ function createSelectionWindow(sgui) {
         list.appendChild(button)
     })
     selectionWindow.appendChild(list)
+    // add drop
     return selectionWindow
 }
 
@@ -119,8 +120,10 @@ function updateSceneGraphWindow(sceneGraphWindow,selectionWindow,scene) {
         sceneGraphWindow.listRoot.appendChild(dropDown)
         dropDown.contentDiv.innerHTML = ""
         dropDown.entity = entity.entity
-        for (const component in entity.entity.components){
-            dropDown.appendChild(new SGuiText({text:component.name}))
+        for (const component in entity.entity.components) {
+            // const entry = new SGuiText()
+            console.log("compo",component)
+            dropDown.appendChild(new SGuiText({text:component}))
         }
         dropDown.toggleDiv.ondblclick = () => {
             selectionWindow.open()
