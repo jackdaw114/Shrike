@@ -109,7 +109,6 @@ function createSelectionWindow(sgui) {
         list.appendChild(button)
     })
     selectionWindow.appendChild(list)
-    // add drop
     return selectionWindow
 }
 
@@ -120,11 +119,20 @@ function updateSceneGraphWindow(sceneGraphWindow,selectionWindow,scene) {
         sceneGraphWindow.listRoot.appendChild(dropDown)
         dropDown.contentDiv.innerHTML = ""
         dropDown.entity = entity.entity
-        for (const component in entity.entity.components) {
-            // const entry = new SGuiText()
-            console.log("compo",component)
-            dropDown.appendChild(new SGuiText({text:component}))
-        }
+        let update = () => {
+            for (const component in entity.entity.components){
+            const entry = new SGuiText({text:component})
+            entry.className = component
+            dropDown.appendChild(entry)
+            entry.ondblclick = (e) => {
+                document.dispatchEvent(new CustomEvent("set-active-object",{
+                    detail: {
+                        entity:dropDown.entity
+                    }
+                }))
+            }
+        }}
+        update()
         dropDown.toggleDiv.ondblclick = () => {
             selectionWindow.open()
             selectionWindow.context = dropDown 
@@ -140,18 +148,18 @@ function updateSceneGraphWindow(sceneGraphWindow,selectionWindow,scene) {
                     dropDown.geometry = geometry 
                     scene.addComponent(entity.entity,geometry)
                     scene.addComponent(entity.entity,transformation)
-                    const entry = new SGuiText({text:"geometry"})
-                    entry.className = "geometry"
-                    dropDown.appendChild(entry)
-                    entry.ondblclick = (e) => {
-                        document.dispatchEvent(new CustomEvent("set-active-object",{
-                            detail: {
-                                entity:dropDown.entity
-                            }
-                        }))
-                    }
+                    update()
                     break;
-            }
+                case "collider":
+                    if (dropDown.collider) break;
+                    const collider = new Collider(
+                        [],[]
+                    )
+                    dropDown.collider = collider 
+                    scene.addComponent(entity.entity,collider)  
+                    update()
+                    break;
+            } 
         })
     }
 }
