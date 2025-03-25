@@ -47,7 +47,7 @@ export class CannonPhysicsSystem extends System{
             this.world.step(this.fixedTime, deltaTime, this.maxSubSteps);
             for (const component of this.scene.componentRegister["CannonObject"]) {
                 if(component.initialized){
-                    // component.entity.getComponent("Transformation").setPosition(component.body.position)
+                    //component.entity.getComponent("Transformation").setPosition(component.body.position)
                 }
             }
         }

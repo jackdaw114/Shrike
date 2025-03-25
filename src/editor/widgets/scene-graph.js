@@ -4,7 +4,7 @@ import SGuiList from "../../../lib/shrike-gui/child-elements/list";
 import SGuiText from "../../../lib/shrike-gui/child-elements/text";
 import { Shrike } from "../../core/core";
 import {Transformation} from "../../ecs/classes";
-import {Geometry} from "../../ecs/component-classes";
+import {Geometry, Script} from "../../ecs/component-classes";
 
 /**
  *
@@ -113,13 +113,14 @@ function createSelectionWindow(sgui) {
 }
 
 function updateSceneGraphWindow(sceneGraphWindow,selectionWindow,scene) {
-    sceneGraphWindow.listRoot.innerHTML = ""
+    sceneGraphWindow.listRoot.innerHTML = ""  // TODO: check if events are being discarded here
     for (const entity of sceneGraphWindow.entities) {
         const dropDown = new SGuiDropDown({heading:entity.entity.name}) 
         sceneGraphWindow.listRoot.appendChild(dropDown)
         dropDown.contentDiv.innerHTML = ""
         dropDown.entity = entity.entity
         let update = () => {
+            dropDown.contentDiv.innerHTML = ""
             for (const component in entity.entity.components){
             const entry = new SGuiText({text:component})
             entry.className = component
@@ -137,6 +138,7 @@ function updateSceneGraphWindow(sceneGraphWindow,selectionWindow,scene) {
             selectionWindow.open()
             selectionWindow.context = dropDown 
         }
+        console.log(entity.entity.components)
         dropDown.addEventListener("selected", e => {
             switch (e.detail.name) {
                 case "geometry": //edge case issues
@@ -157,6 +159,15 @@ function updateSceneGraphWindow(sceneGraphWindow,selectionWindow,scene) {
                     )
                     dropDown.collider = collider 
                     scene.addComponent(entity.entity,collider)  
+                    update()
+                    break;
+                case "script":
+                    if (dropDown.script) break;
+                    const script = new Script(
+                        [],[]
+                    )
+                    dropDown.script = script 
+                    scene.addComponent(entity.entity,script)  
                     update()
                     break;
             } 
