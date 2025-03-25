@@ -3,11 +3,16 @@ import SGuiFilePanel from "../../../lib/shrike-gui/child-elements/file-panel";
 
 export const createPropertiesWindow = (sgui, object) => {
     const propertiesWindow = {};
-
+    let activeObj = {};
     propertiesWindow.mainWindow = sgui.createWindow("properties", true)
-    propertiesWindow.object = object
+    
+    propertiesWindow.object = object;
     propertiesWindow.components = [];
     document.addEventListener("set-active-object", (e) => {
+        if (activeObj === e.detail.entity) {
+            return;
+        }
+        activeObj = e.detail.entity;
         propertiesWindow.components = e.detail.entity.components;
         console.log("propertiesWindow.components  ",propertiesWindow.components)
         for (const key of Object.keys(propertiesWindow.components)) {
