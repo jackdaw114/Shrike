@@ -32,8 +32,6 @@ export class CannonRenderer extends System {
     constructor(scene, context,framebuffer, aspect_ratio, width, height) {
         super(scene);
 
-        this.sphereShape = parseOBJ(ball);
-
         this.aspect_ratio = aspect_ratio;
         this.width = width;
         this.height = height;
@@ -50,13 +48,6 @@ export class CannonRenderer extends System {
         this.#context.bindBuffer(this.#context.ARRAY_BUFFER, this.sphereVBOID);
 
         this.instanceVAOID = this.#context.createBuffer(); 
-        //this.#context.bufferData(this.instanceVAOID,, usage)  
-
-        this.#context.bufferData(
-            this.#context.ARRAY_BUFFER,
-            this.sphereShape.vertices,
-            this.#context.STATIC_DRAW
-        ) 
 
         this.#context.enableVertexAttribArray(0);
         this.#context.enableVertexAttribArray(1);
@@ -85,11 +76,6 @@ export class CannonRenderer extends System {
             this.#context.ELEMENT_ARRAY_BUFFER,
             this.sphereEBOID
         );
-        this.#context.bufferData(
-            this.#context.ELEMENT_ARRAY_BUFFER,
-            this.sphereShape.indices,
-            this.#context.STATIC_DRAW
-        );
 
         this.shader = new Shader(this.#context, testVert, testFrag, [
             "mWorld",
@@ -97,9 +83,33 @@ export class CannonRenderer extends System {
             "mProj",
         ]);
 
-        this.framebuffer =framebuffer 
+        this.framebuffer = framebuffer;
     }
-    init() {
+
+    async init() {
+        this.sphereShape = await parseOBJ(ball);
+        
+        // Set up the vertex buffer data after we have the parsed shape
+        this.#context.bindBuffer(
+            this.#context.ARRAY_BUFFER,
+            this.sphereVBOID
+        );
+        this.#context.bufferData(
+            this.#context.ARRAY_BUFFER,
+            this.sphereShape.vertices,
+            this.#context.STATIC_DRAW
+        );
+
+        // Set up the element buffer data
+        this.#context.bindBuffer(
+            this.#context.ELEMENT_ARRAY_BUFFER,
+            this.sphereEBOID
+        );
+        this.#context.bufferData(
+            this.#context.ELEMENT_ARRAY_BUFFER,
+            this.sphereShape.indices,
+            this.#context.STATIC_DRAW
+        );
     }
     /**
      *
@@ -124,13 +134,18 @@ export class CannonRenderer extends System {
             this.framebuffer.width,
             this.framebuffer.height
         );
-        this.#context.useProgram(this.shader.getProgram())
-        this.#context.bindVertexArray(this.sphereVAOID)
-        this.#context.bindBuffer(this.#context.ELEMENT_ARRAY_BUFFER, this.sphereEBOID)
+
+        // Use the shader program first
+        this.shader.use();
+        
+        // Then bind VAO and EBO
+        this.#context.bindVertexArray(this.sphereVAOID);
+        this.#context.bindBuffer(this.#context.ELEMENT_ARRAY_BUFFER, this.sphereEBOID);
+
         let identityMatrix = new Float32Array(16);
         mat4.identity(identityMatrix);
 
-        let worldMatrix = mat4.create()
+        let worldMatrix = mat4.create();
 
         let viewMatrix = this.scene.getCamera().matrix;
         let projMatrix = new Float32Array(16);
@@ -141,7 +156,6 @@ export class CannonRenderer extends System {
             0.1, // get from camera
             1000.0 // get from camera
         );
-        
 
         this.#context.uniformMatrix4fv(
             this.shader.getUniform("mWorld"),

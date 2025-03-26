@@ -91,8 +91,8 @@ const arrowYAxis = engine.createEntity(gameScene);
 
 //editorRenderer.options.clear = false;
 
-const { indices, vertices } = parseOBJ(monke);
-const { indices: arrowInd, vertices: arrowVert } = parseOBJ(arrow);
+const { indices, vertices } = await parseOBJ(monke);
+const { indices: arrowInd, vertices: arrowVert } = await parseOBJ(arrow);
 
 gameScene.addComponent(entity1, new Geometry(vertices, indices));
 gameScene.addComponent(entity1, new Transformation());

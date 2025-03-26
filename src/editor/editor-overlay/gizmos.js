@@ -4,8 +4,8 @@ import { Geometry, Script } from "../../ecs/component-classes";
 import { Material } from "../../material/material";
 import { arrow } from "../editor-assets";
 
-export const createEditorGizmos = (engine, editor, scene) => {
-    const arrowGeo = parseOBJ(arrow)
+export const createEditorGizmos = async (engine, editor, scene) => {
+    const arrowGeo = await parseOBJ(arrow)
     const moveGizmo = {
         x: {
             geometry: new Geometry(arrowGeo.vertices, arrowGeo.indices, new Material([1., 0., 0.], [1., 0., 0.], [1., 0., 0.], 1)),

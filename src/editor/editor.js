@@ -28,6 +28,7 @@ export class Editor {
     engine;
     cannonMaxSubSteps = 5;
     isNavigating = false;
+    gizmos = null;
 
     constructor(canvas, gameSpeed, width, height) {
         this.canvas = canvas;
@@ -42,11 +43,13 @@ export class Editor {
         this.editorCameraSetup();
         this.sguiSetup();
         this.initWidgets();
-
         this.initEventListeners();
-
-        this.gizmos = createEditorGizmos(this.engine, this,this.editorScene);
     }
+
+    async init() {
+        this.gizmos = await createEditorGizmos(this.engine, this, this.editorScene);
+    }
+
     initSystems() {
         const width = this.width;
         const height = this.height;
@@ -302,10 +305,10 @@ export class Editor {
                     console.log("unknown color picker id: ", e.detail.id);
             }
         });
-        this.canvas.addEventListener("file-drop", (e) => {
-
+        this.canvas.addEventListener("file-drop", async (e) => {
+            const geometry = await parseOBJ(e.detail.content);
             this.addGameObject({
-                geometry: parseOBJ(e.detail.content),
+                geometry,
             });
         });
         this.canvas.ondragover = function (e) {
