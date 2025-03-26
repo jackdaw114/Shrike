@@ -71,7 +71,9 @@
     cursor: pointer;
     font-size: smaller;
     color: rgb(179, 179, 179);
-
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .sgui-file-list li:hover {
@@ -99,6 +101,18 @@
 
 .sgui-file-list::-webkit-scrollbar-thumb:hover {
     background: #445267;
+}
+
+.remove-btn {
+    background: none;
+    border: none;
+    color: #ff4d4d;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.remove-btn:hover {
+    color: #ff6666;
 }
 
 .file-placeholder {
