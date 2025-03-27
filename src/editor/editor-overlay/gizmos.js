@@ -30,6 +30,7 @@ export const createEditorGizmos = async (engine, editor, scene) => {
 
 
     Object.entries(moveGizmo).forEach(([key, arm]) => {
+        console.log("looping",key,arm)
         const arrowAxis = engine.createEntity(scene)
         arm.entity = arrowAxis;
         moveGizmo[key].entity = arrowAxis
@@ -45,13 +46,13 @@ export const createEditorGizmos = async (engine, editor, scene) => {
                 updateAxis(deltaTime, components, scene)
             }
         }))
-        editor.addEditorObject({
-            components: [
-                arm.geometry,
-                arm.transformation,
-                new Script({update:updateAxis})
-            ]
-        })
+        // editor.addEditorObject({
+        //     components: [
+        //         arm.geometry,
+        //         arm.transformation,
+        //         new Script({update:updateAxis})
+        //     ]
+        // })
         //scene.addComponent(arrowAxis,arm.geometry)
         //scene.addComponent(arrowAxis,arm.transformation)
         //scene.addComponent(arrowAxis,new Script({update:updateAxis}))
@@ -60,18 +61,27 @@ export const createEditorGizmos = async (engine, editor, scene) => {
     const rect = editor.canvas.getBoundingClientRect();
     const RATE = 2500
     editor.canvas.addEventListener("drag", (e) => {
+        console.log("drag", editor.selectedGizmoId)
+        engine.entities.forEach(entity => {
+            console.log("entity", entity.id)
+        })
         if (editor.activeObjects[0]) {
             const dispX = Math.hypot(e.detail.dragEndPos.x, e.detail.dragEndPos.y) * Math.sign(e.detail.dispX)
             const dispY = Math.hypot(e.detail.dragEndPos.x, e.detail.dragEndPos.y) * Math.sign(e.detail.dispY)
+            console.log("dispX", dispX, "dispY", dispY)
+            console.log("gizmos are ", moveGizmo.x.entity.id, moveGizmo.y.entity.id, moveGizmo.z.entity.id)
             switch (editor.selectedGizmoId) {
                 case moveGizmo.x.entity.id:
                     editor.activeObjects[0].getComponent("Transformation").translate(dispX / RATE, 0, 0)
+                    console.log("transformation",editor.activeObjects[0].getComponent("Transformation"))
                     break;
                 case moveGizmo.y.entity.id:
                     editor.activeObjects[0].getComponent("Transformation").translate(0, 0, dispX / RATE)
+                    console.log("transformation",editor.activeObjects[0].getComponent("Transformation"))
                     break;
                 case moveGizmo.z.entity.id:
                     editor.activeObjects[0].getComponent("Transformation").translate(0,-dispY / RATE, 0)
+                    console.log("transformation",editor.activeObjects[0].getComponent("Transformation"))
                     break;
             }
 

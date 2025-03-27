@@ -370,7 +370,7 @@ export class Editor {
         this.sceneGraphWindow = createSceneGraphWindow(this.canvas,this.engine,this.SGui,this.gameScene)
         this.resourceWindow = createResourceWindow(this.canvas, this.SGui);
         this.menuBar = createMenuBar(this, this.canvas, this.SGui);
-        this.propertiesWindow = createPropertiesWindow(this.SGui,this.activeObjects)
+        this.propertiesWindow = createPropertiesWindow(this.SGui,this.activeObjects,this.gameScene,this.gameRenderer)
     }
 }
 

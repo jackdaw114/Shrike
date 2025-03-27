@@ -58,6 +58,15 @@ export class Renderer extends System {
             "lightPosition",
         ]);
 
+        // Set up default lighting parameters
+        this.lightParams = {
+            constant: 1.0,
+            linear: 0.9,
+            quadratic: 0.032,
+            F0: 0.04,
+            metallic: 0.5
+        };
+
         this.framebuffer = createFramebuffer(this.#context, {
             width: width,
             height: height,
@@ -235,6 +244,7 @@ export class Renderer extends System {
         let viewMatrix = this.scene.getCamera().matrix;
         let projMatrix = camera.getProjMatrix();
 
+        // Update matrices
         this.#context.uniformMatrix4fv(
             this.shader.getUniform("mWorld"),
             false,
@@ -252,28 +262,45 @@ export class Renderer extends System {
             viewMatrix
         );
 
+        // Get material properties
+        const material = component.material;
+        const diffuse = material.getDiffuse();
+        const specular = material.getSpecular();
+        const shininess = material.getShininess();
+        const ambient = material.getAmbient();
+
+        // Calculate roughness from shininess (inverse relationship)
+        const roughness = 1.0 - (shininess / 100.0);
+
+        // Update material uniforms with energy conservation
         this.#context.uniform3fv(
             this.shader.getUniform("diffuseColor"),
-            component.material.getDiffuse()
+            diffuse
         );
 
         this.#context.uniform3fv(
             this.shader.getUniform("specularColor"),
-            component.material.getSpecular()
+            specular
         );
 
         this.#context.uniform1f(
             this.shader.getUniform("shininess"),
-            component.material.getShininess()
+            shininess
         );
+
         this.#context.uniform3fv(
             this.shader.getUniform("ambientColor"),
-            component.material.getAmbient()
+            ambient
         );
+
+        // Update light position in world space
+        const lightPos = camera.position;
         this.#context.uniform3fv(
             this.shader.getUniform("lightPosition"),
-            camera.position 
+            lightPos
         );
+
+        // Draw the mesh
         this.#context.drawElements(
             this.#context.TRIANGLES,
             component.indices.length,

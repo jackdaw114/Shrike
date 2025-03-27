@@ -1,7 +1,10 @@
+import { parseOBJ } from "../../../lib/parse-obj";
 import SGuiDropDown from "../../../lib/shrike-gui/child-elements/drop-down";
 import SGuiFilePanel from "../../../lib/shrike-gui/child-elements/file-panel";
+import { Geometry } from "../../ecs/component-classes";
+import { Material } from "../../material/material";
 
-export const createPropertiesWindow = (sgui, object) => {
+export const createPropertiesWindow = (sgui, object,scene,renderer) => {
     const propertiesWindow = {};
     let activeObj = {};
     propertiesWindow.mainWindow = sgui.createWindow("properties", true)
@@ -12,6 +15,7 @@ export const createPropertiesWindow = (sgui, object) => {
         // if (activeObj === e.detail.entity) {
         //     return;
         // }
+        
         activeObj = e.detail.entity;
         propertiesWindow.components = e.detail.entity.components;
         console.log("propertiesWindow.components  ",propertiesWindow.components)
@@ -33,10 +37,16 @@ export const createPropertiesWindow = (sgui, object) => {
 
     propertiesWindow.Script.filePanel.addEventListener("special-file-selected", (e) => {
         console.log("file-selected", e.detail.file)
+        e.detail.element
     })
-    propertiesWindow.Geometry.filePanel.addEventListener("special-file-selected", (e) => {
-        console.log("file-selected", e.detail.file)
+    propertiesWindow.Geometry.filePanel.addEventListener("special-file-drop", async (e) => {
+        console.log("file-drop", e.detail.file)
+        const {indices,vertices} = await parseOBJ(e.detail.file)
+        const geometry = new Geometry(vertices,indices,new Material([1., 0., 0.], [1., 0., 0.], [1., 0., 0.], 1))
+        scene.addComponent(activeObj,geometry)
+        
+        renderer.initGeometry(geometry)
+        console.log(activeObj.getComponent("Geometry"))
     })
-
     return propertiesWindow;
 }

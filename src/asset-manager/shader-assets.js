@@ -1,4 +1,3 @@
-
 export const testVert = `#version 300 es
 precision mediump float;
 
@@ -13,19 +12,23 @@ uniform vec3 lightPosition;
 out vec3 vNormal;
 out vec3 vViewPosition;
 out vec3 vWorldPosition;
-out vec3 vLightDirection; 
+out vec3 vLightDirection;
 
 void main(void) {
+    // Transform position to world space
     vec4 worldPosition = mWorld * vec4(a_position, 1.0);
     vWorldPosition = worldPosition.xyz;
 
+    // Transform to view space for lighting calculations
     vec4 viewPosition = mView * worldPosition;
     vViewPosition = viewPosition.xyz;
  
-    vNormal = mat3(mWorld) * a_normal;
+    // Transform normal to world space for lighting
+    vNormal = normalize(mat3(mWorld) * a_normal);
 
-    vec4 lightViewPosition =  vec4(lightPosition, 1.0);
-    vLightDirection = lightViewPosition.xyz ;
+    // Calculate light direction in view space
+    vec4 lightViewPosition = mView * vec4(lightPosition, 1.0);
+    vLightDirection = normalize(lightViewPosition.xyz - viewPosition.xyz);
  
     gl_Position = mProj * viewPosition;
 }    
@@ -46,27 +49,32 @@ uniform float shininess;
 layout(location=0) out vec4 outColor;
 
 void main(void) {
-    // Normalize the normal and light direction
+    // Normalize vectors for lighting calculations
     vec3 N = normalize(vNormal);
     vec3 L = normalize(vLightDirection);
-    vec3 V = normalize(-vViewPosition); // View direction is opposite of view position
-    vec3 H = normalize(L + V); // Halfway vector
+    vec3 V = normalize(-vViewPosition);
+    vec3 H = normalize(L + V);
     
-    // Ambient component
-    vec3 ambient = ambientColor * (0.8 * diffuseColor);
-    
-    // Diffuse component
+    // Calculate lighting components
     float NdotL = max(dot(N, L), 0.0);
+    float NdotH = max(dot(N, H), 0.0);
+    
+    // Ambient with improved intensity
+    vec3 ambient = ambientColor * (0.5 + 0.5 * NdotL) * diffuseColor;
+    
+    // Diffuse with improved falloff
     vec3 diffuse = NdotL * diffuseColor;
     
-    // Specular component
-    float NdotH = max(dot(N, H), 0.0);
-    vec3 specular = pow(NdotH, shininess) * specularColor;
+    // Specular with improved falloff and fresnel-like effect
+    float specularIntensity = pow(NdotH, shininess) * (1.0 - NdotL * 0.5);
+    vec3 specular = specularIntensity * specularColor;
     
-    // Combine all components
+    // Combine components with improved balance
     vec3 finalColor = ambient + diffuse + specular;
     
-    // Output the final color
+    // Gamma correction for better visual quality
+    finalColor = pow(finalColor, vec3(0.4545));
+    
     outColor = vec4(finalColor, 1.0);
 }
 `
