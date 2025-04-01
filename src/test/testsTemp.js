@@ -5,7 +5,7 @@ import { arrow } from "./editor-assets";
 import { DebugLine, Geometry, Script } from "../ecs/component-classes";
 import { Transformation } from "../ecs/classes";
 import { glMatrix, mat4 } from "gl-matrix";
-import { MouseEvent } from "../event-handler/event-handler";
+import { EventHandler } from "../event-handler/event-handler";
 import { DebugSystem } from "../gpu/debug-graphics/debug-helper";
 import { Renderer } from "../gpu/renderer/renderer";
 import { ScriptSystem } from "../script-system/script-system";
@@ -223,7 +223,7 @@ drawGrid(lineObj, 15, 0.5);
 //    console.log(pickingSystem.readColor(x, y));
 //});
 
-const mouseEvents = new MouseEvent(canvas);
+const mouseEvents = new EventHandler(canvas);
 const tempCamera = gameScene.activeCamera;
 editorScene.activeCamera = gameScene.activeCamera;
 

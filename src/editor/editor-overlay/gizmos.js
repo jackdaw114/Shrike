@@ -76,11 +76,11 @@ export const createEditorGizmos = async (engine, editor, scene) => {
                     console.log("transformation",editor.activeObjects[0].getComponent("Transformation"))
                     break;
                 case moveGizmo.y.entity.id:
-                    editor.activeObjects[0].getComponent("Transformation").translate(0, 0, dispX / RATE)
+                    editor.activeObjects[0].getComponent("Transformation").translate(0, dispX / RATE,0)
                     console.log("transformation",editor.activeObjects[0].getComponent("Transformation"))
                     break;
                 case moveGizmo.z.entity.id:
-                    editor.activeObjects[0].getComponent("Transformation").translate(0,-dispY / RATE, 0)
+                    editor.activeObjects[0].getComponent("Transformation").translate(0,0,-dispY / RATE)
                     console.log("transformation",editor.activeObjects[0].getComponent("Transformation"))
                     break;
             }
@@ -96,6 +96,6 @@ export const createEditorGizmos = async (engine, editor, scene) => {
 const updateAxis = (deltaTime, components, scene) => {
     const camera = scene.getCamera()
     const dist = camera.dist(Object.values(components.Transformation[0].position))
-    const scaleFactor = dist / 10
+    const scaleFactor = dist / 12
     components.Transformation[0].setScale(scaleFactor, scaleFactor, scaleFactor)
 }

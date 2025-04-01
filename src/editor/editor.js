@@ -2,7 +2,7 @@ import { Shrike } from "../core/core";
 import { parseOBJ } from "../../lib/parse-obj";
 import { DebugLine, Geometry, Script } from "../ecs/component-classes";
 import { Transformation } from "../ecs/classes";
-import { MouseEvent } from "../event-handler/event-handler";
+import { EventHandler } from "../event-handler/event-handler";
 import { DebugSystem } from "../gpu/debug-graphics/debug-helper";
 import { Renderer } from "../gpu/renderer/renderer";
 import { ScriptSystem } from "../script-system/script-system";
@@ -29,6 +29,7 @@ export class Editor {
     cannonMaxSubSteps = 5;
     isNavigating = false;
     gizmos = null;
+    eventHandler;
 
     constructor(canvas, gameSpeed, width, height) {
         this.canvas = canvas;
@@ -38,6 +39,7 @@ export class Editor {
         this.gameSpeed = gameSpeed;
         this.engine = new Shrike(canvas, width, height);
         this.editorOverlays = {};
+        this.eventHandler = new EventHandler(canvas);
         this.initSystems();
         this.initEditor();
         this.editorCameraSetup();
@@ -95,11 +97,13 @@ export class Editor {
         );
         this.scriptSystem = this.engine.createSystem(
             ScriptSystem,
-            this.gameScene
+            this.gameScene,
+            this.eventHandler
         );
         this.editorScriptSystem = this.engine.createSystem(
             ScriptSystem,
-            this.editorScene
+            this.editorScene,
+            this.eventHandler
         );
         this.editorScriptSystem.start()
         this.gameScenePickingSystem = this.engine.createSystem(
@@ -225,7 +229,6 @@ export class Editor {
     }
 
     initEventListeners() {
-        this.mouseEvent = new MouseEvent(this.canvas);
         this.canvas.addEventListener("picker-selection", (e) => {
             switch (e.detail.scene) {
                 case this.editorScene:
@@ -365,6 +368,14 @@ export class Editor {
         callback();
     }
 
+    toggleRunGame() {
+        if (this.scriptSystem.isStarted) {
+            this.scriptSystem.pause()
+        } else {
+            this.scriptSystem.start()
+        }
+    }
+
     initWidgets() {
         this.transformationWindow = createTransformationWindow(this,this.SGui,this.canvas)
         this.sceneGraphWindow = createSceneGraphWindow(this.canvas,this.engine,this.SGui,this.gameScene)
@@ -372,7 +383,10 @@ export class Editor {
         this.menuBar = createMenuBar(this, this.canvas, this.SGui);
         this.propertiesWindow = createPropertiesWindow(this.SGui,this.activeObjects,this.gameScene,this.gameRenderer)
     }
+
+    destroy() {
+        if (this.eventHandler) {
+            this.eventHandler.destroy();
+        }
+    }
 }
-
-
-

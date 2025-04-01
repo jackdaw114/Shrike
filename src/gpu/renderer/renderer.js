@@ -241,16 +241,10 @@ export class Renderer extends System {
             .getMatrix();
 
         const camera = this.scene.getCamera();
-        let viewMatrix = this.scene.getCamera().matrix;
-        let projMatrix = camera.getProjMatrix();
+        const viewMatrix = camera.matrix;
+        const projMatrix = camera.getProjMatrix();
 
-        // Update matrices
-        this.#context.uniformMatrix4fv(
-            this.shader.getUniform("mWorld"),
-            false,
-            worldMatrix
-        );
-
+        // Update matrices in correct order (P * V * M)
         this.#context.uniformMatrix4fv(
             this.shader.getUniform("mProj"),
             false,
@@ -260,6 +254,11 @@ export class Renderer extends System {
             this.shader.getUniform("mView"),
             false,
             viewMatrix
+        );
+        this.#context.uniformMatrix4fv(
+            this.shader.getUniform("mWorld"),
+            false,
+            worldMatrix
         );
 
         // Get material properties
@@ -294,11 +293,11 @@ export class Renderer extends System {
         );
 
         // Update light position in world space
-        const lightPos = camera.position;
         this.#context.uniform3fv(
             this.shader.getUniform("lightPosition"),
-            lightPos
+            camera.position
         );
+        console.log("lightPosition",camera.position)
 
         // Draw the mesh
         this.#context.drawElements(

@@ -27,7 +27,7 @@ void main(void) {
     vNormal = normalize(mat3(mWorld) * a_normal);
 
     // Calculate light direction in view space
-    vec4 lightViewPosition = mView * vec4(lightPosition, 1.0);
+    vec4 lightViewPosition =  vec4(lightPosition, 1.0);
     vLightDirection = normalize(lightViewPosition.xyz - viewPosition.xyz);
  
     gl_Position = mProj * viewPosition;

@@ -11,7 +11,8 @@ export const createMenuBar = (editor,element,sgui) => {
     const menuBar = {};
     menuBar.mainWindow = sgui.createWindow("Menu Bar",true)
     menuBar.buttons = {
-        transformationWidgetToggle: new SGuiButton(element,{})
+        transformationWidgetToggle: new SGuiButton(element,{}),
+        toggleRunGame: new SGuiButton(element,{})
     };
     menuBar.mainWindow.append(...Object.values(menuBar.buttons))
     element.addEventListener("sgui-button-click", (e)=>{
@@ -25,6 +26,9 @@ export const createMenuBar = (editor,element,sgui) => {
                     editor.engine.compositor.addFramebuffer(editor.editorGizmoRenderer.framebuffer,{priority:0})
                     editor.editorOverlays.editorGizmoRenderer.active = true;
                 }
+                break;
+            case menuBar.buttons.toggleRunGame:
+                editor.toggleRunGame()
                 break;
             default:
                 console.log("not a valid  button")

@@ -221,9 +221,9 @@ export class Transformation extends Component {
         this.updateMatrix()
     }
     updateRotation(){
-        quat.fromEuler(this.quaternion,this.rotation.x,this.rotation.y,this.rotation.z)
+        quat.fromEuler(this.quaternion,this.rotation.x,this.rotation.z,this.rotation.y)
     }
     updateMatrix() {
-        mat4.fromRotationTranslationScale(this.matrix, this.quaternion, vec3.fromValues(this.position.x, this.position.y, this.position.z), vec3.fromValues(this.scale.x, this.scale.y, this.scale.z))
+        mat4.fromRotationTranslationScale(this.matrix, this.quaternion, vec3.fromValues(this.position.x, this.position.z, this.position.y), vec3.fromValues(this.scale.x, this.scale.z, this.scale.y))
     }
 }

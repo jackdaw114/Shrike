@@ -1,4 +1,4 @@
-export class MouseEvent {
+export class EventHandler {
     DRAG_THRESHOLD = 20
     constructor(element) {
         this.element = element;

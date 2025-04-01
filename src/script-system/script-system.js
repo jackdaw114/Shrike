@@ -1,9 +1,11 @@
 import { System } from "../ecs/classes";
 
 export class ScriptSystem extends System {
-    constructor(scene) {
+    constructor(scene,eventHandler) {
         super(scene);
         this.isStarted = false
+        this.eventHandler = eventHandler
+        console.log("eventHandler", eventHandler)
     }
     init() {
         if (!this.scene.componentRegister.hasOwnProperty("Script")) {
@@ -17,11 +19,10 @@ export class ScriptSystem extends System {
         }
     }
     update(deltaTime) { // event data access 
-        if (!this.isStarted) {
-            return
-        }
+        if (!this.scene.componentRegister.hasOwnProperty("Script")) return;
+        if (!this.isStarted) return;
         for (const script of this.scene.componentRegister["Script"]) {
-            script.update(deltaTime,script.entity.components,this.scene);
+            script.update(deltaTime,script.entity.components,this.scene,this.eventHandler.activeKeys);
         }
     }
     start() {
