@@ -11,8 +11,16 @@ export const createMenuBar = (editor,element,sgui) => {
     const menuBar = {};
     menuBar.mainWindow = sgui.createWindow("Menu Bar",true)
     menuBar.buttons = {
-        transformationWidgetToggle: new SGuiButton(element,{}),
-        toggleRunGame: new SGuiButton(element,{})
+        transformationWidgetToggle: new SGuiButton(element,{
+            icon: "M3,3H21V21H3V3M5,5V19H19V5H5M7,7H17V9H7V7M7,11H17V13H7V11M7,15H13V17H7V15Z",
+            iconSize: 20,
+            customClasses: ["menu-bar-button"]
+        }),
+        toggleRunGame: new SGuiButton(element,{
+            icon: "M8,5.14V19.14L19,12.14L8,5.14Z",
+            iconSize: 20,
+            customClasses: ["menu-bar-button"]
+        })
     };
     menuBar.mainWindow.append(...Object.values(menuBar.buttons))
     element.addEventListener("sgui-button-click", (e)=>{

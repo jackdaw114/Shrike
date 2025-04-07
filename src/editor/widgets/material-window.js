@@ -147,7 +147,6 @@ export const createMaterialWindow = (editor, sgui, canvas) => {
             display: flex;
             flex-direction: column;
             gap: 12px;
-            padding: 12px;
             background-color: #1a222b;
         }
         .color-picker-container {
