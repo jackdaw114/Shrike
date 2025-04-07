@@ -151,6 +151,11 @@ function updateSceneGraphWindow(sceneGraphWindow,selectionWindow,scene) {
                     scene.addComponent(entity.entity,geometry)
                     scene.addComponent(entity.entity,transformation)
                     update()
+                    document.dispatchEvent(new CustomEvent("refresh-properties",{
+                        detail: {
+                            entity: entity.entity
+                        }
+                    }))
                     break;
                 case "collider":
                     if (dropDown.collider) break;
@@ -160,6 +165,11 @@ function updateSceneGraphWindow(sceneGraphWindow,selectionWindow,scene) {
                     dropDown.collider = collider 
                     scene.addComponent(entity.entity,collider)  
                     update()
+                    document.dispatchEvent(new CustomEvent("refresh-properties",{
+                        detail: {
+                            entity: entity.entity
+                        }
+                    }))
                     break;
                 case "script":
                     if (dropDown.script) break;
@@ -169,6 +179,11 @@ function updateSceneGraphWindow(sceneGraphWindow,selectionWindow,scene) {
                     dropDown.script = script 
                     scene.addComponent(entity.entity,script)  
                     update()
+                    document.dispatchEvent(new CustomEvent("refresh-properties",{
+                        detail: {
+                            entity: entity.entity
+                        }
+                    }))
                     break;
             } 
         })

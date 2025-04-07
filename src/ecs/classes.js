@@ -98,6 +98,35 @@ export class Scene {
        // }
     }
 
+    removeComponent(entity, component) {
+        const componentClass = component.constructor.name;
+        
+        // Remove from entity's components
+        if (entity.components[componentClass]) {
+            const index = entity.components[componentClass].indexOf(component);
+            if (index !== -1) {
+                entity.components[componentClass].splice(index, 1);
+                if (entity.components[componentClass].length === 0) {
+                    delete entity.components[componentClass];
+                }
+            }
+        }
+
+        // Remove from component register
+        if (this.componentRegister[componentClass]) {
+            const registerIndex = this.componentRegister[componentClass].indexOf(component);
+            if (registerIndex !== -1) {
+                this.componentRegister[componentClass].splice(registerIndex, 1);
+                if (this.componentRegister[componentClass].length === 0) {
+                    delete this.componentRegister[componentClass];
+                }
+            }
+        }
+
+        // Clear component's entity reference
+        component.entity = null;
+    }
+
     removeComponents(entity) {
         Object.entries(entity.components).forEach(([key, value]) => {
             const list = this.componentRegister.get(key);
