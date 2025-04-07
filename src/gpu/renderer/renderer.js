@@ -56,6 +56,7 @@ export class Renderer extends System {
             "shininess",
             "ambientColor",
             "lightPosition",
+            "viewPos"
         ]);
 
         // Set up default lighting parameters
@@ -297,7 +298,12 @@ export class Renderer extends System {
             this.shader.getUniform("lightPosition"),
             camera.position
         );
-        console.log("lightPosition",camera.position)
+
+        // Update view position (camera position)
+        this.#context.uniform3fv(
+            this.shader.getUniform("viewPos"),
+            camera.position
+        );
 
         // Draw the mesh
         this.#context.drawElements(

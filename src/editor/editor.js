@@ -22,6 +22,7 @@ import Camera from "../ecs/camera";
 import { createTransformationWindow } from "./widgets/transformation-window";
 import {createSceneGraphWindow} from "./widgets/scene-graph";
 import {createPropertiesWindow} from "./widgets/properties-window";
+import { createMaterialWindow } from "./widgets/material-window";
 
 export class Editor {
     activeObjects = [];
@@ -138,20 +139,6 @@ export class Editor {
     }
     sguiSetup() {
         this.SGui = new SGui();
-        this.materialWindow = {
-            mainWindow: this.SGui.createWindow("Material", true),
-            r: new SGuiSlider( this.canvas,{ value: 0, max: 255 }),
-            g: new SGuiSlider( this.canvas,{ value: 0, max: 255 }),
-            b: new SGuiSlider( this.canvas,{ value: 0, max: 255 }),
-            diffusePanel: new SGuiContainer({ heading: "diffuse color:" }),
-            colorPicker: new SGuiColorPicker(this.canvas ,{}),
-        };
-        this.materialWindow.diffusePanel.append(
-            this.materialWindow.r,
-            this.materialWindow.g,
-            this.materialWindow.b,
-            this.materialWindow.colorPicker
-        );
     }
 
     editorCameraSetup() {
@@ -252,62 +239,7 @@ export class Editor {
                 this.isNavigating = false;
             }
         });
-        this.canvas.addEventListener("select-object", (e) => {
 
-            //this.materialWindow.diffusePanel.appendChild(this.materialWindow.r)
-            this.materialWindow.mainWindow.appendChild(
-                this.materialWindow.diffusePanel
-            );
-
-        });
-
-        this.canvas.addEventListener("slider-change", (e) => {
-            console.log(e)
-            switch (e.detail.id) {
-                case this.materialWindow.r.id:
-                    this.materialWindow.colorPicker.iroRef.color.rgb = {
-                        r: e.detail.value,
-                        g: this.materialWindow.g.getValue(),
-                        b: this.materialWindow.b.getValue(),
-                    };
-                    break;
-                case this.materialWindow.g.id:
-                    this.materialWindow.colorPicker.iroRef.color.rgb = {
-                        r: this.materialWindow.r.getValue(),
-                        g: e.detail.value,
-                        b: this.materialWindow.b.getValue(),
-                    };
-                    break;
-                case this.materialWindow.b.id:
-                    this.materialWindow.colorPicker.iroRef.color.rgb = {
-                        r: this.materialWindow.r.getValue(),
-                        g: this.materialWindow.g.getValue(),
-                        b: e.detail.value,
-                    };
-                    break;
-                default:
-                    console.log("invalid window id:", e.detail.id);
-                    break;
-            }
-        });
-        this.canvas.addEventListener("color-change", (e) => {
-            switch (e.detail.id) {
-                case this.materialWindow.colorPicker.id:
-                    this.activeObjects[0].getComponent(
-                        "Geometry"
-                    ).material.diffuseColor = [
-                        e.detail.rgb.r,
-                        e.detail.rgb.g,
-                        e.detail.rgb.b,
-                    ].map((val) => val / 255);
-                    this.materialWindow.r.setValue(e.detail.rgb.r);
-                    this.materialWindow.g.setValue(e.detail.rgb.g);
-                    this.materialWindow.b.setValue(e.detail.rgb.b);
-                    break;
-                default:
-                    console.log("unknown color picker id: ", e.detail.id);
-            }
-        });
         this.canvas.addEventListener("file-drop", async (e) => {
             const geometry = await parseOBJ(e.detail.content);
             this.addGameObject({
@@ -339,16 +271,6 @@ export class Editor {
         }
     }
 
-    updateActiveMaterial(diffuseColor, ambientColor, specularColor, shininess) {
-        if (this.activeObjects.length === 1) {
-            this.activeObjects[0].getComponent("Geometry").materialOptions({
-                diffuseColor,
-                ambientColor,
-                specularColor,
-                shininess,
-            });
-        }
-    }
 
     start() {
         this.engine.compositor.addFramebuffer(
@@ -375,6 +297,16 @@ export class Editor {
             this.scriptSystem.start()
         }
     }
+    ipdateActiveMaterial(diffuseColor, ambientColor, specularColor, shininess) {
+        if (this.activeObjects.length === 1) {
+            this.activeObjects[0].getComponent("Geometry").materialOptions({
+                diffuseColor,
+                ambientColor,
+                specularColor,
+                shininess,
+            });
+        }
+    }
 
     initWidgets() {
         this.transformationWindow = createTransformationWindow(this,this.SGui,this.canvas)
@@ -382,6 +314,7 @@ export class Editor {
         this.resourceWindow = createResourceWindow(this.canvas, this.SGui);
         this.menuBar = createMenuBar(this, this.canvas, this.SGui);
         this.propertiesWindow = createPropertiesWindow(this.SGui,this.activeObjects,this.gameScene,this.gameRenderer)
+        this.materialWindow = createMaterialWindow(this,this.SGui,this.canvas)
     }
 
     destroy() {
