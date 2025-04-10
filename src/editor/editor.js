@@ -33,6 +33,7 @@ export class Editor {
     isNavigating = false;
     gizmos = null;
     eventHandler;
+    isGameRunning = false;
 
     constructor(canvas, gameSpeed, width, height) {
         this.canvas = canvas;
@@ -258,6 +259,11 @@ export class Editor {
         this.canvas.ondragover = function (e) {
             return false;
         };
+
+        document.addEventListener("set-active-object", (e)=>{
+            this.activeObjects = [e.detail.entity]
+            console.log("active objects",this.activeObjects)
+        })
     }
 
     addEditorObject(objectInfo) {
@@ -300,6 +306,7 @@ export class Editor {
     }
 
     toggleRunGame() {
+        this.isGameRunning = !this.isGameRunning;
         if (this.scriptSystem.isStarted) {
             this.scriptSystem.pause()
             this.cannonPhysicsSystem.stop()
