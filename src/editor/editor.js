@@ -259,6 +259,11 @@ export class Editor {
         this.canvas.ondragover = function (e) {
             return false;
         };
+
+        document.addEventListener("set-active-object", (e)=>{
+            this.activeObjects = [e.detail.entity]
+            console.log("active objects",this.activeObjects)
+        })
     }
 
     addEditorObject(objectInfo) {
