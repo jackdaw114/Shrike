@@ -97,9 +97,8 @@ export class PhysicsSystem extends System {
 
     update(deltaTime) {
         if (!this.isRunning) return;
-
         // Step the physics world
-        this.world.step(this.fixedTime, deltaTime, this.maxSubSteps);
+        this.world.step(this.fixedTime, deltaTime/60, this.maxSubSteps);
 
         // Update entity transformations based on physics bodies
         for (const [entityId, body] of this.bodies) {

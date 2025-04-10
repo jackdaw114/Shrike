@@ -174,21 +174,23 @@ export const createPhysicsWindow = (editor, sgui) => {
 
     // Add event listeners for world settings
     physicsWindow.gravity.x.addEventListener('change', (e) => {
-        const physicsSystem = editor.gameScene.getSystem("PhysicsSystem");
+        const physicsSystem = editor.cannonPhysicsSystem;
+        
         if (physicsSystem) {
             physicsSystem.world.gravity.x = parseFloat(e.target.value);
         }
     });
 
     physicsWindow.gravity.y.addEventListener('change', (e) => {
-        const physicsSystem = editor.gameScene.getSystem("PhysicsSystem");
+        const physicsSystem = editor.cannonPhysicsSystem;
+        console.log(physicsSystem)
         if (physicsSystem) {
             physicsSystem.world.gravity.y = parseFloat(e.target.value);
         }
     });
 
     physicsWindow.gravity.z.addEventListener('change', (e) => {
-        const physicsSystem = editor.gameScene.getSystem("PhysicsSystem");
+        const physicsSystem = editor.cannonPhysicsSystem;
         if (physicsSystem) {
             physicsSystem.world.gravity.z = parseFloat(e.target.value);
         }
