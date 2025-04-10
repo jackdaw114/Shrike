@@ -33,6 +33,7 @@ export class Editor {
     isNavigating = false;
     gizmos = null;
     eventHandler;
+    isGameRunning = false;
 
     constructor(canvas, gameSpeed, width, height) {
         this.canvas = canvas;
@@ -300,6 +301,7 @@ export class Editor {
     }
 
     toggleRunGame() {
+        this.isGameRunning = !this.isGameRunning;
         if (this.scriptSystem.isStarted) {
             this.scriptSystem.pause()
             this.cannonPhysicsSystem.stop()

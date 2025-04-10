@@ -49,6 +49,7 @@ export const createMenuBar = (editor,element,sgui) => {
                 const iconContainer = menuBar.buttons.toggleRunGame.querySelector('.sgui-button-icon');
                 console.log(iconContainer)
                 if (iconContainer) {
+                    console.log("is running?",editor.isGameRunning)
                     iconContainer.innerHTML = editor.isGameRunning ? pauseIcon : playIcon;
                 }
                 break;
