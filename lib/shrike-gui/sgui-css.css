@@ -1,4 +1,3 @@
-
 /* floating window styling */
 
 *{
@@ -298,6 +297,61 @@
 
 .sgui-button{
     margin: 0.5em;
+    padding: 0.1em;
     height: 2em;
     width: 2em;
 }
+
+.sgui-button-icon{
+    font-size: 1.5em;
+    padding: 0;
+    margin: 0;
+}
+
+.sgui-list {
+    list-style: none;
+    margin: 0;
+    padding: 0.8rem;
+    background-color: #212730;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.sgui-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sgui-list::-webkit-scrollbar-track {
+    background: #1a222b;
+    border-radius: 3px;
+}
+
+.sgui-list::-webkit-scrollbar-thumb {
+    background: #364150;
+    border-radius: 3px;
+}
+
+.sgui-list::-webkit-scrollbar-thumb:hover {
+    background: #445267;
+}
+
+.sgui-list li {
+    padding: 0.5rem;
+    margin-bottom: 0.2rem;
+    background-color: #2a3441;
+    border-radius: 0.3rem;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+    color: #fff;
+}
+
+.sgui-list li:hover {
+    background-color: #364150;
+}
+
+.sgui-list li:active {
+    background-color: #445267;
+}
+

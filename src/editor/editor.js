@@ -23,6 +23,7 @@ import { createTransformationWindow } from "./widgets/transformation-window";
 import {createSceneGraphWindow} from "./widgets/scene-graph";
 import {createPropertiesWindow} from "./widgets/properties-window";
 import { createMaterialWindow } from "./widgets/material-window";
+import { createPhysicsWindow } from "./widgets/physics-window";
 
 export class Editor {
     activeObjects = [];
@@ -51,6 +52,9 @@ export class Editor {
 
     async init() {
         this.gizmos = await createEditorGizmos(this.engine, this, this.editorScene);
+        this.propertiesWindow = createPropertiesWindow(this.SGui,this.activeObjects,this.gameScene,this.gameRenderer)
+        this.materialWindow = createMaterialWindow(this,this.SGui,this.canvas)
+        this.physicsWindow = createPhysicsWindow(this, this.SGui)
     }
 
     initSystems() {
@@ -315,6 +319,7 @@ export class Editor {
         this.menuBar = createMenuBar(this, this.canvas, this.SGui);
         this.propertiesWindow = createPropertiesWindow(this.SGui,this.activeObjects,this.gameScene,this.gameRenderer)
         this.materialWindow = createMaterialWindow(this,this.SGui,this.canvas)
+        this.physicsWindow = createPhysicsWindow(this, this.SGui)
     }
 
     destroy() {

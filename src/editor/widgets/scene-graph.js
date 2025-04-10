@@ -5,6 +5,8 @@ import SGuiText from "../../../lib/shrike-gui/child-elements/text";
 import { Shrike } from "../../core/core";
 import {Transformation} from "../../ecs/classes";
 import {Geometry, Script} from "../../ecs/component-classes";
+import { PhysicsBody } from "../../ecs/component-classes/physics-body";
+import CANNON from "cannon";
 
 /**
  *
@@ -13,7 +15,7 @@ import {Geometry, Script} from "../../ecs/component-classes";
  * @param {*} sgui
  * @returns
  */
-export const createSceneGraphWindow = (element, engine, sgui,scene) => {
+export const createSceneGraphWindow = (element, engine, sgui, scene) => {
     const sceneGraphWindow = {};
     const sceneGraph = {};
     sceneGraphWindow.mainWindow = sgui.createWindow("Scene", true);
@@ -52,7 +54,7 @@ export const createSceneGraphWindow = (element, engine, sgui,scene) => {
                     name:e.detail.name
                 })
                 updateSceneGraphWindow(sceneGraphWindow,selectionWindow,scene)
-            
+                break;
         }
     })
 
@@ -69,28 +71,24 @@ function createSelectionWindow(sgui) {
     const tempList = [
         {
             name: "node",
-            func: () => {
-                
-            }
+            func: () => {}
         },
         {
             name: "geometry",
-            func: () => {
-
-            }
+            func: () => {}
         },
         {
             name: "script",
-            func: () => {
-
-            }
+            func: () => {}
         },
         {
-            name: "collider",
-            func: () => {
-
-            }
+            name: "physics-object",
+            func: () => {}
         },
+        {
+            name: "physics-body",
+            func: () => {}
+        }
     ];
     const list = new SGuiList() 
     tempList.forEach(item=>{
@@ -112,7 +110,7 @@ function createSelectionWindow(sgui) {
     return selectionWindow
 }
 
-function updateSceneGraphWindow(sceneGraphWindow,selectionWindow,scene) {
+function updateSceneGraphWindow(sceneGraphWindow, selectionWindow, scene) {
     sceneGraphWindow.listRoot.innerHTML = ""  // TODO: check if events are being discarded here
     for (const entity of sceneGraphWindow.entities) {
         const dropDown = new SGuiDropDown({heading:entity.entity.name}) 
@@ -122,17 +120,18 @@ function updateSceneGraphWindow(sceneGraphWindow,selectionWindow,scene) {
         let update = () => {
             dropDown.contentDiv.innerHTML = ""
             for (const component in entity.entity.components){
-            const entry = new SGuiText({text:component})
-            entry.className = component
-            dropDown.appendChild(entry)
-            entry.ondblclick = (e) => {
-                document.dispatchEvent(new CustomEvent("set-active-object",{
-                    detail: {
-                        entity:dropDown.entity
-                    }
-                }))
+                const entry = new SGuiText({text:component})
+                entry.className = component
+                dropDown.appendChild(entry)
+                entry.ondblclick = (e) => {
+                    document.dispatchEvent(new CustomEvent("set-active-object",{
+                        detail: {
+                            entity:dropDown.entity
+                        }
+                    }))
+                }
             }
-        }}
+        }
         update()
         dropDown.toggleDiv.ondblclick = () => {
             selectionWindow.open()
@@ -149,6 +148,7 @@ function updateSceneGraphWindow(sceneGraphWindow,selectionWindow,scene) {
                     const transformation = new Transformation()
                     dropDown.geometry = geometry 
                     scene.addComponent(entity.entity,geometry)
+                    if(!entity.entity.components.Transformation)
                     scene.addComponent(entity.entity,transformation)
                     update()
                     document.dispatchEvent(new CustomEvent("refresh-properties",{
@@ -157,13 +157,18 @@ function updateSceneGraphWindow(sceneGraphWindow,selectionWindow,scene) {
                         }
                     }))
                     break;
-                case "collider":
-                    if (dropDown.collider) break;
-                    const collider = new Collider(
-                        [],[]
-                    )
-                    dropDown.collider = collider 
-                    scene.addComponent(entity.entity,collider)  
+                case "physics-body":
+                    const body = new PhysicsBody({
+                        mass: 1,
+                        position: new CANNON.Vec3(0, 0, 0),
+                        shape: new CANNON.Box(new CANNON.Vec3(1, 1, 1)),
+                        material: new CANNON.Material("physicsMaterial"),
+                        linearDamping: 0.01,
+                        angularDamping: 0.01
+                    });
+                    scene.addComponent(entity.entity, body);
+                    if(!entity.entity.components.Transformation)
+                        scene.addComponent(entity.entity, new Transformation());
                     update()
                     document.dispatchEvent(new CustomEvent("refresh-properties",{
                         detail: {

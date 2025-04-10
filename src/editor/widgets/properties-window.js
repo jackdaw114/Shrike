@@ -4,6 +4,7 @@ import SGuiFilePanel from "../../../lib/shrike-gui/child-elements/file-panel";
 import { Geometry } from "../../ecs/component-classes";
 import { Material } from "../../material/material";
 import { Script } from "../../ecs/component-classes";
+import SGuiText from "../../../lib/shrike-gui/child-elements/text";
 
 export const createPropertiesWindow = (sgui, object,scene,renderer) => {
     const propertiesWindow = {};
@@ -12,7 +13,7 @@ export const createPropertiesWindow = (sgui, object,scene,renderer) => {
     
     // Data structure to store entity objects for all entities
     propertiesWindow.entityObjects = new Map(); // Map<entityId, {Geometry: null, Script: null, files: {Script: File, Geometry: File}}>
-    
+    propertiesWindow.PhysicsBody = new SGuiText({text:"TODO: Physics settings"}) 
     propertiesWindow.object = object;
     propertiesWindow.components = [];
     document.addEventListener("set-active-object", (e) => {
