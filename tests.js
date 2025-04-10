@@ -18,7 +18,7 @@ const CANVAS_HEIGHT = (canvas.height = window.innerHeight * scale);
 const aspectRatio = CANVAS_WIDTH / CANVAS_HEIGHT;
 
 async function initEditor() {
-    const editor = new Editor(canvas, scale, CANVAS_WIDTH, CANVAS_HEIGHT);
+    const editor = new Editor(canvas, 1/60, CANVAS_WIDTH, CANVAS_HEIGHT);
     await editor.init();
     editor.start();
 }

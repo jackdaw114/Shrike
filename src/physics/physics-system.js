@@ -8,7 +8,7 @@ export class PhysicsSystem extends System {
         
         // Default physics world options
         this.defaultOptions = {
-            gravity: new CANNON.Vec3(0, 0, -9.82),
+            gravity: new CANNON.Vec3(0, 0, -9.81),
             broadphase: new CANNON.NaiveBroadphase(),
             allowSleep: true,
             sleepSpeedLimit: 0.01,
@@ -103,22 +103,18 @@ export class PhysicsSystem extends System {
 
         // Update entity transformations based on physics bodies
         for (const [entityId, body] of this.bodies) {
-            const entity = this.scene.getEntity(entityId);
-            if (!entity) continue;
+            const entity = this.scene.getEntityById(entityId);
+            if (!entity) 
+                continue;
 
             const transform = entity.getComponent("Transformation");
-            if (!transform) continue;
-
+            if (!transform) 
+                continue;
+            console.log(body.position)
             // Update position
-            transform.setPosition(body.position.x, body.position.y, body.position.z);
+            transform.setPosition(body.position);
             
             // Update rotation
-            transform.setRotation(
-                body.quaternion.x,
-                body.quaternion.y,
-                body.quaternion.z,
-                body.quaternion.w
-            );
         }
     }
 

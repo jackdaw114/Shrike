@@ -29,7 +29,7 @@ export class CannonRenderer extends System {
     /**
      * @param {WebGL2RenderingContext} canvas
      */
-    constructor(scene, context,framebuffer, aspect_ratio, width, height) {
+    constructor(scene, context,framebuffer,physicsSystem, aspect_ratio, width, height) {
         super(scene);
 
         this.aspect_ratio = aspect_ratio;
@@ -40,7 +40,7 @@ export class CannonRenderer extends System {
         this.#context.enable(this.#context.CULL_FACE);
         this.#context.frontFace(this.#context.CCW);
         this.#context.cullFace(this.#context.BACK);
-
+        this.physicsSystem = physicsSystem
         this.sphereVAOID = this.#context.createVertexArray();
         this.sphereVBOID = this.#context.createBuffer();
 
@@ -122,8 +122,21 @@ export class CannonRenderer extends System {
             }
         }
     }
+    initializeBody(body){
+        this.physicsSystem.addBody(body.entity,body.body)
+    }
+    render(body){
+        this.#context.drawElements(
+            this.#context.LINE_LOOP,
+            this.sphereShape.indices.length,
+            this.#context.UNSIGNED_SHORT,
+            0
+        );
 
+    }
     update(deltaTime) {
+        if (!this.scene.componentRegister.hasOwnProperty("PhysicsBody")) return;
+        this.shader.use();
         this.#context.bindFramebuffer(
             this.#context.FRAMEBUFFER,
             this.framebuffer.fbo
@@ -134,34 +147,18 @@ export class CannonRenderer extends System {
             this.framebuffer.width,
             this.framebuffer.height
         );
-
-        // Use the shader program first
-        this.shader.use();
         
         // Then bind VAO and EBO
         this.#context.bindVertexArray(this.sphereVAOID);
         this.#context.bindBuffer(this.#context.ELEMENT_ARRAY_BUFFER, this.sphereEBOID);
-
         let identityMatrix = new Float32Array(16);
         mat4.identity(identityMatrix);
 
-        let worldMatrix = mat4.create();
+        const camera = this.scene.getCamera();
+        const viewMatrix = camera.matrix;
+        const projMatrix = camera.getProjMatrix();
 
-        let viewMatrix = this.scene.getCamera().matrix;
-        let projMatrix = new Float32Array(16);
-        mat4.perspective(
-            projMatrix,
-            glMatrix.toRadian(45),
-            this.aspect_ratio,
-            0.1, // get from camera
-            1000.0 // get from camera
-        );
 
-        this.#context.uniformMatrix4fv(
-            this.shader.getUniform("mWorld"),
-            false,
-            identityMatrix
-        );
 
         this.#context.uniformMatrix4fv(
             this.shader.getUniform("mProj"),
@@ -179,10 +176,19 @@ export class CannonRenderer extends System {
             this.#context.UNSIGNED_SHORT,
             0
         );
+        for (const body of this.scene.componentRegister["PhysicsBody"]){
+            if (!body.initialized)
+                this.initializeBody(body)
+
+            let worldMatrix = body.entity
+                .getComponent("Transformation")
+                .getMatrix();
+            this.#context.uniformMatrix4fv(
+                this.shader.getUniform("mWorld"),
+                false,
+                worldMatrix
+            );
+            this.render(body)
+        }
     }
-   // update(deltaTime) {
-   //     for (const body of this.scene.systems["CannonPhysicsSystem"].world.bodies) {
-   //         console.log("body",body)
-   //     }
-   // }
 }

@@ -24,6 +24,7 @@ import {createSceneGraphWindow} from "./widgets/scene-graph";
 import {createPropertiesWindow} from "./widgets/properties-window";
 import { createMaterialWindow } from "./widgets/material-window";
 import { createPhysicsWindow } from "./widgets/physics-window";
+import { PhysicsSystem } from "../physics/physics-system";
 
 export class Editor {
     activeObjects = [];
@@ -87,15 +88,19 @@ export class Editor {
         this.engine.activateScene(this.editorScene);
 
         this.cannonPhysicsSystem = this.engine.createSystem(
-            CannonPhysicsSystem,
+            PhysicsSystem,
             this.gameScene,
             gameSpeed,
+            3,
+            {},
             this.cannonMaxSubSteps
         );
         this.cannonRenderer = this.engine.createSystem(
             CannonRenderer,
             this.gameScene,
             this.context,
+            this.gameRenderer.framebuffer,
+            this.cannonPhysicsSystem,
             width / height,
             width,
             height
@@ -297,8 +302,10 @@ export class Editor {
     toggleRunGame() {
         if (this.scriptSystem.isStarted) {
             this.scriptSystem.pause()
+            this.cannonPhysicsSystem.stop()
         } else {
             this.scriptSystem.start()
+            this.cannonPhysicsSystem.start()
         }
     }
     ipdateActiveMaterial(diffuseColor, ambientColor, specularColor, shininess) {
