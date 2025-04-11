@@ -50,6 +50,14 @@ export class PhysicsSystem extends System {
 
     start() {
         this.isRunning = true;
+        for (const [entityId, body] of this.bodies) {
+
+            const entity = this.scene.getEntityById(entityId);
+            const transform = entity.getComponent("Transformation");
+            body.position.set(transform.position.x, transform.position.y, transform.position.z);
+            body.velocity.set(0, 0, 0);
+            body.angularVelocity.set(0, 0, 0);
+        }   
     }
 
     stop() {
@@ -98,8 +106,8 @@ export class PhysicsSystem extends System {
     update(deltaTime) {
         if (!this.isRunning) return;
         // Step the physics world
-        this.world.step(this.fixedTime, deltaTime/60, this.maxSubSteps);
-
+        this.world.step(deltaTime/1000);
+        console.log(this.bodies)
         // Update entity transformations based on physics bodies
         for (const [entityId, body] of this.bodies) {
             const entity = this.scene.getEntityById(entityId);
@@ -107,8 +115,8 @@ export class PhysicsSystem extends System {
                 continue;
 
             const transform = entity.getComponent("Transformation");
-            if (!transform) 
-                continue;
+            if (!transform) continue;
+            console.log(transform)
             console.log(body.position)
             // Update position
             transform.setPosition(body.position);

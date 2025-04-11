@@ -2,7 +2,7 @@ import SGuiDropDown from "../../../lib/shrike-gui/child-elements/drop-down";
 import SGuiInputBox from "../../../lib/shrike-gui/child-elements/input-box";
 import SGuiSlider from "../../../lib/shrike-gui/child-elements/slider";
 import SGuiCheckbox from "../../../lib/shrike-gui/child-elements/checkbox";
-
+import CANNON from "cannon";
 export const createPhysicsWindow = (editor, sgui) => {
     const physicsWindow = {
         mainWindow: sgui.createWindow("Physics", true),
@@ -142,7 +142,10 @@ export const createPhysicsWindow = (editor, sgui) => {
     physicsWindow.mass.addEventListener('change', (e) => {
         if (editor.activeObjects.length === 0) return;
         const physicsBody = editor.activeObjects[0].getComponent("PhysicsBody");
+        console.log("physics body",physicsBody)
         if (physicsBody) {
+            console.log("Physics body changed",physicsBody.body)
+            console.log("mass changed",e.target.value)
             physicsBody.body.mass = parseFloat(e.target.value);
             physicsBody.body.updateMassProperties();
         }
@@ -151,6 +154,7 @@ export const createPhysicsWindow = (editor, sgui) => {
     physicsWindow.friction.addEventListener('change', (e) => {
         if (editor.activeObjects.length === 0) return;
         const physicsBody = editor.activeObjects[0].getComponent("PhysicsBody");
+        
         if (physicsBody) {
             physicsBody.body.material.friction = parseFloat(e.target.value);
         }
