@@ -1,5 +1,5 @@
 import { System } from "../ecs/classes";
-
+import CANNON from "cannon";
 export class ScriptSystem extends System {
     constructor(scene,eventHandler) {
         super(scene);
@@ -22,7 +22,7 @@ export class ScriptSystem extends System {
         if (!this.scene.componentRegister.hasOwnProperty("Script")) return;
         if (!this.isStarted) return;
         for (const script of this.scene.componentRegister["Script"]) {
-            script.update(deltaTime,script.entity.components,this.scene,this.eventHandler.activeKeys);
+            script.update(deltaTime,CANNON,script.entity.components,this.scene,this.eventHandler.activeKeys);
         }
     }
     start() {

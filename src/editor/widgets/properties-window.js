@@ -143,7 +143,7 @@ export const createPropertiesWindow = (sgui, object,scene,renderer) => {
             
             console.log("updateFunctionBody", updateFunctionBody);
             const script = new Script({
-                update: new Function('deltaTime', 'components', 'scene', 'activeKeys', updateFunctionBody)
+                update: new Function('deltaTime','CANNON', 'components', 'scene', 'activeKeys', updateFunctionBody)
             });
             
             // Initialize entity data if it doesn't exist

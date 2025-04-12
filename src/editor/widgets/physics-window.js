@@ -200,6 +200,70 @@ export const createPhysicsWindow = (editor, sgui) => {
         }
     });
 
+    // Add event listeners for shape properties
+    physicsWindow.boxSize.x.addEventListener('change', (e) => {
+        if (editor.activeObjects.length === 0) return;
+        const physicsBody = editor.activeObjects[0].getComponent("PhysicsBody");
+        if (physicsBody && physicsBody.body.shapes[0] instanceof CANNON.Box) {
+            const halfExtents = physicsBody.body.shapes[0].halfExtents;
+            const newHalfExtents = new CANNON.Vec3(
+                parseFloat(e.target.value) / 2,
+                halfExtents.y,
+                halfExtents.z
+            );
+            physicsBody.removeShape(physicsBody.body.shapes[0]);
+            const newShape = new CANNON.Box(newHalfExtents);
+            physicsBody.body.addShape(newShape);
+            physicsBody.body.updateBoundingRadius();
+        }
+    });
+
+    physicsWindow.boxSize.y.addEventListener('change', (e) => {
+        if (editor.activeObjects.length === 0) return;
+        const physicsBody = editor.activeObjects[0].getComponent("PhysicsBody");
+        if (physicsBody && physicsBody.body.shapes[0] instanceof CANNON.Box) {
+            const halfExtents = physicsBody.body.shapes[0].halfExtents;
+            const newHalfExtents = new CANNON.Vec3(
+                halfExtents.x,
+                parseFloat(e.target.value) / 2,
+                halfExtents.z
+            );
+            physicsBody.removeShape(physicsBody.body.shapes[0]);
+            const newShape = new CANNON.Box(newHalfExtents);
+            physicsBody.body.addShape(newShape);
+            physicsBody.body.updateBoundingRadius();
+        }
+    });
+
+    physicsWindow.boxSize.z.addEventListener('change', (e) => {
+        if (editor.activeObjects.length === 0) return;
+        const physicsBody = editor.activeObjects[0].getComponent("PhysicsBody");
+        if (physicsBody && physicsBody.body.shapes[0] instanceof CANNON.Box) {
+            const halfExtents = physicsBody.body.shapes[0].halfExtents;
+            const newHalfExtents = new CANNON.Vec3(
+                halfExtents.x,
+                halfExtents.y,
+                parseFloat(e.target.value) / 2
+            );
+            physicsBody.removeShape(physicsBody.body.shapes[0]);
+            const newShape = new CANNON.Box(newHalfExtents);
+            physicsBody.body.addShape(newShape);
+            physicsBody.body.updateBoundingRadius();
+        }
+    });
+
+    physicsWindow.sphereRadius.addEventListener('change', (e) => {
+        if (editor.activeObjects.length === 0) return;
+        const physicsBody = editor.activeObjects[0].getComponent("PhysicsBody");
+        if (physicsBody && physicsBody.body.shapes[0] instanceof CANNON.Sphere) {
+            const newRadius = parseFloat(e.target.value);
+            physicsBody.removeShape(physicsBody.body.shapes[0]);
+            const newShape = new CANNON.Sphere(newRadius);
+            physicsBody.body.addShape(newShape);
+            physicsBody.body.updateBoundingRadius();
+        }
+    });
+
     // Add update method to refresh UI when active object changes
     physicsWindow.updateActivePhysics = () => {
         if (editor.activeObjects.length === 1) {

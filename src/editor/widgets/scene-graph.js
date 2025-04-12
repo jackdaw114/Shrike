@@ -161,7 +161,7 @@ function updateSceneGraphWindow(sceneGraphWindow, selectionWindow, scene) {
                     const body = new PhysicsBody({
                         mass: 1,
                         position: new CANNON.Vec3(0, 0, 0),
-                        shape: new CANNON.Box(new CANNON.Vec3(1, 1, 1)),
+                        shape: new CANNON.Sphere(1),
                         material: new CANNON.Material("physicsMaterial"),
                         linearDamping: 0.01,
                         angularDamping: 0.01

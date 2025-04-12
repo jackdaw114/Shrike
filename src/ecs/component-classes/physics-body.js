@@ -78,6 +78,15 @@ export class PhysicsBody extends Component {
         this.body.removeEventListener(event, callback);
     }
 
+    removeShape(shape) {
+        if (!shape) return;
+        const index = this.body.shapes.indexOf(shape);
+        if (index !== -1) {
+            this.body.shapes.splice(index, 1);
+            this.body.updateBoundingRadius();
+        }
+    }
+
     destroy() {
         // Clean up any event listeners or other resources
         this.body = null;

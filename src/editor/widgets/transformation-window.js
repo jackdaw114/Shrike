@@ -80,7 +80,7 @@ export const createTransformationWindow = (editor,sgui,element)=>{
     const script_entity = editor.engine.createEntity(editor.editorScene)
 
     editor.editorScene.addComponent(script_entity, new Script({ update: (deltaTime, components, scene)=>{
-        if (editor.activeObjects[0]){
+        if (editor.activeObjects[0] && editor.activeObjects[0].getComponent("Transformation")){
             const position = editor.activeObjects[0].getComponent("Transformation").position
             const scale = editor.activeObjects[0].getComponent("Transformation").scale
             const rot = editor.activeObjects[0].getComponent("Transformation").rotation

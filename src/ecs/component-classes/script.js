@@ -8,7 +8,7 @@ export class Script extends Component {
         }
     }
 
-    update(deltaTime, components, scene) {
+    update(deltaTime,CANNON, components, scene) {
         console.log("update script not Overridden \nscript attached to entity: -", this.entity.id, "\navailable components are:-", components);
         this.update = () => {};
     }

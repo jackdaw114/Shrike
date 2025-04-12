@@ -39,12 +39,12 @@ export const createEditorGizmos = async (engine, editor, scene) => {
         scene.addComponent(arrowAxis, arm.geometry)
         scene.addComponent(arrowAxis, arm.transformation)
         scene.addComponent(arrowAxis, new Script({
-            update: (deltaTime, components, scene) => {
-                if (editor.activeObjects[0]) {
+            update: (deltaTime,CANNON, components, scene) => {
+                if (editor.activeObjects[0] && editor.activeObjects[0].getComponent("Transformation")) {
                     const position = editor.activeObjects[0].getComponent("Transformation").position
                     components.Transformation[0].setPosition(position)
                 }
-                updateAxis(deltaTime, components, scene)
+                updateAxis(deltaTime,CANNON, components, scene)
             }
         }))
         // editor.addEditorObject({
@@ -99,7 +99,7 @@ export const createEditorGizmos = async (engine, editor, scene) => {
 }
 
 
-const updateAxis = (deltaTime, components, scene) => {
+const updateAxis = (deltaTime,CANNON, components, scene) => {
     const camera = scene.getCamera()
     const dist = camera.dist(Object.values(components.Transformation[0].position))
     const scaleFactor = dist / 12

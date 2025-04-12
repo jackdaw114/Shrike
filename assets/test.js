@@ -1,8 +1,12 @@
-update = (deltaTime, components, scene,activeKeys) => {
+update = (deltaTime,CANNON, components, scene,activeKeys) => {
     console.log("update", deltaTime, components, scene)
+    console.log("this",this)
     const transform = components.Transformation[0]
+    if(activeKeys.b !== undefined){
+        components.PhysicsBody[0].body.applyLocalImpulse({x:0,y:0,z:.2},{x:0,y:0,z:0})
+    }
     if (activeKeys.w !== undefined) {
-        transform.translate(0,0,deltaTime/2000)
+        components.PhysicsBody[0].body.position.vadd({x:0,y:deltaTime/2000,z:0},components.PhysicsBody[0].body.position)
     }
     if (activeKeys.s !== undefined) {
         transform.translate(0,0,-deltaTime/2000)
