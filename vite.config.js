@@ -6,6 +6,11 @@ export default defineConfig({
     port: 3000,
   },
   build: {
+    minify: 'terser',
+    terserOptions: {
+      keep_classnames: true,
+      keep_fnames: true,
+    },
     outDir: 'dist', // output directory
     rollupOptions: {
       input: {

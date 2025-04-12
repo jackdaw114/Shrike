@@ -147,6 +147,7 @@ export class Editor {
     initEditor() {
         const debugLineEntity = this.engine.createEntity(this.gameScene);
         this.gameScene.addComponent(debugLineEntity, new DebugLine());
+        console.log("debugLineEntity",debugLineEntity)
         this.generateDebugGrid(debugLineEntity.getComponent("DebugLine"));
     }
     sguiSetup() {
@@ -210,6 +211,8 @@ export class Editor {
         //let lineObj = debugLineEntity.getComponent("DebugLine");
         function drawGrid(lineComponent, numberOfLines, spacing) {
             let size = (numberOfLines * spacing - spacing) / 2;
+            console.log("lineComponent",lineComponent)
+            
             for (let i = 0; i < numberOfLines; i++) {
                 lineComponent.addLine(
                     [-size, 0, spacing * i - size, 0, 0, 0],
