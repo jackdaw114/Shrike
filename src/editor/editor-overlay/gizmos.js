@@ -1,3 +1,4 @@
+import { vec3 } from "gl-matrix";
 import { parseOBJ } from "../../../lib/parse-obj";
 import { Transformation } from "../../ecs/classes";
 import { Geometry, Script } from "../../ecs/component-classes";
@@ -62,26 +63,31 @@ export const createEditorGizmos = async (engine, editor, scene) => {
     const RATE = 2500
     editor.canvas.addEventListener("drag", (e) => {
         // console.log("drag", editor.selectedGizmoId)
+        const camera = editor.gameScene.getCamera()
+        const gizmoPosition = moveGizmo.x.entity.getComponent("Transformation").position
+        const xGizmoPosition = new Float32Array([gizmoPosition.x,gizmoPosition.y,gizmoPosition.z])
+        const xGizmoDepth =vec3.dist(xGizmoPosition,camera.position)
+        const mousePosition = camera.unproject(
+            e.detail.currentX,
+            e.detail.currentY,
+            editor.canvas.width,
+            editor.canvas.height,
+            xGizmoDepth
+        )
+        console.log("mouse position in world space", mousePosition)
         engine.entities.forEach(entity => {
             // console.log("entity", entity.id)
         })
         if (editor.activeObjects[0]) {
-            const dispX = Math.hypot(e.detail.dragEndPos.x, e.detail.dragEndPos.y) * Math.sign(e.detail.dispX)
-            const dispY = Math.hypot(e.detail.dragEndPos.x, e.detail.dragEndPos.y) * Math.sign(e.detail.dispY)
-            // console.log("dispX", dispX, "dispY", dispY)
-            // console.log("gizmos are ", moveGizmo.x.entity.id, moveGizmo.y.entity.id, moveGizmo.z.entity.id)
             switch (editor.selectedGizmoId) {
                 case moveGizmo.x.entity.id:
-                    editor.activeObjects[0].getComponent("Transformation").translate(dispX / RATE, 0, 0)
-                    // console.log("transformation",editor.activeObjects[0].getComponent("Transformation"))
+                    editor.activeObjects[0].getComponent("Transformation").setPositionX(mousePosition[0])
                     break;
                 case moveGizmo.y.entity.id:
-                    editor.activeObjects[0].getComponent("Transformation").translate(0, dispX / RATE,0)
-                    // console.log("transformation",editor.activeObjects[0].getComponent("Transformation"))
+                    editor.activeObjects[0].getComponent("Transformation").setPositionY(mousePosition[2])
                     break;
                 case moveGizmo.z.entity.id:
-                    editor.activeObjects[0].getComponent("Transformation").translate(0,0,-dispY / RATE)
-                    // console.log("transformation",editor.activeObjects[0].getComponent("Transformation"))
+                    editor.activeObjects[0].getComponent("Transformation").setPositionZ(mousePosition[1])
                     break;
             }
 

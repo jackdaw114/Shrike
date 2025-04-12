@@ -98,4 +98,78 @@ export class Shrike {
             scene.init();
         }
     }
+
+    /**
+     * Saves the current entities to a JSON file
+     * @param {string} filename - The name of the file to save to
+     */
+    async saveEntitiesToFile(filename) {
+        const serializedEntities = this.entities.map(entity => {
+            if (!entity) return null;
+            return {
+                id: entity.id,
+                name: entity.name,
+                components: entity.components.map(component => ({
+                    type: component.constructor.name,
+                    data: component.serialize ? component.serialize() : component
+                }))
+            };
+        }).filter(entity => entity !== null);
+
+        const blob = new Blob([JSON.stringify(serializedEntities, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    /**
+     * Loads entities from a JSON file
+     * @param {File} file - The file to load entities from
+     * @param {Scene} scene - The scene to add the loaded entities to
+     * @returns {Promise<void>}
+     */
+    async loadEntitiesFromFile(file, scene) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            
+            reader.onload = (event) => {
+                try {
+                    const serializedEntities = JSON.parse(event.target.result);
+                    
+                    // Clear existing entities if needed
+                    this.entities = [];
+                    this.entity_uid = 1;
+                    
+                    serializedEntities.forEach(serializedEntity => {
+                        const entity = new Entity(this.entity_uid, serializedEntity.name);
+                        this.entities[this.entity_uid] = entity;
+                        
+                        serializedEntity.components.forEach(serializedComponent => {
+                            // Here you would need to implement component deserialization
+                            // based on your component system
+                            if (serializedComponent.data) {
+                                entity.addComponent(serializedComponent.data);
+                            }
+                        });
+                        
+                        scene.addEntity(this.entity_uid, entity);
+                        this.entity_uid++;
+                    });
+                    
+                    resolve();
+                } catch (error) {
+                    reject(error);
+                }
+            };
+            
+            reader.onerror = (error) => reject(error);
+            reader.readAsText(file);
+        });
+    }
 }

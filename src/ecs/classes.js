@@ -249,6 +249,18 @@ export class Transformation extends Component {
         this.position = position
         this.updateMatrix()
     }
+    setPositionX(x){
+        this.position.x = x
+        this.updateMatrix()
+    }
+    setPositionY(y){
+        this.position.y = y
+        this.updateMatrix()
+    }
+    setPositionZ(z){
+        this.position.z = z
+        this.updateMatrix()
+    }
     updateRotation(){
         quat.fromEuler(this.quaternion,this.rotation.x,this.rotation.z,this.rotation.y)
     }

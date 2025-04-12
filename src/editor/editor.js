@@ -24,6 +24,7 @@ import {createSceneGraphWindow} from "./widgets/scene-graph";
 import {createPropertiesWindow} from "./widgets/properties-window";
 import { createMaterialWindow } from "./widgets/material-window";
 import { createPhysicsWindow } from "./widgets/physics-window";
+import { createEntitySerializationWindow } from "./widgets/entity-serialization-window";
 import { PhysicsSystem } from "../physics/physics-system";
 
 export class Editor {
@@ -57,6 +58,7 @@ export class Editor {
         this.propertiesWindow = createPropertiesWindow(this.SGui,this.activeObjects,this.gameScene,this.gameRenderer)
         this.materialWindow = createMaterialWindow(this,this.SGui,this.canvas)
         this.physicsWindow = createPhysicsWindow(this, this.SGui)
+        this.entitySerializationWindow = createEntitySerializationWindow(this, this.SGui)
     }
 
     initSystems() {
@@ -331,9 +333,6 @@ export class Editor {
         this.sceneGraphWindow = createSceneGraphWindow(this.canvas,this.engine,this.SGui,this.gameScene)
         this.resourceWindow = createResourceWindow(this.canvas, this.SGui);
         this.menuBar = createMenuBar(this, this.canvas, this.SGui);
-        this.propertiesWindow = createPropertiesWindow(this.SGui,this.activeObjects,this.gameScene,this.gameRenderer)
-        this.materialWindow = createMaterialWindow(this,this.SGui,this.canvas)
-        this.physicsWindow = createPhysicsWindow(this, this.SGui)
     }
 
     destroy() {

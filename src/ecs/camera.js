@@ -2,7 +2,7 @@ import { glMatrix, mat4, quat, vec3 } from "gl-matrix";
 
 export default class Camera {
     constructor(
-        type = "perspective",
+        type = "orthographic",
         customOptions = {  }
     ) {
         const defaultOptions = {
@@ -41,6 +41,7 @@ export default class Camera {
                 break;
             case "orthographic":
                 mat4.ortho(this.projectionMatrix,options.left, options.right, options.bottom, options.top, options.near, options.far)
+                break;
             default:
                 throw new Error("invalid camera Type")
         }
@@ -160,5 +161,37 @@ export default class Camera {
     }
     dist(vec) {
         return vec3.dist(this.position, vec)
+    }
+
+    unproject(screenX, screenY, viewportWidth, viewportHeight, depth = 0) {
+        // Convert screen coordinates to normalized device coordinates (NDC)
+        let z = -depth ;
+        let x = ( screenX*2 / (viewportWidth))-1.0;
+        let y = 1.0-(screenY*2 / (viewportHeight));
+        x*=-z 
+        y*=-z
+        // Create the inverse view-projection matrix
+        const viewProjMatrix = mat4.create();
+        mat4.multiply(viewProjMatrix, this.projectionMatrix, this.matrix);
+        const invViewProjMatrix = mat4.create();
+        mat4.invert(invViewProjMatrix, this.matrix);
+
+        let testVec = vec3.create() 
+        console.log("x , y, z", x, y, z)
+        //vec3.transformMat4(testVec, new Float32Array([x, y, z]), );
+        console.log("trasformint to matrixc", testVec)
+        // Transform NDC to world space
+        const worldPos = vec3.create();
+        const testMat = mat4.create();
+        mat4.invert(testMat,this.matrix)
+        vec3.transformMat4(worldPos, new Float32Array([x, y, z]), invViewProjMatrix);
+        // Perspective divide
+        // if (this.type === "perspective") {
+        //     worldPos[0] /= worldPos[3];
+        //     worldPos[1] /= worldPos[3];
+        //     worldPos[2] /= worldPos[3];
+        // }
+        console.log("worldPos", worldPos)
+        return worldPos;
     }
 }
