@@ -1,3 +1,4 @@
+import { safeStringify } from "../../lib/util/safe-stringify";
 import { Entity, Scene } from "../ecs/classes";
 import {Compositor} from "./compositor/compositor";
 
@@ -103,16 +104,29 @@ export class Shrike {
      * Saves the current entities to a JSON file
      * @param {string} filename - The name of the file to save to
      */
-    async saveEntitiesToFile(filename) {
-        const serializedEntities = this.entities.map(entity => {
+    async saveEntitiesToFile(filename,scene) {
+        console.log(this.entities)
+        const serializedEntities = Object.values(scene.entities).map(entity => {
             if (!entity) return null;
+            console.log(Object.values(entity.components).forEach(component => 
+                 ({
+                    type: component[0].constructor.name,
+                    data: safeStringify(component[0])
+                    }))
+)
             return {
                 id: entity.id,
                 name: entity.name,
-                components: entity.components.map(component => ({
-                    type: component.constructor.name,
-                    data: component.serialize ? component.serialize() : component
-                }))
+                components: Object.values(entity.components).map(component => {
+                    console.log(safeStringify(component[0]))
+                    if(component[0].constructor.name === "DebugLine") {
+                        return
+                    }
+                    return {
+                        type: component[0].constructor.name,
+                        data: safeStringify(component[0],["entity"])
+                    }
+                })
             };
         }).filter(entity => entity !== null);
 

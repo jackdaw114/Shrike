@@ -89,7 +89,7 @@ export const createEntitySerializationWindow = (editor, sgui) => {
     // Add event listeners for file operations
     serializationWindow.saveButton.addEventListener('click', async () => {
         const filename = `entities_${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
-        await editor.core.saveEntitiesToFile(filename);
+        await editor.engine.saveEntitiesToFile(filename,editor.gameScene);
     });
 
     serializationWindow.loadButton.addEventListener('click', () => {
