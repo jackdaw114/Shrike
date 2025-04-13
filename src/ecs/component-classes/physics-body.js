@@ -86,7 +86,30 @@ export class PhysicsBody extends Component {
             this.body.updateBoundingRadius();
         }
     }
-
+    fromJSON(json){
+        let newShape
+        switch(json.options.shape.type){
+            case 1:
+                newShape = new CANNON.Sphere(json.options.shape.radius)
+                break;
+            case 4:
+                newShape = new CANNON.Box(json.options.shape.halfExtents)
+                break;
+        }
+        this.body = new CANNON.Body(
+            {
+                mass: json.options.mass,
+                position: json.options.position,
+                material: json.options.material,
+                linearDamping: json.options.linearDamping,
+                angularDamping: json.options.angularDamping,
+                fixedRotation: json.options.fixedRotation,
+                collisionResponse: json.options.collisionResponse,
+                shape: newShape
+            }
+        )
+        this.body.updateMassProperties()
+    }
     destroy() {
         // Clean up any event listeners or other resources
         this.body = null;

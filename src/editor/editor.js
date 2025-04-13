@@ -118,7 +118,6 @@ export class Editor {
             this.editorScene,
             this.eventHandler
         );
-        this.editorScriptSystem.start()
         this.gameScenePickingSystem = this.engine.createSystem(
             PickingSystem,
             this.gameScene,
@@ -143,6 +142,13 @@ export class Editor {
             width / height,
             this.gameRenderer.framebuffer
         );
+        this.editorScriptSystem.start()
+        this.gameRenderer.start()
+        this.editorGizmoRenderer.start()
+        this.cannonRenderer.start()
+        this.gameScenePickingSystem.start()
+        this.editorPickingSystem.start()
+        this.debugSystem.start()
     }
     initEditor() {
         const debugLineEntity = this.engine.createEntity(this.gameScene);

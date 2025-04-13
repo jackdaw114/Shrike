@@ -31,11 +31,9 @@ export const createEditorGizmos = async (engine, editor, scene) => {
 
 
     Object.entries(moveGizmo).forEach(([key, arm]) => {
-        // console.log("looping",key,arm)
         const arrowAxis = engine.createEntity(scene)
         arm.entity = arrowAxis;
         moveGizmo[key].entity = arrowAxis
-        // console.log("the arrow axis is", arrowAxis.id)
         scene.addComponent(arrowAxis, arm.geometry)
         scene.addComponent(arrowAxis, arm.transformation)
         scene.addComponent(arrowAxis, new Script({
@@ -57,12 +55,10 @@ export const createEditorGizmos = async (engine, editor, scene) => {
         //scene.addComponent(arrowAxis,arm.geometry)
         //scene.addComponent(arrowAxis,arm.transformation)
         //scene.addComponent(arrowAxis,new Script({update:updateAxis}))
-        // console.log(scene.componentRegister)
     })
     const rect = editor.canvas.getBoundingClientRect();
     const RATE = 2500
     editor.canvas.addEventListener("drag", (e) => {
-        // console.log("drag", editor.selectedGizmoId)
         const camera = editor.gameScene.getCamera()
         const gizmoPosition = moveGizmo.x.entity.getComponent("Transformation").position
         const xGizmoPosition = new Float32Array([gizmoPosition.x,gizmoPosition.y,gizmoPosition.z])
@@ -74,9 +70,7 @@ export const createEditorGizmos = async (engine, editor, scene) => {
             editor.canvas.height,
             xGizmoDepth
         )
-        console.log("mouse position in world space", mousePosition)
         engine.entities.forEach(entity => {
-            // console.log("entity", entity.id)
         })
         if (editor.activeObjects[0]) {
             switch (editor.selectedGizmoId) {

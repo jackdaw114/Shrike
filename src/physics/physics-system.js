@@ -62,6 +62,7 @@ export class PhysicsSystem extends System {
 
     stop() {
         this.isRunning = false;
+        console.log("stopping physics system")
     }
 
     init() {
@@ -105,6 +106,7 @@ export class PhysicsSystem extends System {
 
     update(deltaTime) {
         if (!this.isRunning) return;
+        console.log("updating physics system")
         // Step the physics world
         this.world.step(deltaTime/1000);
         console.log(this.bodies)

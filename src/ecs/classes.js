@@ -1,6 +1,6 @@
 import { mat4, quat, vec3 } from "gl-matrix";
 import Camera from "./camera";
-import {Vec3} from "cannon";
+import { Geometry } from "./component-classes";
 
 export class Entity {
     constructor(id,name) {
@@ -27,7 +27,13 @@ export class Component {
      */
     constructor() {
         // take entity reference here
+        this.type = this.constructor.name;
         this.entity;
+    }
+    fromJSON(json){
+        for (const key in json){
+            this[key] = json[key]
+        }
     }
 }
 
@@ -37,10 +43,29 @@ export class Scene {
         this.entities = {};
         this.systems = {};
         this.componentRegister = {};
-        this.isRunning = false;
+        this.isRunning = true;
         this.activeCamera = new Camera();
         this.width = width;
         this.height =height
+    }
+    stop(){
+        this.isRunning = false;
+        console.log("stopping scene")
+        for (const system of Object.values(this.systems)) {
+            system.stop();
+        }
+    }
+    start(){
+        this.isRunning = true;
+        for (const system of Object.values(this.systems)) {
+            system.start();
+        }
+    }
+    forceReload(){
+        console.log("componentRegister",this.componentRegister)
+        for (const system of Object.values(this.systems)) {
+            system.forceReload();
+        }
     }
     setCamera(camera) {
         this.activeCamera = camera;
@@ -74,7 +99,8 @@ export class Scene {
         return this.entities[id]
     }
     addComponent(entity, component) {
-        const componentClass = component.constructor.name;
+        const componentClass = component.type;
+        console.log("adding component to class",componentClass) 
         if (!entity.hasOwnProperty(componentClass)) {
             entity.components[componentClass] = [component];
         } else {
@@ -99,7 +125,7 @@ export class Scene {
     }
 
     removeComponent(entity, component) {
-        const componentClass = component.constructor.name;
+        const componentClass = component.type;
         
         // Remove from entity's components
         if (entity.components[componentClass]) {
@@ -161,7 +187,8 @@ export class System {
         this.components = {};
         this.scene = scene;
     }
-
+    forceReload(){
+    }
     update(deltaTime) {
         throw new Error("Method 'update' must be implemented.");
     }

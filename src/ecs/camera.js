@@ -177,9 +177,7 @@ export default class Camera {
         mat4.invert(invViewProjMatrix, this.matrix);
 
         let testVec = vec3.create() 
-        console.log("x , y, z", x, y, z)
         //vec3.transformMat4(testVec, new Float32Array([x, y, z]), );
-        console.log("trasformint to matrixc", testVec)
         // Transform NDC to world space
         const worldPos = vec3.create();
         const testMat = mat4.create();
@@ -191,7 +189,6 @@ export default class Camera {
         //     worldPos[1] /= worldPos[3];
         //     worldPos[2] /= worldPos[3];
         // }
-        console.log("worldPos", worldPos)
         return worldPos;
     }
 }

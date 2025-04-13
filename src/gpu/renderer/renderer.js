@@ -38,7 +38,7 @@ export class Renderer extends System {
      */
     constructor(scene, context, aspect_ratio, width, height) {
         super(scene);
-
+        this.isRunning = false;
         this.aspect_ratio = aspect_ratio;
         this.width = width;
         this.height = height;
@@ -77,10 +77,16 @@ export class Renderer extends System {
 
     update(deltaTime) {
         // octree culling here then provide updated array to the loop below
-
+        if(!this.isRunning) return;
         this.renderPass();
     }
 
+    stop(){
+        this.isRunning = false;
+    }
+    start(){
+        this.isRunning = true;
+    }
     getFramebuffer() {
         return this.framebuffer;
     }
@@ -105,6 +111,23 @@ export class Renderer extends System {
             if (!component.vaoID) {
                 this.initGeometry(component);
             }
+        }
+    }
+    forceReload(){
+        
+        for (const component of this.scene.componentRegister["Geometry"]){
+            this.checkGeometry(component)
+            this.initGeometry(component)
+        }
+    }
+    checkGeometry(component){
+        if(typeof component.vaoID === "WebGLVertexArrayObject"){
+            if (this.#context.isVertexArray(component.vaoID))
+                this.#context.deleteVertexArray(component.vaoID)
+        }
+        if(typeof component.vboID === "WebGLBuffer"){
+            if (this.#context.isBuffer(component.vboID))
+                this.#context.deleteBuffer(component.vboID)
         }
     }
 

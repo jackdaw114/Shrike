@@ -7,8 +7,8 @@ export const createEntitySerializationWindow = (editor, sgui) => {
         
         // File operations
         fileDropDown: new SGuiDropDown({ heading: "File Operations" }),
-        saveButton: new SGuiButton({ text: "Save Entities" }),
-        loadButton: new SGuiButton({ text: "Load Entities" }),
+        saveButton: new SGuiButton(document,{ text: "Save Entities" }),
+        loadButton: new SGuiButton(document,{ text: "Load Entities" }),
         
         // Entity selection
         entityDropDown: new SGuiDropDown({ heading: "Entity Selection" }),
@@ -93,14 +93,17 @@ export const createEntitySerializationWindow = (editor, sgui) => {
     });
 
     serializationWindow.loadButton.addEventListener('click', () => {
+        editor.gameScene.stop();
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.json';
         input.onchange = async (e) => {
             const file = e.target.files[0];
             if (file) {
-                await editor.core.loadEntitiesFromFile(file, editor.activeScene);
+                await editor.engine.loadEntitiesFromFile(file, editor.gameScene);
                 updateEntityList();
+                editor.gameScene.forceReload();
+                editor.gameScene.start();
             }
         };
         input.click();
@@ -110,7 +113,7 @@ export const createEntitySerializationWindow = (editor, sgui) => {
     const updateEntityList = () => {
         serializationWindow.selectedEntity.innerHTML = '';
         const entities = editor.engine.entities.filter(e => e !== null);
-        
+
         entities.forEach(entity => {
             const option = document.createElement('div');
             option.textContent = entity.name;

@@ -5,6 +5,7 @@ import { Geometry } from "../../ecs/component-classes";
 import { Material } from "../../material/material";
 import { Script } from "../../ecs/component-classes";
 import SGuiText from "../../../lib/shrike-gui/child-elements/text";
+import { findFunctionBody } from "../../../lib/util/function-body-parser";
 
 export const createPropertiesWindow = (sgui, object,scene,renderer) => {
     const propertiesWindow = {};
@@ -104,37 +105,6 @@ export const createPropertiesWindow = (sgui, object,scene,renderer) => {
             console.log("scriptContent", scriptContent)
             
             // Stack-based parser for nested braces
-            const findFunctionBody = (content, functionName) => {
-                let stack = [];
-                let startIndex = -1;
-                let inFunction = false;
-                
-                // Find the start of the function
-                const functionStartRegex = new RegExp(`(?:function\\s+${functionName}|${functionName}\\s*=\\s*\\([^)]*\\)\\s*=>)\\s*{`);
-                const match = content.match(functionStartRegex);
-                if (!match) return null;
-                console.log("match", match)
-                startIndex = match.index + match[0].length;
-                console.log("match index", startIndex)
-                console.log("match[whatever]", match[startIndex])
-                
-                stack.push('{') 
-                // Parse through the content
-                for (let i = startIndex; i < content.length; i++) {
-                    const char = content[i];
-                    
-                    if (char === '{') {
-                        stack.push('{');
-                    } else if (char === '}') {
-                        stack.pop();
-                        if (stack.length === 0) {
-                            return content.substring(startIndex, i);
-                        }
-                    }
-                }
-                return null;
-            };
-            
             const updateFunctionBody = findFunctionBody(scriptContent, 'update');
             if (!updateFunctionBody) {
                 console.error("No valid update function found in script file");

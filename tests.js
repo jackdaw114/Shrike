@@ -1,6 +1,8 @@
 //import "./src/editor/editor";
 import {parseOBJ} from "./lib/parse-obj";
+import { safeStringify } from "./lib/util/safe-stringify";
 import {monke} from "./monke";
+import { Geometry } from "./src/ecs/component-classes";
 import {Editor} from "./src/editor/editor";
 
 document.addEventListener("DOMContentLoaded", () => {

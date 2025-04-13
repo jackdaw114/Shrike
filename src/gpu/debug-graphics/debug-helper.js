@@ -86,7 +86,12 @@ export class DebugSystem extends System {
             this.COLOR_OFFSET
         );
     }
-
+    stop(){
+        this.isRunning = false;
+    }
+    start(){
+        this.isRunning = true;
+    }
     init() {
         if (!this.scene.componentRegister.hasOwnProperty("DebugLine")) {
             console.warn(

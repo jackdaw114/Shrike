@@ -85,7 +85,12 @@ export class CannonRenderer extends System {
 
         this.framebuffer = framebuffer;
     }
-
+    stop(){
+        this.isRunning = false;
+    }
+    start(){
+        this.isRunning = true;
+    }
     async init() {
         this.sphereShape = await parseOBJ(ball);
         
@@ -124,6 +129,8 @@ export class CannonRenderer extends System {
     }
     initializeBody(body){
         this.physicsSystem.addBody(body.entity,body.body)
+    }
+    forceReload(){
     }
     render(body){
         this.#context.drawElements(

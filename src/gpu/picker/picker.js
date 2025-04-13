@@ -60,7 +60,12 @@ export class PickingSystem extends System {
             }
         });
     }
-
+    stop(){
+        this.isRunning = false;
+    }
+    start(){
+        this.isRunning = true;
+    }
     initTexture(width, height) {
         const ext = this.#context.getExtension("EXT_color_buffer_float"); // extensions lol
         this.pickerTexture = this.#context.createTexture();

@@ -1,5 +1,6 @@
 import { safeStringify } from "../../lib/util/safe-stringify";
-import { Entity, Scene } from "../ecs/classes";
+import { Entity, Scene, Transformation } from "../ecs/classes";
+import { Geometry, PhysicsBody, Script } from "../ecs/component-classes";
 import {Compositor} from "./compositor/compositor";
 
 export class Shrike {
@@ -105,26 +106,20 @@ export class Shrike {
      * @param {string} filename - The name of the file to save to
      */
     async saveEntitiesToFile(filename,scene) {
-        console.log(this.entities)
         const serializedEntities = Object.values(scene.entities).map(entity => {
+
             if (!entity) return null;
-            console.log(Object.values(entity.components).forEach(component => 
-                 ({
-                    type: component[0].constructor.name,
-                    data: safeStringify(component[0])
-                    }))
-)
+
             return {
                 id: entity.id,
                 name: entity.name,
                 components: Object.values(entity.components).map(component => {
-                    console.log(safeStringify(component[0]))
                     if(component[0].constructor.name === "DebugLine") {
                         return
                     }
                     return {
                         type: component[0].constructor.name,
-                        data: safeStringify(component[0],["entity"])
+                        data: safeStringify(component[0],["entity"],["vaoID","vboID","iboID","programID"])
                     }
                 })
             };
@@ -151,7 +146,6 @@ export class Shrike {
     async loadEntitiesFromFile(file, scene) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            
             reader.onload = (event) => {
                 try {
                     const serializedEntities = JSON.parse(event.target.result);
@@ -159,23 +153,45 @@ export class Shrike {
                     // Clear existing entities if needed
                     this.entities = [];
                     this.entity_uid = 1;
-                    
                     serializedEntities.forEach(serializedEntity => {
                         const entity = new Entity(this.entity_uid, serializedEntity.name);
                         this.entities[this.entity_uid] = entity;
-                        
+                        if(serializedEntity.components !== null) {
                         serializedEntity.components.forEach(serializedComponent => {
-                            // Here you would need to implement component deserialization
-                            // based on your component system
-                            if (serializedComponent.data) {
-                                entity.addComponent(serializedComponent.data);
+                            if ( serializedComponent?.data !== undefined) {
+                                 
+                                switch(JSON.parse(serializedComponent.data).type){
+                                    case "Geometry":
+                                        let geometry = new Geometry()
+                                        geometry.fromJSON(JSON.parse(serializedComponent.data))
+                                        scene.addComponent(entity,geometry)
+                                        break;
+                                    case "Transformation":
+                                        let transformation = new Transformation()
+                                        transformation.fromJSON(JSON.parse(serializedComponent.data))
+                                        scene.addComponent(entity,transformation)
+                                        break;
+                                    case "PhysicsBody":
+                                        let physicsBody = new PhysicsBody()
+                                        physicsBody.fromJSON(JSON.parse(serializedComponent.data))
+                                        scene.addComponent(entity,physicsBody)
+                                        break;
+                                    case "Script":
+                                        let script = new Script()
+                                        script.fromJSON(JSON.parse(serializedComponent.data))
+                                        scene.addComponent(entity,script)
+                                        break;
+                                    default:
+                                        scene.addComponent(entity,JSON.parse(serializedComponent.data))
+                                }
+                                
                             }
                         });
-                        
+                    }
                         scene.addEntity(this.entity_uid, entity);
                         this.entity_uid++;
                     });
-                    
+                    scene.forceReload();
                     resolve();
                 } catch (error) {
                     reject(error);
@@ -184,6 +200,8 @@ export class Shrike {
             
             reader.onerror = (error) => reject(error);
             reader.readAsText(file);
-        });
+    
+    });
     }
+
 }

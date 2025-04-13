@@ -32,4 +32,9 @@ export class Geometry extends Component {
         } = params;
         this.material = new Material(diffuseColor, ambientColor, specularColor, shininess);
     }
+    fromJSON(json){
+        this.vertices = new Float32Array(json.vertices)
+        this.indices = new Uint16Array(json.indices)
+        this.material = new Material(json.material.diffuseColor, json.material.ambientColor, json.material.specularColor, json.material.shininess)
+    }
 } 
