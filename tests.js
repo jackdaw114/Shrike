@@ -4,6 +4,7 @@ import { safeStringify } from "./lib/util/safe-stringify";
 import {monke} from "./monke";
 import { Geometry } from "./src/ecs/component-classes";
 import {Editor} from "./src/editor/editor";
+import {box} from "./assets/box";
 
 document.addEventListener("DOMContentLoaded", () => {
     let canvas = document.getElementById("canvas1");
@@ -26,9 +27,12 @@ document.addEventListener("DOMContentLoaded", () => {
         editor.start();
     }
 
-
     initEditor().catch(console.error);
 })
+setTimeout(async () => {
+    console.log("box vertices", Array.from((await parseOBJ(box)).indices))
+    
+}, 1000)
 //import "./src/test/testsTemp"
 //editor.addGameObject({
 //        geometry: parseOBJ(monke)

@@ -19,6 +19,12 @@ export class Entity {
             return null
         }
     }
+    updateAllComponents(){
+        console.log("components",this.components)
+        for (const component of Object.values(this.components)) {
+            component[0].updateSelf()
+        }
+    }
 }
 
 export class Component {
@@ -34,6 +40,9 @@ export class Component {
         for (const key in json){
             this[key] = json[key]
         }
+    }
+    updateSelf(){
+        console.warn("Method 'updateSelf' must be implemented.");
     }
 }
 
@@ -294,8 +303,24 @@ export class Transformation extends Component {
         this.position.z = z
         this.updateMatrix()
     }
+    setRotation(quaternion) {
+        console.log("setting rotation",quaternion)
+        this.quaternion = quat.fromValues(quaternion.x,quaternion.y,quaternion.z,quaternion.w)
+        const rotationMatrix = mat4.create()
+        mat4.fromQuat(rotationMatrix,this.quaternion)
+        console.log("rotationMatrix",rotationMatrix)
+        mat4.multiply(this.matrix,this.matrix,rotationMatrix)
+        console.log("matrix",this.matrix)
+    }
+    spin(value){
+        this.rotation.x += value.x
+        this.rotation.y += value.y
+        this.rotation.z += value.z
+        this.updateRotation()
+    }
     updateRotation(){
         quat.fromEuler(this.quaternion,this.rotation.x,this.rotation.z,this.rotation.y)
+        this.updateMatrix()
     }
     updateMatrix() {
         mat4.fromRotationTranslationScale(this.matrix, this.quaternion, vec3.fromValues(this.position.x, this.position.z, this.position.y), vec3.fromValues(this.scale.x, this.scale.z, this.scale.y))

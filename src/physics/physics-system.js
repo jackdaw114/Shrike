@@ -1,6 +1,6 @@
 import CANNON from "cannon";
 import { System } from "../ecs/classes";
-import { Transformation } from "../ecs/classes";
+import { quat } from "gl-matrix";
 
 export class PhysicsSystem extends System {
     constructor(scene, fixedTime = 1/60, maxSubSteps = 3, options = {}) {
@@ -119,12 +119,12 @@ export class PhysicsSystem extends System {
 
             const transform = entity.getComponent("Transformation");
             if (!transform) continue;
-            console.log(transform)
-            console.log(body.position)
             // Update position
             transform.setPosition(body.position);
-            
             // Update rotation
+            console.log("body quaternion",body.quaternion)
+            transform.quaternion =quat.fromValues(body.quaternion.x,body.quaternion.y,body.quaternion.z,body.quaternion.w)
+            transform.updateMatrix()
         }
     }
 

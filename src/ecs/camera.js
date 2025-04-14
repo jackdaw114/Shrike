@@ -16,6 +16,7 @@ export default class Camera {
             bottom: -1
         }
         const options = {...defaultOptions,...customOptions}
+        this.aspect_ratio = options.aspect_ratio
         this.fov = options.fov 
         this.type = type;
         this.matrix = mat4.create();
@@ -166,23 +167,29 @@ export default class Camera {
     unproject(screenX, screenY, viewportWidth, viewportHeight, depth = 0) {
         // Convert screen coordinates to normalized device coordinates (NDC)
         let z = -depth ;
-        let x = ( screenX*2 / (viewportWidth))-1.0;
-        let y = 1.0-(screenY*2 / (viewportHeight));
+        let x = (screenX *2 / (viewportWidth))-1.0;
+        let y = (1.0-(screenY *2/ (viewportHeight)))*2/this.aspect_ratio;
         x*=-z 
         y*=-z
+        let unprojectedVec3 = vec3.create()
         // Create the inverse view-projection matrix
         const viewProjMatrix = mat4.create();
-        mat4.multiply(viewProjMatrix, this.projectionMatrix, this.matrix);
+        mat4.multiply(viewProjMatrix, this.matrix, this.projectionMatrix);
         const invViewProjMatrix = mat4.create();
-        mat4.invert(invViewProjMatrix, this.matrix);
+        mat4.invert(invViewProjMatrix, viewProjMatrix);
+        const invProjMatrix = mat4.create();
+        mat4.invert(invProjMatrix, this.projectionMatrix);
+        const invViewMatrix = mat4.create();
+        mat4.invert(invViewMatrix, this.matrix);
+
+
+        vec3.transformMat4(unprojectedVec3, new Float32Array([x, y, z]), this.projectionMatrix)
 
         let testVec = vec3.create() 
         //vec3.transformMat4(testVec, new Float32Array([x, y, z]), );
         // Transform NDC to world space
         const worldPos = vec3.create();
-        const testMat = mat4.create();
-        mat4.invert(testMat,this.matrix)
-        vec3.transformMat4(worldPos, new Float32Array([x, y, z]), invViewProjMatrix);
+        vec3.transformMat4(worldPos, new Float32Array([x, y, z]), invViewMatrix);
         // Perspective divide
         // if (this.type === "perspective") {
         //     worldPos[0] /= worldPos[3];

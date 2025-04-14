@@ -5,6 +5,8 @@ import { System } from "../../ecs/classes";
 import { createFramebuffer } from "../framebuffer";
 import Shader from "../shaders";
 import { ball } from "./assets";
+import { boxArrayFromHalfExtents } from "../../../lib/util/box-from-halfextents";
+import { box } from "../../../assets/box";
 
 export class CannonRenderer extends System {
     POS_SIZE = 3;
@@ -41,13 +43,14 @@ export class CannonRenderer extends System {
         this.#context.frontFace(this.#context.CCW);
         this.#context.cullFace(this.#context.BACK);
         this.physicsSystem = physicsSystem
+
         this.sphereVAOID = this.#context.createVertexArray();
         this.sphereVBOID = this.#context.createBuffer();
 
         this.#context.bindVertexArray(this.sphereVAOID);
         this.#context.bindBuffer(this.#context.ARRAY_BUFFER, this.sphereVBOID);
 
-        this.instanceVAOID = this.#context.createBuffer(); 
+        //this.instanceVAOID = this.#context.createBuffer(); 
 
         this.#context.enableVertexAttribArray(0);
         this.#context.enableVertexAttribArray(1);
@@ -72,11 +75,31 @@ export class CannonRenderer extends System {
         );
 
         this.sphereEBOID = this.#context.createBuffer();
-        this.#context.bindBuffer(
-            this.#context.ELEMENT_ARRAY_BUFFER,
-            this.sphereEBOID
-        );
 
+        this.boxVAOID = this.#context.createVertexArray();
+        this.boxVBOID = this.#context.createBuffer();
+        this.boxEBOID = this.#context.createBuffer();
+
+        this.#context.bindVertexArray(this.boxVAOID);
+        this.#context.bindBuffer(this.#context.ARRAY_BUFFER, this.boxVBOID);
+        this.#context.enableVertexAttribArray(0);
+        this.#context.enableVertexAttribArray(1);
+        this.#context.vertexAttribPointer(
+            0,
+            this.POS_SIZE,
+            this.#context.FLOAT,
+            false,
+            this.VERTEX_SIZE_IN_BYTES,
+            this.POS_OFFSET
+        );
+        this.#context.vertexAttribPointer(
+            1,
+            this.COLOR_SIZE,
+            this.#context.FLOAT,
+            false,
+            this.VERTEX_SIZE_IN_BYTES,
+            this.COLOR_OFFSET
+        );
         this.shader = new Shader(this.#context, testVert, testFrag, [
             "mWorld",
             "mView",
@@ -93,7 +116,7 @@ export class CannonRenderer extends System {
     }
     async init() {
         this.sphereShape = await parseOBJ(ball);
-        
+         
         // Set up the vertex buffer data after we have the parsed shape
         this.#context.bindBuffer(
             this.#context.ARRAY_BUFFER,
@@ -115,6 +138,29 @@ export class CannonRenderer extends System {
             this.sphereShape.indices,
             this.#context.STATIC_DRAW
         );
+
+
+
+        // **************************  **************************
+        this.boxShape = boxArrayFromHalfExtents([1,1,1])
+        this.#context.bindBuffer(
+            this.#context.ARRAY_BUFFER,
+            this.boxVBOID
+        );
+        this.#context.bufferData(
+            this.#context.ARRAY_BUFFER,
+            this.boxShape.vertices,
+            this.#context.STATIC_DRAW
+        );
+        this.#context.bindBuffer(
+            this.#context.ELEMENT_ARRAY_BUFFER,
+            this.boxEBOID
+        );
+        this.#context.bufferData(
+            this.#context.ELEMENT_ARRAY_BUFFER,
+            this.boxShape.indices,
+            this.#context.STATIC_DRAW
+        );
     }
     /**
      *
@@ -132,15 +178,6 @@ export class CannonRenderer extends System {
     }
     forceReload(){
     }
-    render(body){
-        this.#context.drawElements(
-            this.#context.LINE_LOOP,
-            this.sphereShape.indices.length,
-            this.#context.UNSIGNED_SHORT,
-            0
-        );
-
-    }
     update(deltaTime) {
         if (!this.scene.componentRegister.hasOwnProperty("PhysicsBody")) return;
         this.shader.use();
@@ -155,17 +192,12 @@ export class CannonRenderer extends System {
             this.framebuffer.height
         );
         
-        // Then bind VAO and EBO
-        this.#context.bindVertexArray(this.sphereVAOID);
-        this.#context.bindBuffer(this.#context.ELEMENT_ARRAY_BUFFER, this.sphereEBOID);
         let identityMatrix = new Float32Array(16);
         mat4.identity(identityMatrix);
 
         const camera = this.scene.getCamera();
         const viewMatrix = camera.matrix;
         const projMatrix = camera.getProjMatrix();
-
-
 
         this.#context.uniformMatrix4fv(
             this.shader.getUniform("mProj"),
@@ -177,25 +209,63 @@ export class CannonRenderer extends System {
             false,
             viewMatrix
         );
+        for (const body of this.scene.componentRegister["PhysicsBody"]){
+            if (!body.initialized)
+                this.initializeBody(body)
+
+            if (body.body.shapes[0].type === 1){
+                this.renderSphere(body)
+            }
+            else if (body.body.shapes[0].type === 4){
+                this.renderBox(body)
+            }
+        }
+    }
+
+    
+    renderSphere(body){
+        const scale = body.body.shapes[0].radius
+        const worldMatrix = mat4.create()
+        let bodyPosition = Object.values(body.body.position)
+        bodyPosition= [bodyPosition[0],bodyPosition[2],bodyPosition[1]]
+        mat4.translate(worldMatrix,worldMatrix,bodyPosition)
+        mat4.scale(worldMatrix,worldMatrix, [scale,scale,scale])
+        this.#context.bindVertexArray(this.sphereVAOID);
+        this.#context.bindBuffer(this.#context.ELEMENT_ARRAY_BUFFER, this.sphereEBOID);
+        this.#context.uniformMatrix4fv(
+            this.shader.getUniform("mWorld"),
+            false,
+            worldMatrix
+        );
         this.#context.drawElements(
             this.#context.LINE_LOOP,
             this.sphereShape.indices.length,
             this.#context.UNSIGNED_SHORT,
             0
         );
-        for (const body of this.scene.componentRegister["PhysicsBody"]){
-            if (!body.initialized)
-                this.initializeBody(body)
 
-            let worldMatrix = body.entity
-                .getComponent("Transformation")
-                .getMatrix();
-            this.#context.uniformMatrix4fv(
-                this.shader.getUniform("mWorld"),
-                false,
-                worldMatrix
-            );
-            this.render(body)
-        }
+    }
+    renderBox(body){
+        const bodyHalfExtents = Object.values(body.body.shapes[0].halfExtents)
+        this.#context.bindVertexArray(this.boxVAOID);
+        this.#context.bindBuffer(this.#context.ELEMENT_ARRAY_BUFFER, this.boxEBOID);
+        let bodyPosition = Object.values(body.body.position)
+        bodyPosition= [bodyPosition[0],bodyPosition[2],bodyPosition[1]]
+        console.log("body position",bodyPosition)
+        
+        const worldMatrix = mat4.create()
+        mat4.translate(worldMatrix,worldMatrix,bodyPosition)
+        mat4.scale(worldMatrix,worldMatrix,bodyHalfExtents)
+        this.#context.uniformMatrix4fv(
+            this.shader.getUniform("mWorld"),
+            false,
+            worldMatrix
+        );
+        this.#context.drawElements(
+            this.#context.LINE_LOOP,
+            this.boxShape.indices.length,
+            this.#context.UNSIGNED_SHORT,
+            0
+        );
     }
 }

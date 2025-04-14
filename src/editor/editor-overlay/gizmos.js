@@ -84,6 +84,7 @@ export const createEditorGizmos = async (engine, editor, scene) => {
                     editor.activeObjects[0].getComponent("Transformation").setPositionZ(mousePosition[1])
                     break;
             }
+            editor.activeObjects[0].updateAllComponents()
 
         }
     })

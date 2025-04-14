@@ -36,7 +36,10 @@ export class PhysicsBody extends Component {
 
         this.initialized = false;
     }
-
+    updateSelf(){
+        const position = this.entity.getComponent("Transformation").position
+        this.setPosition(position.x,position.y,position.z)
+    }
     setMass(mass) {
         this.body.mass = mass;
         this.body.updateMassProperties();
