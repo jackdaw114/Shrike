@@ -46,7 +46,7 @@ export const createSceneGraphWindow = (element, engine, sgui, scene) => {
     sceneGraphWindow.mainWindow.addEventListener("selected", e => {
         console.log(e.detail)
         switch (e.detail.name) {
-            case "node":
+            case "Node":
                 const entity = engine.createEntity(scene)
                 console.log(entity)
                 sceneGraphWindow.entities.push({
