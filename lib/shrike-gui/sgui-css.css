@@ -36,6 +36,7 @@
     outline: none;
     margin-top: 2px;
     margin-bottom: 4px;
+    width: 100%;
 }
 
 .sgui-file-panel{

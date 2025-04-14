@@ -9,60 +9,119 @@ export const createPhysicsWindow = (editor, sgui) => {
         
         // Physics body properties
         bodyDropDown: new SGuiDropDown({ heading: "Physics Body" }),
-        mass: new SGuiInputBox({ heading: "Mass:", type: "number", step: 0.1, content: 1 }),
-        friction: new SGuiInputBox({ heading: "Friction:", type: "number", step: 0.1, content: 0.3 }),
-        restitution: new SGuiInputBox({ heading: "Restitution:", type: "number", step: 0.1, content: 0.3 }),
+        mass: new SGuiInputBox({ heading: "", type: "number", step: 0.1, content: 1 }),
+        friction: new SGuiInputBox({ heading: "", type: "number", step: 0.1, content: 0.3 }),
+        restitution: new SGuiInputBox({ heading: "", type: "number", step: 0.1, content: 0.3 }),
         isStatic: new SGuiCheckbox({ heading: "Static Body" }),
         
         // Collision shape properties
         shapeDropDown: new SGuiDropDown({ heading: "Collision Shape" }),
         shapeType: new SGuiDropDown({ heading: "Shape Type" }),
         boxSize: {
-            x: new SGuiInputBox({ heading: "Width:", type: "number", step: 0.1, content: 1 }),
-            y: new SGuiInputBox({ heading: "Height:", type: "number", step: 0.1, content: 1 }),
-            z: new SGuiInputBox({ heading: "Depth:", type: "number", step: 0.1, content: 1 })
+            x: new SGuiInputBox({ heading: "", type: "number", step: 0.1, content: 1 }),
+            y: new SGuiInputBox({ heading: "", type: "number", step: 0.1, content: 1 }),
+            z: new SGuiInputBox({ heading: "", type: "number", step: 0.1, content: 1 })
         },
-        sphereRadius: new SGuiInputBox({ heading: "Radius:", type: "number", step: 0.1, content: 0.5 }),
+        sphereRadius: new SGuiInputBox({ heading: "", type: "number", step: 0.1, content: 0.5 }),
         
         // World settings
         worldDropDown: new SGuiDropDown({ heading: "World Settings" }),
         gravity: {
-            x: new SGuiInputBox({ heading: "Gravity X:", type: "number", step: 0.1, content: 0 }),
-            y: new SGuiInputBox({ heading: "Gravity Y:", type: "number", step: 0.1, content: 0 }),
-            z: new SGuiInputBox({ heading: "Gravity Z:", type: "number", step: 0.1, content: -9.82 })
+            x: new SGuiInputBox({ heading: "", type: "number", step: 0.1, content: 0 }),
+            y: new SGuiInputBox({ heading: "", type: "number", step: 0.1, content: 0 }),
+            z: new SGuiInputBox({ heading: "", type: "number", step: 0.1, content: -9.82 })
         }
     };
 
     // Add CSS styles
     const style = document.createElement('style');
     style.textContent = `
-        .physics-window {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            background-color: #1a222b;
-        }
-        .input-container {
-            display: flex;
-            flex-direction: column;
+        .physics-grid {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
             gap: 8px;
             padding: 8px;
-            background-color: #212730;
-            border-radius: 4px;
+        }
+        .physics-input {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .physics-label {
+            font-size: 0.8em;
+            color: #888;
+            text-align: center;
+        }
+        .physics-checkbox {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
         }
     `;
     physicsWindow.mainWindow.appendChild(style);
-    physicsWindow.mainWindow.classList.add('physics-window');
+
+    // Create input grid helper function
+    const createInputGrid = (heading, values) => {
+        const container = document.createElement('div');
+        container.className = 'physics-grid';
+        
+        Object.entries(values).forEach(([key, value]) => {
+            const inputContainer = document.createElement('div');
+            inputContainer.className = 'physics-input';
+            
+            const label = document.createElement('div');
+            label.className = 'physics-label';
+            label.textContent = key.toUpperCase();
+            
+            inputContainer.appendChild(label);
+            inputContainer.appendChild(value);
+            container.appendChild(inputContainer);
+        });
+        
+        return container;
+    };
 
     // Setup physics body properties
     const setupBodyProperties = () => {
         const container = document.createElement('div');
-        container.className = 'input-container';
+        container.className = 'physics-grid';
         
-        container.appendChild(physicsWindow.mass);
-        container.appendChild(physicsWindow.friction);
-        container.appendChild(physicsWindow.restitution);
-        container.appendChild(physicsWindow.isStatic);
+        // Mass input
+        const massContainer = document.createElement('div');
+        massContainer.className = 'physics-input';
+        const massLabel = document.createElement('div');
+        massLabel.className = 'physics-label';
+        massLabel.textContent = 'MASS';
+        massContainer.appendChild(massLabel);
+        massContainer.appendChild(physicsWindow.mass);
+        container.appendChild(massContainer);
+        
+        // Friction input
+        const frictionContainer = document.createElement('div');
+        frictionContainer.className = 'physics-input';
+        const frictionLabel = document.createElement('div');
+        frictionLabel.className = 'physics-label';
+        frictionLabel.textContent = 'FRICTION';
+        frictionContainer.appendChild(frictionLabel);
+        frictionContainer.appendChild(physicsWindow.friction);
+        container.appendChild(frictionContainer);
+        
+        // Restitution input
+        const restitutionContainer = document.createElement('div');
+        restitutionContainer.className = 'physics-input';
+        const restitutionLabel = document.createElement('div');
+        restitutionLabel.className = 'physics-label';
+        restitutionLabel.textContent = 'RESTITUTION';
+        restitutionContainer.appendChild(restitutionLabel);
+        restitutionContainer.appendChild(physicsWindow.restitution);
+        container.appendChild(restitutionContainer);
+        
+        // Static checkbox
+        const staticContainer = document.createElement('div');
+        staticContainer.className = 'physics-checkbox';
+        staticContainer.appendChild(physicsWindow.isStatic);
+        container.appendChild(staticContainer);
         
         physicsWindow.bodyDropDown.appendChild(container);
         physicsWindow.mainWindow.appendChild(physicsWindow.bodyDropDown);
@@ -71,7 +130,7 @@ export const createPhysicsWindow = (editor, sgui) => {
     // Setup collision shape properties
     const setupShapeProperties = () => {
         const container = document.createElement('div');
-        container.className = 'input-container';
+        container.className = 'physics-grid';
         
         // Shape type dropdown
         const shapeTypes = ['Box', 'Sphere'];
@@ -88,18 +147,21 @@ export const createPhysicsWindow = (editor, sgui) => {
         container.appendChild(physicsWindow.shapeType);
         
         // Box size inputs
-        const boxContainer = document.createElement('div');
-        boxContainer.className = 'input-container';
-        boxContainer.appendChild(physicsWindow.boxSize.x);
-        boxContainer.appendChild(physicsWindow.boxSize.y);
-        boxContainer.appendChild(physicsWindow.boxSize.z);
+        const boxContainer = createInputGrid("Box Size", physicsWindow.boxSize);
         boxContainer.style.display = 'none';
         physicsWindow.boxContainer = boxContainer;
         
         // Sphere radius input
         const sphereContainer = document.createElement('div');
-        sphereContainer.className = 'input-container';
-        sphereContainer.appendChild(physicsWindow.sphereRadius);
+        sphereContainer.className = 'physics-grid';
+        const sphereInputContainer = document.createElement('div');
+        sphereInputContainer.className = 'physics-input';
+        const sphereLabel = document.createElement('div');
+        sphereLabel.className = 'physics-label';
+        sphereLabel.textContent = 'RADIUS';
+        sphereInputContainer.appendChild(sphereLabel);
+        sphereInputContainer.appendChild(physicsWindow.sphereRadius);
+        sphereContainer.appendChild(sphereInputContainer);
         sphereContainer.style.display = 'none';
         physicsWindow.sphereContainer = sphereContainer;
         
@@ -112,13 +174,7 @@ export const createPhysicsWindow = (editor, sgui) => {
 
     // Setup world settings
     const setupWorldSettings = () => {
-        const container = document.createElement('div');
-        container.className = 'input-container';
-        
-        container.appendChild(physicsWindow.gravity.x);
-        container.appendChild(physicsWindow.gravity.y);
-        container.appendChild(physicsWindow.gravity.z);
-        
+        const container = createInputGrid("Gravity", physicsWindow.gravity);
         physicsWindow.worldDropDown.appendChild(container);
         physicsWindow.mainWindow.appendChild(physicsWindow.worldDropDown);
     };
@@ -126,10 +182,10 @@ export const createPhysicsWindow = (editor, sgui) => {
     // Helper function to update shape inputs visibility
     const updateShapeInputs = (type) => {
         if (physicsWindow.boxContainer) {
-            physicsWindow.boxContainer.style.display = type === 'Box' ? 'block' : 'none';
+            physicsWindow.boxContainer.style.display = type === 'Box' ? 'grid' : 'none';
         }
         if (physicsWindow.sphereContainer) {
-            physicsWindow.sphereContainer.style.display = type === 'Sphere' ? 'block' : 'none';
+            physicsWindow.sphereContainer.style.display = type === 'Sphere' ? 'grid' : 'none';
         }
     };
 

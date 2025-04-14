@@ -18,7 +18,7 @@ import CANNON from "cannon";
 export const createSceneGraphWindow = (element, engine, sgui, scene) => {
     const sceneGraphWindow = {};
     const sceneGraph = {};
-    sceneGraphWindow.mainWindow = sgui.createWindow("Scene", true);
+    sceneGraphWindow.mainWindow = sgui.createWindow("Scene", true, "left");
     sceneGraphWindow.ribbon = document.createElement("div");
     sceneGraphWindow.entities = []
     sceneGraphWindow.ribbon.addObjectButton = new SGuiButton(
@@ -35,7 +35,7 @@ export const createSceneGraphWindow = (element, engine, sgui, scene) => {
     }
     const selectionWindow = createSelectionWindow(sgui)
     const addObject = () => {
-        selectionWindow.open() // some sort of context optinos ig here 
+        selectionWindow.open()
         selectionWindow.context = sceneGraphWindow.mainWindow
     };
 
@@ -66,7 +66,7 @@ export const createSceneGraphWindow = (element, engine, sgui, scene) => {
 };
 
 function createSelectionWindow(sgui) {
-    const selectionWindow = sgui.createWindow("Add Object", false);
+    const selectionWindow = sgui.createWindow("Add Object", false, "left");
     selectionWindow.context = null
 
     // Add CSS styles
@@ -78,7 +78,7 @@ function createSelectionWindow(sgui) {
         .selection-list {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 8px;
+            gap: 6px;
             padding: 8px;
             list-style-type: none;
         }
@@ -141,10 +141,10 @@ function createSelectionWindow(sgui) {
             display: flex;
             flex-direction: column;
             gap: 4px;
-            padding: 8px;
+            padding: 4px;
             background-color: #1a222b;
             border-radius: 4px;
-            margin: 4px 0;
+            margin: 0px 0;
         }
     `;
     selectionWindow.appendChild(style);
