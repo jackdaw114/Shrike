@@ -184,7 +184,8 @@
     align-items: center;
     z-index: 10000;
     opacity: 0;
-    overflow: hidden; 
+    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-x: hidden; /* Keep horizontal overflow hidden */
 
     /* Transition styles for non-width properties */
     transition: all 0.3s ease;
@@ -226,6 +227,7 @@
     background: rgba(33, 39, 48, 0.8);  /* Darker when active */
     justify-content: flex-start;
     align-items: start;
+    overflow-y: auto; /* Ensure scrolling is enabled when docked */
 }
 
 .docking-zone-content {
