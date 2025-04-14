@@ -6,15 +6,15 @@ import { Script } from "../../ecs/component-classes"
 const STEP_SIZE = 0.05
 export const createTransformationWindow = (editor,sgui,element)=>{
     const transformationWindow= {}
-    transformationWindow.mainWindow = sgui.createWindow("transformation",true)
+    transformationWindow.mainWindow = sgui.createWindow("Transformation Window",true)
     transformationWindow.moveDropDown = new SGuiDropDown({
-        heading:"translation"
+        heading:"Translation"
     })
     transformationWindow.scaleDropDown = new SGuiDropDown({
-        heading:"scale"
+        heading:"Scale"
     })
     transformationWindow.rotationDropDown = new SGuiDropDown({
-        heading:"rotation"
+        heading:"Rotation"
     })
     transformationWindow.translation = {
         x:new SGuiInputBox({heading:"x:",type:"number",step:STEP_SIZE,content:1}),

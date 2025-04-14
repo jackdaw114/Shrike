@@ -142,23 +142,20 @@ function createSelectionWindow(sgui) {
 
     const tempList = [
         {
-            name: "node",
+            name: "Node",
             func: () => {}
         },
         {
-            name: "geometry",
+            name: "Geometry",
             func: () => {}
         },
         {
-            name: "script",
+            name: "Script",
             func: () => {}
         },
+        
         {
-            name: "physics-object",
-            func: () => {}
-        },
-        {
-            name: "physics-body",
+            name: "Physics Body",
             func: () => {}
         }
     ];
@@ -195,7 +192,7 @@ function updateSceneGraphWindow(sceneGraphWindow, selectionWindow, scene) {
             dropDown.contentDiv.innerHTML = ""
             for (const component in entity.entity.components){
                 const entry = new SGuiText({text:component})
-                entry.className = component
+                entry.className = `component-entry ${component}`
                 dropDown.appendChild(entry)
                 entry.ondblclick = (e) => {
                     document.dispatchEvent(new CustomEvent("set-active-object",{
@@ -214,7 +211,7 @@ function updateSceneGraphWindow(sceneGraphWindow, selectionWindow, scene) {
         console.log(entity.entity.components)
         dropDown.addEventListener("selected", e => {
             switch (e.detail.name) {
-                case "geometry": //edge case issues
+                case "Geometry": //edge case issues
                     if (dropDown.geometry) break;
                     const geometry = new Geometry(
                         [],[]
@@ -231,7 +228,7 @@ function updateSceneGraphWindow(sceneGraphWindow, selectionWindow, scene) {
                         }
                     }))
                     break;
-                case "physics-body":
+                case "Physics Body":
                     const body = new PhysicsBody({
                         mass: 1,
                         position: new CANNON.Vec3(0, 0, 0),
@@ -250,7 +247,7 @@ function updateSceneGraphWindow(sceneGraphWindow, selectionWindow, scene) {
                         }
                     }))
                     break;
-                case "script":
+                case "Script":
                     if (dropDown.script) break;
                     const script = new Script(
                         [],[]
@@ -268,3 +265,66 @@ function updateSceneGraphWindow(sceneGraphWindow, selectionWindow, scene) {
         })
     }
 }
+
+// Add CSS styles for component entries
+const componentStyle = document.createElement('style');
+componentStyle.textContent = `
+    .component-entry {
+        background-color: #212730;
+        border: 1px solid #2a3441;
+        border-radius: 4px;
+        padding: 8px 12px;
+        color: #e0e0e0;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: left;
+        font-size: 0.9em;
+        transform-origin: center;
+        position: relative;
+        overflow: hidden;
+        margin: 4px 0;
+    }
+    .component-entry::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transform: translateX(-100%);
+        transition: transform 0.6s ease;
+    }
+    .component-entry:hover {
+        background-color: #2a3441;
+        border-color: #3a4a5a;
+        transform: scale(1.02);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .component-entry:hover::before {
+        transform: translateX(100%);
+    }
+    .component-entry:active {
+        background-color: #3a4a5a;
+        transform: scale(0.98);
+        transition: all 0.1s ease;
+    }
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(58, 74, 90, 0.4);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(58, 74, 90, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(58, 74, 90, 0);
+        }
+    }
+    .component-entry:focus {
+        animation: pulse 1.5s infinite;
+        outline: none;
+    }
+`;
+
+// Add the style to the document
+document.head.appendChild(componentStyle);
