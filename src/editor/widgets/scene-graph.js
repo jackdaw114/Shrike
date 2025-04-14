@@ -66,8 +66,80 @@ export const createSceneGraphWindow = (element, engine, sgui, scene) => {
 };
 
 function createSelectionWindow(sgui) {
-    const selectionWindow = sgui.createWindow("select object to add", false);
+    const selectionWindow = sgui.createWindow("Add Object", false);
     selectionWindow.context = null
+
+    // Add CSS styles
+    const style = document.createElement('style');
+    style.textContent = `
+        .selection-window {
+            background-color:rgb(0, 0, 0);
+        }
+        .selection-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
+            padding: 8px;
+            list-style-type: none;
+        }
+        .selection-button {
+            background-color: #212730;
+            border: 1px solid #2a3441;
+            border-radius: 4px;
+            padding: 8px 12px;
+            color: #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: left;
+            font-size: 0.9em;
+            transform-origin: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .selection-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+        .selection-button:hover {
+            background-color: #2a3441;
+            border-color: #3a4a5a;
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .selection-button:hover::before {
+            transform: translateX(100%);
+        }
+        .selection-button:active {
+            background-color: #3a4a5a;
+            transform: scale(0.98);
+            transition: all 0.1s ease;
+        }
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(58, 74, 90, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(58, 74, 90, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(58, 74, 90, 0);
+            }
+        }
+        .selection-button:focus {
+            animation: pulse 1.5s infinite;
+            outline: none;
+        }
+    `;
+    selectionWindow.appendChild(style);
+    selectionWindow.classList.add('selection-window');
+
     const tempList = [
         {
             name: "node",
@@ -91,9 +163,11 @@ function createSelectionWindow(sgui) {
         }
     ];
     const list = new SGuiList() 
+    list.classList.add('selection-list');
     tempList.forEach(item=>{
         const button = document.createElement("button")
         button.innerHTML = item.name
+        button.classList.add('selection-button');
 
         button.onclick = (e) => {
             item.func() 
