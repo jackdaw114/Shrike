@@ -321,9 +321,11 @@ export class Editor {
         if (this.scriptSystem.isStarted) {
             this.scriptSystem.pause()
             this.cannonPhysicsSystem.stop()
+            
         } else {
             this.scriptSystem.start()
             this.cannonPhysicsSystem.start()
+            console.log("cannonPhysicsSystem",this.cannonPhysicsSystem)
         }
     }
     ipdateActiveMaterial(diffuseColor, ambientColor, specularColor, shininess) {

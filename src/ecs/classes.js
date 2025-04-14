@@ -55,8 +55,14 @@ export class Scene {
             system.stop();
         }
     }
-    start(){
+    start(systems = []){
         this.isRunning = true;
+        if(systems.length > 0){
+            for (const system of systems) {
+                system.start()
+            }
+            return
+        }
         for (const system of Object.values(this.systems)) {
             system.start();
         }

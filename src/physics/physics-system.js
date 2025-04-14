@@ -50,6 +50,7 @@ export class PhysicsSystem extends System {
 
     start() {
         this.isRunning = true;
+        console.log("starting physics system")
         for (const [entityId, body] of this.bodies) {
 
             const entity = this.scene.getEntityById(entityId);
