@@ -95,6 +95,7 @@ function createSelectionWindow(sgui) {
             transform-origin: center;
             position: relative;
             overflow: hidden;
+            width: 100%;
         }
         .selection-button::before {
             content: '';
@@ -136,6 +137,15 @@ function createSelectionWindow(sgui) {
             animation: pulse 1.5s infinite;
             outline: none;
         }
+        .component-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 8px;
+            background-color: #1a222b;
+            border-radius: 4px;
+            margin: 4px 0;
+        }
     `;
     selectionWindow.appendChild(style);
     selectionWindow.classList.add('selection-window');
@@ -153,7 +163,6 @@ function createSelectionWindow(sgui) {
             name: "Script",
             func: () => {}
         },
-        
         {
             name: "Physics Body",
             func: () => {}
@@ -182,51 +191,57 @@ function createSelectionWindow(sgui) {
 }
 
 function updateSceneGraphWindow(sceneGraphWindow, selectionWindow, scene) {
-    sceneGraphWindow.listRoot.innerHTML = ""  // TODO: check if events are being discarded here
+    sceneGraphWindow.listRoot.innerHTML = "";
     for (const entity of sceneGraphWindow.entities) {
-        const dropDown = new SGuiDropDown({heading:entity.entity.name}) 
-        sceneGraphWindow.listRoot.appendChild(dropDown)
-        dropDown.contentDiv.innerHTML = ""
-        dropDown.entity = entity.entity
+        const dropDown = new SGuiDropDown({heading:entity.entity.name});
+        sceneGraphWindow.listRoot.appendChild(dropDown);
+        dropDown.contentDiv.innerHTML = "";
+        dropDown.entity = entity.entity;
+        
         let update = () => {
-            dropDown.contentDiv.innerHTML = ""
-            for (const component in entity.entity.components){
-                const entry = new SGuiText({text:component})
-                entry.className = `component-entry ${component}`
-                dropDown.appendChild(entry)
-                entry.ondblclick = (e) => {
+            dropDown.contentDiv.innerHTML = "";
+            for (const component in entity.entity.components) {
+                const container = document.createElement("div");
+                container.classList.add('component-container');
+                const button = document.createElement("button");
+                button.classList.add('selection-button');
+                const entry = new SGuiText({text:component});
+                entry.className = `component-entry ${component}`;
+                button.appendChild(entry);
+                container.appendChild(button);
+                dropDown.appendChild(container);
+                button.ondblclick = (e) => {
                     document.dispatchEvent(new CustomEvent("set-active-object",{
                         detail: {
                             entity:dropDown.entity
                         }
-                    }))
-                }
+                    }));
+                };
             }
-        }
-        update()
+        };
+        update();
+        
         dropDown.toggleDiv.ondblclick = () => {
-            selectionWindow.open()
-            selectionWindow.context = dropDown 
-        }
-        console.log(entity.entity.components)
+            selectionWindow.open();
+            selectionWindow.context = dropDown;
+        };
+        
         dropDown.addEventListener("selected", e => {
             switch (e.detail.name) {
-                case "Geometry": //edge case issues
+                case "Geometry":
                     if (dropDown.geometry) break;
-                    const geometry = new Geometry(
-                        [],[]
-                    )
-                    const transformation = new Transformation()
-                    dropDown.geometry = geometry 
-                    scene.addComponent(entity.entity,geometry)
+                    const geometry = new Geometry([],[]);
+                    const transformation = new Transformation();
+                    dropDown.geometry = geometry;
+                    scene.addComponent(entity.entity,geometry);
                     if(!entity.entity.components.Transformation)
-                    scene.addComponent(entity.entity,transformation)
-                    update()
+                        scene.addComponent(entity.entity,transformation);
+                    update();
                     document.dispatchEvent(new CustomEvent("refresh-properties",{
                         detail: {
                             entity: entity.entity
                         }
-                    }))
+                    }));
                     break;
                 case "Physics Body":
                     const body = new PhysicsBody({
@@ -240,29 +255,27 @@ function updateSceneGraphWindow(sceneGraphWindow, selectionWindow, scene) {
                     scene.addComponent(entity.entity, body);
                     if(!entity.entity.components.Transformation)
                         scene.addComponent(entity.entity, new Transformation());
-                    update()
+                    update();
                     document.dispatchEvent(new CustomEvent("refresh-properties",{
                         detail: {
                             entity: entity.entity
                         }
-                    }))
+                    }));
                     break;
                 case "Script":
                     if (dropDown.script) break;
-                    const script = new Script(
-                        [],[]
-                    )
-                    dropDown.script = script 
-                    scene.addComponent(entity.entity,script)  
-                    update()
+                    const script = new Script([],[]);
+                    dropDown.script = script;
+                    scene.addComponent(entity.entity,script);
+                    update();
                     document.dispatchEvent(new CustomEvent("refresh-properties",{
                         detail: {
                             entity: entity.entity
                         }
-                    }))
+                    }));
                     break;
-            } 
-        })
+            }
+        });
     }
 }
 
