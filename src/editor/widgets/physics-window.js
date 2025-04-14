@@ -182,12 +182,6 @@ export const createPhysicsWindow = (editor, sgui) => {
     // Helper function to update shape inputs visibility
     const updateShapeInputs = (type) => {
         if (physicsWindow.boxContainer) {
-<<<<<<< Updated upstream
-            physicsWindow.boxContainer.style.display = type === 'Box' ? 'grid' : 'none';
-        }
-        if (physicsWindow.sphereContainer) {
-            physicsWindow.sphereContainer.style.display = type === 'Sphere' ? 'grid' : 'none';
-=======
             physicsWindow.boxContainer.style.display = type === 'Box' ? 'block' : 'none';
             if (type === 'Box'){
                 const physicsBody = editor.activeObjects[0].getComponent("PhysicsBody")
@@ -204,7 +198,6 @@ export const createPhysicsWindow = (editor, sgui) => {
                 physicsBody.body.addShape(new CANNON.Sphere(1))
                 physicsBody.body.updateBoundingRadius()
             }
->>>>>>> Stashed changes
         }
     };
 
