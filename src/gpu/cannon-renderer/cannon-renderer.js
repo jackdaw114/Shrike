@@ -227,7 +227,7 @@ export class CannonRenderer extends System {
         const scale = body.body.shapes[0].radius
         const worldMatrix = mat4.create()
         let bodyPosition = Object.values(body.body.position)
-        bodyPosition= [bodyPosition[0],bodyPosition[2],bodyPosition[1]]
+        bodyPosition= [bodyPosition[0],bodyPosition[1],bodyPosition[2]]
         mat4.translate(worldMatrix,worldMatrix,bodyPosition)
         mat4.scale(worldMatrix,worldMatrix, [scale,scale,scale])
         this.#context.bindVertexArray(this.sphereVAOID);
@@ -250,7 +250,7 @@ export class CannonRenderer extends System {
         this.#context.bindVertexArray(this.boxVAOID);
         this.#context.bindBuffer(this.#context.ELEMENT_ARRAY_BUFFER, this.boxEBOID);
         let bodyPosition = Object.values(body.body.position)
-        bodyPosition= [bodyPosition[0],bodyPosition[2],bodyPosition[1]]
+        bodyPosition= [bodyPosition[0],bodyPosition[1],bodyPosition[2]]
         console.log("body position",bodyPosition)
         
         const worldMatrix = mat4.create()

@@ -221,14 +221,14 @@ export class Editor {
             
             for (let i = 0; i < numberOfLines; i++) {
                 lineComponent.addLine(
-                    [-size, 0, spacing * i - size, 0, 0, 0],
-                    [size, 0, spacing * i - size, 0, 0, 0]
+                    [-size,spacing * i - size,0, 0, 0, 0],
+                    [size, spacing * i - size,0, 0, 0, 0]
                 );
             }
             for (let i = 0; i < numberOfLines; i++) {
                 lineComponent.addLine(
-                    [spacing * i - size, 0, -size, 0, 0, 0],
-                    [spacing * i - size, 0, size, 0, 0, 0]
+                    [spacing * i - size, -size,0, 0, 0, 0],
+                    [spacing * i - size, size,0, 0, 0, 0]
                 );
             }
         }

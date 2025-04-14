@@ -20,9 +20,9 @@ export default class Camera {
         this.fov = options.fov 
         this.type = type;
         this.matrix = mat4.create();
-        this.position = [0, 0, 1];
+        this.position = [0, 1, 0];
         this.target = [0, 0, 0];
-        this.up = [0, 1, 0];
+        this.up = [0, 0, 1];
         this.forward = vec3.create();
         this.right = vec3.create();
         this.zoomVal = 1
@@ -137,7 +137,7 @@ export default class Camera {
     }
     orbitX(amount) {
         let quaternion = quat.create();
-        quat.fromEuler(quaternion, 0, -amount, 0);
+        quat.fromEuler(quaternion, 0, 0, -amount);
         let tempVec = vec3.create();
         vec3.transformQuat(tempVec, this.position, quaternion);
         this.setPosition(tempVec);
@@ -172,7 +172,6 @@ export default class Camera {
         x*=-z 
         y*=-z
         let unprojectedVec3 = vec3.create()
-        // Create the inverse view-projection matrix
         const viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, this.matrix, this.projectionMatrix);
         const invViewProjMatrix = mat4.create();
@@ -186,16 +185,8 @@ export default class Camera {
         vec3.transformMat4(unprojectedVec3, new Float32Array([x, y, z]), this.projectionMatrix)
 
         let testVec = vec3.create() 
-        //vec3.transformMat4(testVec, new Float32Array([x, y, z]), );
-        // Transform NDC to world space
         const worldPos = vec3.create();
         vec3.transformMat4(worldPos, new Float32Array([x, y, z]), invViewMatrix);
-        // Perspective divide
-        // if (this.type === "perspective") {
-        //     worldPos[0] /= worldPos[3];
-        //     worldPos[1] /= worldPos[3];
-        //     worldPos[2] /= worldPos[3];
-        // }
         return worldPos;
     }
 }

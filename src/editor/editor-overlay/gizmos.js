@@ -19,12 +19,13 @@ export const createEditorGizmos = async (engine, editor, scene) => {
         y: {
             geometry: new Geometry(arrowGeo.vertices, arrowGeo.indices, new Material([0., 1., 0.], [0., 1., 0.], [0., 1., 0.], 1)),
             transformation: new Transformation({
-                Rx: 90
             }),
         },
         z: {
             geometry: new Geometry(arrowGeo.vertices, arrowGeo.indices, new Material([0., 0., 1.], [0., 0., 1.], [0., 0., 1.], 1)),
-            transformation: new Transformation(),
+            transformation: new Transformation({
+                Rx:90
+            }),
         },
     };
 
@@ -78,10 +79,10 @@ export const createEditorGizmos = async (engine, editor, scene) => {
                     editor.activeObjects[0].getComponent("Transformation").setPositionX(mousePosition[0])
                     break;
                 case moveGizmo.y.entity.id:
-                    editor.activeObjects[0].getComponent("Transformation").setPositionY(mousePosition[2])
+                    editor.activeObjects[0].getComponent("Transformation").setPositionY(mousePosition[1])
                     break;
                 case moveGizmo.z.entity.id:
-                    editor.activeObjects[0].getComponent("Transformation").setPositionZ(mousePosition[1])
+                    editor.activeObjects[0].getComponent("Transformation").setPositionZ(mousePosition[2])
                     break;
             }
             editor.activeObjects[0].updateAllComponents()

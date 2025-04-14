@@ -122,10 +122,10 @@ export class PhysicsSystem extends System {
             // Update position
             transform.setPosition(body.position);
             // Update rotation
-            console.log("body quaternion",body.quaternion)
-            transform.quaternion =quat.fromValues(body.quaternion.x,body.quaternion.y,body.quaternion.z,body.quaternion.w)
+            transform.setRotation(body.quaternion)
             transform.updateMatrix()
         }
+
     }
 
     destroy() {
