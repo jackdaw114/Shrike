@@ -179,6 +179,7 @@ export class CannonRenderer extends System {
     forceReload(){
     }
     update(deltaTime) {
+        if (!this.isRunning) return;
         if (!this.scene.componentRegister.hasOwnProperty("PhysicsBody")) return;
         this.shader.use();
         this.#context.bindFramebuffer(

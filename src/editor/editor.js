@@ -233,7 +233,7 @@ export class Editor {
             }
         }
 
-        drawGrid(lineObj, 60, 0.5);
+        drawGrid(lineObj, 61, 0.5);
     }
 
     initEventListeners() {

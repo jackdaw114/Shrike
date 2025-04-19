@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@wdio/cli": "^9.12.6",
     "three": "^0.172.0",
     "three-addons": "^1.2.0",
     "three-to-cannon": "^5.0.2",

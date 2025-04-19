@@ -103,6 +103,7 @@ export const createEntitySerializationWindow = (editor, sgui) => {
                 await editor.engine.loadEntitiesFromFile(file, editor.gameScene);
                 updateEntityList();
                 editor.gameScene.forceReload();
+                document.dispatchEvent(new Event("reload-scene",{bubbles:true}))
                 editor.gameScene.start([editor.gameRenderer,editor.debugSystem,editor.cannonRenderer]);
             }
         };

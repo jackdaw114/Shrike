@@ -114,7 +114,7 @@ export class Renderer extends System {
         }
     }
     forceReload(){
-        
+        if(this.scene.componentRegister["Geometry"] === undefined) return
         for (const component of this.scene.componentRegister["Geometry"]){
             this.checkGeometry(component)
             this.initGeometry(component)

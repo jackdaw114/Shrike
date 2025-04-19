@@ -18,6 +18,7 @@ export const createPropertiesWindow = (sgui, object,scene,renderer) => {
     propertiesWindow.object = object;
     propertiesWindow.components = [];
     document.addEventListener("set-active-object", (e) => {
+        console.log("set active object",e.detail.entity.getComponent("PhysicsBody"))
         if(activeObj === e.detail.entity) return;
         activeObj = e.detail.entity;
         propertiesWindow.components = e.detail.entity.components;
@@ -165,5 +166,25 @@ export const createPropertiesWindow = (sgui, object,scene,renderer) => {
         renderer.initGeometry(geometry)
         console.log(activeObj.getComponent("Geometry"))
     })
+
+    document.addEventListener("reload-scene",()=>{
+        for (const entity of Object.values(scene.entities)){
+            propertiesWindow.entityObjects.set(entity.id, {
+                Geometry: entity.getComponent("Geometry"),
+                Script: entity.getComponent("Script"),
+                files: {
+                    Script:{
+                        name:"loaded script", 
+                        path:"loaded script"
+                    },
+                    Geometry:{
+                        name:"loaded geometry", 
+                        path:"loaded geometry"
+                    }
+                }
+            })
+        }
+    })
+
     return propertiesWindow;
 }

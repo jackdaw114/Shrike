@@ -57,7 +57,17 @@ export const createSceneGraphWindow = (element, engine, sgui, scene) => {
                 break;
         }
     })
-
+    document.addEventListener("reload-scene",()=>{
+        console.log("reload scene")
+        console.log(scene.entities)
+        sceneGraphWindow.entities = Object.values(scene.entities).map(entity =>{
+            return{
+                entity:entity,
+                name:entity.name
+            }
+        })
+        updateSceneGraphWindow(sceneGraphWindow,selectionWindow,scene)
+    })
     return {
         window: sceneGraphWindow,
         sceneGraph: sceneGraph,
@@ -192,6 +202,7 @@ function createSelectionWindow(sgui) {
 
 function updateSceneGraphWindow(sceneGraphWindow, selectionWindow, scene) {
     sceneGraphWindow.listRoot.innerHTML = "";
+    console.log(sceneGraphWindow.entities)
     for (const entity of sceneGraphWindow.entities) {
         const dropDown = new SGuiDropDown({heading:entity.entity.name});
         sceneGraphWindow.listRoot.appendChild(dropDown);
@@ -211,6 +222,7 @@ function updateSceneGraphWindow(sceneGraphWindow, selectionWindow, scene) {
                 container.appendChild(button);
                 dropDown.appendChild(container);
                 button.ondblclick = (e) => {
+                    console.log("set active object",dropDown.entity)
                     document.dispatchEvent(new CustomEvent("set-active-object",{
                         detail: {
                             entity:dropDown.entity

@@ -5,6 +5,7 @@ import {monke} from "./monke";
 import { Geometry } from "./src/ecs/component-classes";
 import {Editor} from "./src/editor/editor";
 import {box} from "./assets/box";
+import CANNON from "cannon";
 
 document.addEventListener("DOMContentLoaded", () => {
     let canvas = document.getElementById("canvas1");
@@ -33,6 +34,12 @@ setTimeout(async () => {
     console.log("box vertices", Array.from((await parseOBJ(box)).indices))
     
 }, 1000)
+
+
+console.log("test body ", new CANNON.Body({
+    mass:1
+}));
+
 //import "./src/test/testsTemp"
 //editor.addGameObject({
 //        geometry: parseOBJ(monke)

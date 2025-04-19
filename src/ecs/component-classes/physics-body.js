@@ -84,33 +84,40 @@ export class PhysicsBody extends Component {
     removeShape(shape) {
         if (!shape) return;
         const index = this.body.shapes.indexOf(shape);
+
         if (index !== -1) {
             this.body.shapes.splice(index, 1);
             this.body.updateBoundingRadius();
         }
+        console.log("removed shape",shape,this.body.shapes)
     }
     fromJSON(json){
         let newShape
-        switch(json.options.shape.type){
+        switch(json.body.shapes[0].type){
             case 1:
-                newShape = new CANNON.Sphere(json.options.shape.radius)
+                newShape = new CANNON.Sphere(json.body.shapes[0].radius)
                 break;
             case 4:
-                newShape = new CANNON.Box(json.options.shape.halfExtents)
+                newShape = new CANNON.Box(new CANNON.Vec3(json.body.shapes[0].halfExtents.x,json.body.shapes[0].halfExtents.y,json.body.shapes[0].halfExtents.z))
+                break;
+            default:
+                newShape = new CANNON.Sphere(1)
                 break;
         }
+        const material = new CANNON.Material()
         this.body = new CANNON.Body(
             {
-                mass: json.options.mass,
-                position: json.options.position,
-                material: json.options.material,
-                linearDamping: json.options.linearDamping,
-                angularDamping: json.options.angularDamping,
-                fixedRotation: json.options.fixedRotation,
-                collisionResponse: json.options.collisionResponse,
+                mass: json.body.mass,
+                position: json.body.position,
+                material: material,
+                linearDamping: json.body.linearDamping,
+                angularDamping: json.body.angularDamping,
+                fixedRotation: json.body.fixedRotation,
+                collisionResponse: json.body.collisionResponse,
                 shape: newShape
             }
         )
+        
         this.body.updateMassProperties()
     }
     destroy() {

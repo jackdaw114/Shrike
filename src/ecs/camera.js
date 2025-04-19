@@ -82,45 +82,52 @@ export default class Camera {
     }
 
     panHorizontal(amount) {
-        let tempVec = vec3.create();
-
-        vec3.add(
-            this.target,
-            this.right.map(
-                (e) => e * vec3.dist(this.target, this.position) * amount
-            ),
-            this.target
-        );
-        vec3.add(
-            tempVec,
-            this.right.map(
-                (e) => e * vec3.dist(this.target, this.position) * amount
-            ),
-            this.position
-        );
-
-        this.setPosition(tempVec);
+        // Calculate the pan distance based on the current distance to target
+        const panDistance = vec3.dist(this.position, this.target) * amount;
+        
+        // Create temporary vectors for position and target updates
+        const positionOffset = vec3.create();
+        const targetOffset = vec3.create();
+        
+        // Scale the right vector by the pan distance
+        vec3.scale(positionOffset, this.right, panDistance);
+        vec3.scale(targetOffset, this.right, panDistance);
+        
+        // Update position and target
+        vec3.add(this.position, this.position, positionOffset);
+        vec3.add(this.target, this.target, targetOffset);
+        
+        // Recalculate camera orientation
+        this.calculateRight();
+        this._calculateMatrix();
     }
+
     panVertical(amount) {
-        let tempVec = vec3.create();
-        vec3.cross(tempVec, this.forward, this.right);
-        vec3.add(
-            this.target,
-            this.up.map(
-                (e) => e * vec3.dist(this.target, this.position) * amount
-            ),
-            this.target
-        );
-        vec3.add(
-            tempVec,
-            tempVec.map(
-                (e) => e * vec3.dist(this.target, this.position) * amount
-            ),
-            this.position
-        );
-
-        this.setPosition(tempVec);
+        // Calculate the pan distance based on the current distance to target
+        const panDistance = vec3.dist(this.position, this.target) * -amount;
+        
+        // Create temporary vectors for position and target updates
+        const positionOffset = vec3.create();
+        const targetOffset = vec3.create();
+        
+        // Calculate the camera's local up vector (perpendicular to forward and right)
+        const localUp = vec3.create();
+        vec3.cross(localUp, this.right, this.forward);
+        vec3.normalize(localUp, localUp);
+        
+        // Scale the local up vector by the pan distance
+        vec3.scale(positionOffset, localUp, panDistance);
+        vec3.scale(targetOffset, localUp, panDistance);
+        
+        // Update position and target
+        vec3.add(this.position, this.position, positionOffset);
+        vec3.add(this.target, this.target, targetOffset);
+        
+        // Recalculate camera orientation
+        this.calculateRight();
+        this._calculateMatrix();
     }
+
     zoom(amount) {
         let tempVec = vec3.create();
         this.zoomVal += amount
@@ -164,11 +171,11 @@ export default class Camera {
         return vec3.dist(this.position, vec)
     }
 
-    unproject(screenX, screenY, viewportWidth, viewportHeight, depth = 0) {
-        // Convert screen coordinates to normalized device coordinates (NDC)
+    unproject(screenX, screenY, viewportWidth, viewportHeight, depth = 0) { 
+        //TODO: Better way to do this (project ray from camera to a plane instead of point on gizmo)
         let z = -depth ;
         let x = (screenX *2 / (viewportWidth))-1.0;
-        let y = (1.0-(screenY *2/ (viewportHeight)))*2/this.aspect_ratio;
+        let y = (1.0-(screenY *2/ (viewportHeight)))/2;
         x*=-z 
         y*=-z
         let unprojectedVec3 = vec3.create()

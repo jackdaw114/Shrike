@@ -21,6 +21,13 @@ export const createMenuBar = (editor,element,sgui) => {
                     <path d="M5 3l14 9-14 9V3z"/>
             </svg>`,
             iconPosition: "left"
+        }),
+        toggleCannonRenderer: new SGuiButton(element,{
+            text: "Physics Debug",
+            icon: `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>`,
+            iconPosition: "left"
         })
     };
     menuBar.mainWindow.append(...Object.values(menuBar.buttons))
@@ -51,6 +58,15 @@ export const createMenuBar = (editor,element,sgui) => {
                 if (iconContainer) {
                     console.log("is running?",editor.isGameRunning)
                     iconContainer.innerHTML = editor.isGameRunning ? pauseIcon : playIcon;
+                }
+                break;
+            case menuBar.buttons.toggleCannonRenderer:
+                console.log("toggle cannon renderer")
+                console.log("cannon is running?",editor.cannonRenderer.isRunning)
+                if (editor.cannonRenderer.isRunning) {
+                    editor.cannonRenderer.stop();
+                } else {
+                    editor.cannonRenderer.start();
                 }
                 break;
             default:

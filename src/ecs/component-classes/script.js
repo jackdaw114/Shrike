@@ -14,10 +14,9 @@ export class Script extends Component {
         this.update = () => {};
     }
     fromJSON(json){
-        console.log("json",json.update)
-        const updateFunctionBody = findFunctionBody(json.update, 'anonymous');
-        console.log("updateFunctionBody",updateFunctionBody)
-        this.update = new Function('deltaTime','CANNON', 'components', 'scene', 'activeKeys', updateFunctionBody)
-        console.log("update",this.update)
+        if (json.update){
+            const updateFunctionBody = findFunctionBody(json.update, 'anonymous');
+            this.update = new Function('deltaTime','CANNON', 'components', 'scene', 'activeKeys', updateFunctionBody)
+        }
     }
 } 
