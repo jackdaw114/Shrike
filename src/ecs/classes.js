@@ -57,6 +57,14 @@ export class Scene {
         this.width = width;
         this.height =height
     }
+    endGame(){
+        console.log("systems",this.systems)
+        this.systems?.ScriptSystem.pause()
+        this.systems?.PhysicsSystem.stop()
+        document.dispatchEvent(new CustomEvent("game-end",{
+            detail:"to be added"
+        }))
+    }
     stop(){
         this.isRunning = false;
         console.log("stopping scene")
@@ -284,6 +292,24 @@ export class Transformation extends Component {
             x:this.position.x+x,
             y:this.position.y+y,
             z:this.position.z+z,
+        }
+        this.updateMatrix()
+    }
+    translateX(x){
+        this.position = {
+            x:this.position.x+x,
+        }
+        this.updateMatrix()
+    }
+    translateY(y){
+        this.position = {
+            y:this.position.y+y,
+        }
+        this.updateMatrix()
+    }
+    translateZ(z){
+        this.position = {
+            z:this.position.z+z
         }
         this.updateMatrix()
     }

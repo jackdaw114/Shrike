@@ -107,15 +107,13 @@ export const createPropertiesWindow = (sgui, object,scene,renderer) => {
             
             // Stack-based parser for nested braces
             const updateFunctionBody = findFunctionBody(scriptContent, 'update');
-            if (!updateFunctionBody) {
-                console.error("No valid update function found in script file");
-                return;
-            }
+            const initFunctionBody = findFunctionBody(scriptContent, 'init')
+            const script = new Script({
+                    update: updateFunctionBody ? new Function('deltaTime','CANNON', 'components', 'scene', 'activeKeys', updateFunctionBody) : ()=>{},
+                    init: initFunctionBody ? new Function('CANNON','components','scene',initFunctionBody):()=>{}
+            });
             
             console.log("updateFunctionBody", updateFunctionBody);
-            const script = new Script({
-                update: new Function('deltaTime','CANNON', 'components', 'scene', 'activeKeys', updateFunctionBody)
-            });
             
             // Initialize entity data if it doesn't exist
             if (!propertiesWindow.entityObjects.has(activeObj.id)) {

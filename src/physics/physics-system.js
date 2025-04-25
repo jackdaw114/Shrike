@@ -105,6 +105,7 @@ export class PhysicsSystem extends System {
         this.world.gravity.set(x, y, z);
     }
     forceReload(){
+        if (!this.scene.componentRegister.hasOwnProperty("PhysicsBody")) return;
         for (const body of this.scene.componentRegister["PhysicsBody"]){
             console.log(body)
             const transform = body.entity.getComponent("Transformation")

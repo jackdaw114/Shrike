@@ -93,6 +93,7 @@ export class PhysicsBody extends Component {
     }
     fromJSON(json){
         let newShape
+        console.log("CANNON BODY TYPE",Number(json.body.type))
         switch(json.body.shapes[0].type){
             case 1:
                 newShape = new CANNON.Sphere(json.body.shapes[0].radius)
@@ -114,7 +115,9 @@ export class PhysicsBody extends Component {
                 angularDamping: json.body.angularDamping,
                 fixedRotation: json.body.fixedRotation,
                 collisionResponse: json.body.collisionResponse,
-                shape: newShape
+                shape: newShape,
+                type:Number(json.body.type)
+
             }
         )
         

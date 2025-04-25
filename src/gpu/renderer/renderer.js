@@ -15,18 +15,18 @@ import {
 
 export class Renderer extends System {
     POS_SIZE = 3;
-    COLOR_SIZE = 3;
+    NORMAL_SIZE = 3;
     UV_SIZE = 2;
     TEXTURE_ID_SIZE = 1;
     POS_OFFSET = 0;
-    COLOR_OFFSET =
+    NORMAL_OFFSET =
         this.POS_OFFSET + this.POS_SIZE * Float32Array.BYTES_PER_ELEMENT;
     UV_OFFSET =
-        this.COLOR_OFFSET + this.COLOR_SIZE * Float32Array.BYTES_PER_ELEMENT;
+        this.NORMAL_OFFSET + this.NORMAL_SIZE * Float32Array.BYTES_PER_ELEMENT;
     TEXTURE_ID_OFFSET =
         this.UV_OFFSET + this.UV_SIZE * Float32Array.BYTES_PER_ELEMENT;
     VERTEX_SIZE =
-        this.POS_SIZE + this.COLOR_SIZE + this.UV_SIZE + this.TEXTURE_ID_SIZE;
+        this.POS_SIZE + this.NORMAL_SIZE + this.UV_SIZE + this.TEXTURE_ID_SIZE;
     VERTEX_SIZE_IN_BYTES = this.VERTEX_SIZE * Float32Array.BYTES_PER_ELEMENT;
 
     /**
@@ -56,7 +56,7 @@ export class Renderer extends System {
             "shininess",
             "ambientColor",
             "lightPosition",
-            "viewPos"
+            "viewPos",
         ]);
 
         // Set up default lighting parameters
@@ -147,6 +147,7 @@ export class Renderer extends System {
 
         this.#context.enableVertexAttribArray(0);
         this.#context.enableVertexAttribArray(1);
+        this.#context.enableVertexAttribArray(2);
 
         //TODO: figure out vertex buffer layout properly
         this.#context.vertexAttribPointer(
@@ -159,12 +160,20 @@ export class Renderer extends System {
         );
         this.#context.vertexAttribPointer(
             1,
-            3,
+            this.NORMAL_SIZE,
             this.#context.FLOAT,
             false,
             this.VERTEX_SIZE_IN_BYTES,
-            this.COLOR_OFFSET
+            this.NORMAL_OFFSET
         );
+        this.#context.vertexAttribPointer(
+            2,
+            this.UV_SIZE,
+            this.#context.FLOAT,
+            false,
+            this.VERTEX_SIZE_IN_BYTES,
+            this.UV_OFFSET
+        )
 
         component.eboID = this.#context.createBuffer();
         this.#context.bindBuffer(
@@ -300,7 +309,6 @@ export class Renderer extends System {
             this.shader.getUniform("diffuseColor"),
             diffuse
         );
-
         this.#context.uniform3fv(
             this.shader.getUniform("specularColor"),
             specular

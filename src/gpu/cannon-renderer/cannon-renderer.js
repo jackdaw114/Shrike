@@ -252,7 +252,6 @@ export class CannonRenderer extends System {
         this.#context.bindBuffer(this.#context.ELEMENT_ARRAY_BUFFER, this.boxEBOID);
         let bodyPosition = Object.values(body.body.position)
         bodyPosition= [bodyPosition[0],bodyPosition[1],bodyPosition[2]]
-        console.log("body position",bodyPosition)
         
         const worldMatrix = mat4.create()
         mat4.translate(worldMatrix,worldMatrix,bodyPosition)

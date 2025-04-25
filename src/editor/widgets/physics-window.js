@@ -6,14 +6,14 @@ import CANNON from "cannon";
 export const createPhysicsWindow = (editor, sgui) => {
     const physicsWindow = {
         mainWindow: sgui.createWindow("Physics", true),
-        
+
         // Physics body properties
         bodyDropDown: new SGuiDropDown({ heading: "Physics Body" }),
         mass: new SGuiInputBox({ heading: "", type: "number", step: 0.1, content: 1 }),
         friction: new SGuiInputBox({ heading: "", type: "number", step: 0.1, content: 0.3 }),
         restitution: new SGuiInputBox({ heading: "", type: "number", step: 0.1, content: 0.3 }),
-        isStatic: new SGuiCheckbox({ heading: "Static Body" }),
-        
+        bodyType: document.createElement('form'),
+
         // Collision shape properties
         shapeDropDown: new SGuiDropDown({ heading: "Collision Shape" }),
         shapeType: new SGuiDropDown({ heading: "Shape Type" }),
@@ -23,7 +23,7 @@ export const createPhysicsWindow = (editor, sgui) => {
             z: new SGuiInputBox({ heading: "", type: "number", step: 0.1, content: 1 })
         },
         sphereRadius: new SGuiInputBox({ heading: "", type: "number", step: 0.1, content: 0.5 }),
-        
+
         // World settings
         worldDropDown: new SGuiDropDown({ heading: "World Settings" }),
         gravity: {
@@ -65,20 +65,20 @@ export const createPhysicsWindow = (editor, sgui) => {
     const createInputGrid = (heading, values) => {
         const container = document.createElement('div');
         container.className = 'physics-grid';
-        
+
         Object.entries(values).forEach(([key, value]) => {
             const inputContainer = document.createElement('div');
             inputContainer.className = 'physics-input';
-            
+
             const label = document.createElement('div');
             label.className = 'physics-label';
             label.textContent = key.toUpperCase();
-            
+
             inputContainer.appendChild(label);
             inputContainer.appendChild(value);
             container.appendChild(inputContainer);
         });
-        
+
         return container;
     };
 
@@ -86,7 +86,7 @@ export const createPhysicsWindow = (editor, sgui) => {
     const setupBodyProperties = () => {
         const container = document.createElement('div');
         container.className = 'physics-grid';
-        
+
         // Mass input
         const massContainer = document.createElement('div');
         massContainer.className = 'physics-input';
@@ -96,7 +96,7 @@ export const createPhysicsWindow = (editor, sgui) => {
         massContainer.appendChild(massLabel);
         massContainer.appendChild(physicsWindow.mass);
         container.appendChild(massContainer);
-        
+
         // Friction input
         const frictionContainer = document.createElement('div');
         frictionContainer.className = 'physics-input';
@@ -106,7 +106,7 @@ export const createPhysicsWindow = (editor, sgui) => {
         frictionContainer.appendChild(frictionLabel);
         frictionContainer.appendChild(physicsWindow.friction);
         container.appendChild(frictionContainer);
-        
+
         // Restitution input
         const restitutionContainer = document.createElement('div');
         restitutionContainer.className = 'physics-input';
@@ -116,13 +116,39 @@ export const createPhysicsWindow = (editor, sgui) => {
         restitutionContainer.appendChild(restitutionLabel);
         restitutionContainer.appendChild(physicsWindow.restitution);
         container.appendChild(restitutionContainer);
-        
+
         // Static checkbox
         const staticContainer = document.createElement('div');
         staticContainer.className = 'physics-checkbox';
-        staticContainer.appendChild(physicsWindow.isStatic);
+        const types = [{
+            type:CANNON.Body.STATIC,
+            name: 'static',
+        },{
+            type:CANNON.Body.DYNAMIC,
+            name: 'dynamic',
+        },{
+            type:CANNON.Body.KINEMATIC,
+            name: 'kinematic',
+        }
+        ]
+
+        types.forEach(entry => {
+            const label = document.createElement('label');
+
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = 'type';
+            radio.value = entry.type;
+
+            label.appendChild(radio);
+            label.append(`${entry.name}`);
+                physicsWindow.bodyType.appendChild(label);
+                physicsWindow.bodyType.appendChild(document.createElement('br'));
+        });
+
+        staticContainer.appendChild(physicsWindow.bodyType);
         container.appendChild(staticContainer);
-        
+
         physicsWindow.bodyDropDown.appendChild(container);
         physicsWindow.mainWindow.appendChild(physicsWindow.bodyDropDown);
     };
@@ -131,22 +157,22 @@ export const createPhysicsWindow = (editor, sgui) => {
     const setupShapeProperties = () => {
         const container = document.createElement('div');
         container.className = 'physics-grid';
-        
+
         // Shape type dropdown
         const shapeTypes = ['Box', 'Sphere'];
         shapeTypes.forEach(type => {
             const option = document.createElement('div');
             option.textContent = type;
             option.onclick = () => {
-                if(editor.activeObjects.length === 0) return
+                if (editor.activeObjects.length === 0) return
                 physicsWindow.shapeType.setAttribute('heading', `Shape Type: ${type}`);
                 const physicsBody = editor.activeObjects[0].getComponent("PhysicsBody")
-                console.log("physics body",physicsBody)
-                if(type === 'Box'){
+                console.log("physics body", physicsBody)
+                if (type === 'Box') {
                     physicsBody.removeShape(physicsBody.body.shapes[0])
-                    physicsBody.body.addShape(new CANNON.Box(new CANNON.Vec3(1,1,1)))
+                    physicsBody.body.addShape(new CANNON.Box(new CANNON.Vec3(1, 1, 1)))
                 }
-                if(type === 'Sphere'){
+                if (type === 'Sphere') {
                     physicsBody.removeShape(physicsBody.body.shapes[0])
                     physicsBody.body.addShape(new CANNON.Sphere(1))
                 }
@@ -156,14 +182,14 @@ export const createPhysicsWindow = (editor, sgui) => {
             };
             physicsWindow.shapeType.appendChild(option);
         });
-        
+
         container.appendChild(physicsWindow.shapeType);
-        
+
         // Box size inputs
         const boxContainer = createInputGrid("Box Size", physicsWindow.boxSize);
         boxContainer.style.display = 'none';
         physicsWindow.boxContainer = boxContainer;
-        
+
         // Sphere radius input
         const sphereContainer = document.createElement('div');
         sphereContainer.className = 'physics-grid';
@@ -177,10 +203,10 @@ export const createPhysicsWindow = (editor, sgui) => {
         sphereContainer.appendChild(sphereInputContainer);
         sphereContainer.style.display = 'none';
         physicsWindow.sphereContainer = sphereContainer;
-        
+
         container.appendChild(boxContainer);
         container.appendChild(sphereContainer);
-        
+
         physicsWindow.shapeDropDown.appendChild(container);
         physicsWindow.mainWindow.appendChild(physicsWindow.shapeDropDown);
     };
@@ -195,14 +221,14 @@ export const createPhysicsWindow = (editor, sgui) => {
     const updateShapeInputs = (type) => {
         if (physicsWindow.boxContainer) {
             physicsWindow.boxContainer.style.display = type === 'Box' ? 'block' : 'none';
-            if (type === 'Box'){
+            if (type === 'Box') {
                 const physicsBody = editor.activeObjects[0].getComponent("PhysicsBody")
                 physicsBody.body.updateBoundingRadius()
             }
         }
         if (physicsWindow.sphereContainer) {
             physicsWindow.sphereContainer.style.display = type === 'Sphere' ? 'block' : 'none';
-            if (type === 'Sphere'){
+            if (type === 'Sphere') {
                 const physicsBody = editor.activeObjects[0].getComponent("PhysicsBody")
                 // physicsBody.removeShape(physicsBody.body.shapes[0])
                 // physicsBody.body.addShape(new CANNON.Sphere(1))
@@ -220,10 +246,10 @@ export const createPhysicsWindow = (editor, sgui) => {
     physicsWindow.mass.addEventListener('change', (e) => {
         if (editor.activeObjects.length === 0) return;
         const physicsBody = editor.activeObjects[0].getComponent("PhysicsBody");
-        console.log("physics body",physicsBody)
+        console.log("physics body", physicsBody)
         if (physicsBody) {
-            console.log("Physics body changed",physicsBody.body)
-            console.log("mass changed",e.target.value)
+            console.log("Physics body changed", physicsBody.body)
+            console.log("mass changed", e.target.value)
             physicsBody.body.mass = parseFloat(e.target.value);
             physicsBody.body.updateMassProperties();
         }
@@ -232,7 +258,7 @@ export const createPhysicsWindow = (editor, sgui) => {
     physicsWindow.friction.addEventListener('change', (e) => {
         if (editor.activeObjects.length === 0) return;
         const physicsBody = editor.activeObjects[0].getComponent("PhysicsBody");
-        
+
         if (physicsBody) {
             physicsBody.body.material.friction = parseFloat(e.target.value);
         }
@@ -246,18 +272,21 @@ export const createPhysicsWindow = (editor, sgui) => {
         }
     });
 
-    physicsWindow.isStatic.addEventListener('change', (e) => {
+    physicsWindow.bodyType.addEventListener('change', (e) => {
         if (editor.activeObjects.length === 0) return;
         const physicsBody = editor.activeObjects[0].getComponent("PhysicsBody");
         if (physicsBody) {
-            physicsBody.body.type = e.target.checked ? CANNON.Body.STATIC : CANNON.Body.DYNAMIC;
+            console.log(e.target.value)
+            physicsBody.body.type = e.target.value;
+            physicsBody.body.updateMassProperties();
+            // console.log(physicsBody.body.type)
         }
     });
 
     // Add event listeners for world settings
     physicsWindow.gravity.x.addEventListener('change', (e) => {
         const physicsSystem = editor.cannonPhysicsSystem;
-        
+
         if (physicsSystem) {
             physicsSystem.world.gravity.x = parseFloat(e.target.value);
         }
@@ -333,16 +362,16 @@ export const createPhysicsWindow = (editor, sgui) => {
     physicsWindow.sphereRadius.addEventListener('change', (e) => {
         if (editor.activeObjects.length === 0) return;
         const physicsBody = editor.activeObjects[0].getComponent("PhysicsBody");
-        console.log("current radius",physicsBody.body.shapes[0].radius)
-        console.log("new radius",e.target.value)
+        console.log("current radius", physicsBody.body.shapes[0].radius)
+        console.log("new radius", e.target.value)
         if (physicsBody && physicsBody.body.shapes[0] instanceof CANNON.Sphere) {
             const newRadius = parseFloat(e.target.value);
             physicsBody.removeShape(physicsBody.body.shapes[0]);
             const newShape = new CANNON.Sphere(newRadius);
             physicsBody.body.addShape(newShape);
             physicsBody.body.updateBoundingRadius();
-            console.log("new radius",newShape.radius,physicsBody.body.shapes[0])
-            console.log('HLSDFJ:LFAJL:AFJLJ',editor.activeObjects[0].getComponent("PhysicsBody"))
+            console.log("new radius", newShape.radius, physicsBody.body.shapes[0])
+            console.log('HLSDFJ:LFAJL:AFJLJ', editor.activeObjects[0].getComponent("PhysicsBody"))
         }
     });
 
@@ -354,8 +383,8 @@ export const createPhysicsWindow = (editor, sgui) => {
                 physicsWindow.mass.setValue(physicsBody.body.mass);
                 physicsWindow.friction.setValue(physicsBody.body.material.friction);
                 physicsWindow.restitution.setValue(physicsBody.body.material.restitution);
-                physicsWindow.isStatic.setChecked(physicsBody.body.type === CANNON.Body.STATIC);
-                
+                physicsWindow.bodyType.type.value = physicsBody.body.type
+
                 // Update shape properties based on shape type
                 if (physicsBody.body.shapes[0] instanceof CANNON.Box) {
                     physicsWindow.shapeType.setAttribute('heading', 'Shape Type: Box');
@@ -375,7 +404,7 @@ export const createPhysicsWindow = (editor, sgui) => {
 
     // Listen for active object changes
     document.addEventListener("set-active-object", () => {
-        console.log("set active object",editor.activeObjects[0].getComponent("PhysicsBody"))
+        console.log("set active object", editor.activeObjects[0].getComponent("PhysicsBody"))
         physicsWindow.updateActivePhysics();
     });
 

@@ -317,8 +317,7 @@ export class Editor {
     }
 
     toggleRunGame() {
-        this.isGameRunning = !this.isGameRunning;
-        if (this.scriptSystem.isStarted) {
+        if (this.isGameRunning) {
             this.scriptSystem.pause()
             this.cannonPhysicsSystem.stop()
             
@@ -327,6 +326,7 @@ export class Editor {
             this.cannonPhysicsSystem.start()
             console.log("cannonPhysicsSystem",this.cannonPhysicsSystem)
         }
+        this.isGameRunning = !this.isGameRunning;
     }
     ipdateActiveMaterial(diffuseColor, ambientColor, specularColor, shininess) {
         if (this.activeObjects.length === 1) {

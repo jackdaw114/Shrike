@@ -22,11 +22,17 @@ export class ScriptSystem extends System {
         if (!this.scene.componentRegister.hasOwnProperty("Script")) return;
         if (!this.isStarted) return;
         for (const script of this.scene.componentRegister["Script"]) {
-            script.update(deltaTime,CANNON,script.entity.components,this.scene,this.eventHandler.activeKeys);
+            if(script.update)
+                script.update(deltaTime,CANNON,script.entity.components,this.scene,this.eventHandler.activeKeys);
         }
     }
     start() {
         this.isStarted =true
+        if (!this.scene.componentRegister.hasOwnProperty("Script")) return;
+        for (const script of this.scene.componentRegister["Script"]) {
+            if(script.init)
+                script.init(CANNON,script.entity.components,this.scene);
+        }
     }
     pause() {
         this.isStarted= false
