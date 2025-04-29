@@ -28,6 +28,7 @@ import { createEntitySerializationWindow } from "./widgets/entity-serialization-
 import { PhysicsSystem } from "../physics/physics-system";
 
 export class Editor {
+    file;
     activeObjects = [];
     engine;
     cannonMaxSubSteps = 5;
@@ -153,7 +154,6 @@ export class Editor {
     initEditor() {
         const debugLineEntity = this.engine.createEntity(this.gameScene);
         this.gameScene.addComponent(debugLineEntity, new DebugLine());
-        console.log("debugLineEntity",debugLineEntity)
         this.generateDebugGrid(debugLineEntity.getComponent("DebugLine"));
     }
     sguiSetup() {
@@ -217,7 +217,6 @@ export class Editor {
         //let lineObj = debugLineEntity.getComponent("DebugLine");
         function drawGrid(lineComponent, numberOfLines, spacing) {
             let size = (numberOfLines * spacing - spacing) / 2;
-            console.log("lineComponent",lineComponent)
             
             for (let i = 0; i < numberOfLines; i++) {
                 lineComponent.addLine(
@@ -242,11 +241,9 @@ export class Editor {
                 case this.editorScene:
                     break;
                 case this.gameScene:
-                    console.log("game Scenen")
                     break;
             }
             if (!this.isNavigating) {
-                //console.log("selecting");
                 if (e.detail.scene === this.editorScene) {
                 } else {
                     this.activeObjects = [e.detail.entity];
@@ -273,7 +270,6 @@ export class Editor {
 
         document.addEventListener("set-active-object", (e)=>{
             this.activeObjects = [e.detail.entity]
-            console.log("active objects",this.activeObjects)
         })
     }
 
@@ -316,15 +312,23 @@ export class Editor {
         callback();
     }
 
-    toggleRunGame() {
+    async toggleRunGame() {
         if (this.isGameRunning) {
             this.scriptSystem.pause()
             this.cannonPhysicsSystem.stop()
             
+            if (this.file){
+                this.gameScene.clearScene(); 
+                await this.engine.loadEntitiesFromFile(this.file, this.gameScene);
+                this.gameScene.forceReload();
+                document.dispatchEvent(new Event("reload-scene",{bubbles:true}))
+                this.gameScene.start([this.gameRenderer,this.debugSystem,this.cannonRenderer]);
+
+            }
+            
         } else {
             this.scriptSystem.start()
             this.cannonPhysicsSystem.start()
-            console.log("cannonPhysicsSystem",this.cannonPhysicsSystem)
         }
         this.isGameRunning = !this.isGameRunning;
     }

@@ -67,14 +67,15 @@ export class Shrike {
         const entity = new Entity(this.entity_uid,"entity-"+(this.entity_uid));
         this.entities[this.entity_uid] = entity;
         scene.addEntity(this.entity_uid,entity);
-        console.log("entity created", entity)
         console.trace("entity created")
         this.entity_uid++;
         return entity;
     }
-
+    framerate = 60;
     gameLoop(currentTime) {
         const deltaTime = currentTime - this.lastFrameTime;
+        const currFramerate =1000/deltaTime
+        this.framerate = currFramerate
         for (const scene of this.activeScenes) {
             scene.update(deltaTime);
         }
@@ -203,5 +204,4 @@ export class Shrike {
     
     });
     }
-
 }

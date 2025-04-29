@@ -186,6 +186,10 @@ export class Renderer extends System {
             this.#context.STATIC_DRAW
         );
         component.initialized =true
+        let err = this.#context.getError()
+        if (err){
+            console.warn("error ",err)
+        }
     }
 
     renderPass() {
@@ -276,7 +280,6 @@ export class Renderer extends System {
         const camera = this.scene.getCamera();
         const viewMatrix = camera.matrix;
         const projMatrix = camera.getProjMatrix();
-
         // Update matrices in correct order (P * V * M)
         this.#context.uniformMatrix4fv(
             this.shader.getUniform("mProj"),
@@ -293,17 +296,14 @@ export class Renderer extends System {
             false,
             worldMatrix
         );
-
         // Get material properties
         const material = component.material;
         const diffuse = material.getDiffuse();
         const specular = material.getSpecular();
         const shininess = material.getShininess();
         const ambient = material.getAmbient();
-
         // Calculate roughness from shininess (inverse relationship)
         const roughness = 1.0 - (shininess / 100.0);
-
         // Update material uniforms with energy conservation
         this.#context.uniform3fv(
             this.shader.getUniform("diffuseColor"),
@@ -318,24 +318,20 @@ export class Renderer extends System {
             this.shader.getUniform("shininess"),
             shininess
         );
-
         this.#context.uniform3fv(
             this.shader.getUniform("ambientColor"),
             ambient
         );
-
         // Update light position in world space
         this.#context.uniform3fv(
             this.shader.getUniform("lightPosition"),
             camera.position
         );
-
         // Update view position (camera position)
         this.#context.uniform3fv(
             this.shader.getUniform("viewPos"),
             camera.position
-        );
-
+        ); 
         // Draw the mesh
         this.#context.drawElements(
             this.#context.TRIANGLES,

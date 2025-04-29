@@ -100,6 +100,7 @@ export const createEntitySerializationWindow = (editor, sgui) => {
         input.onchange = async (e) => {
             const file = e.target.files[0];
             if (file) {
+                editor.file = file
                 await editor.engine.loadEntitiesFromFile(file, editor.gameScene);
                 updateEntityList();
                 editor.gameScene.forceReload();

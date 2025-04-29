@@ -148,4 +148,11 @@ export class PhysicsSystem extends System {
         }
         this.bodies.clear();
     }
+    reset(){
+        this.world.bodies.forEach((body,key) => this.world.removeBody(body));
+        this.bodies.forEach(body =>{
+            this.world.removeBody(body)
+        })
+        this.bodies = new Map();
+    }
 } 

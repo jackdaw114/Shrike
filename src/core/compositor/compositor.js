@@ -102,7 +102,6 @@ export class Compositor {
 
     removeFramebuffer(framebuffer) {
         this.framebuffers = this.framebuffers.filter(value => value.framebuffer !== framebuffer)
-        console.log(this.framebuffers)
         this.sortFramebuffers()
     }
 

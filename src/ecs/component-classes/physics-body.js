@@ -89,7 +89,6 @@ export class PhysicsBody extends Component {
             this.body.shapes.splice(index, 1);
             this.body.updateBoundingRadius();
         }
-        console.log("removed shape",shape,this.body.shapes)
     }
     fromJSON(json){
         let newShape

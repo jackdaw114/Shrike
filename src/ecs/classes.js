@@ -20,7 +20,6 @@ export class Entity {
         }
     }
     updateAllComponents(){
-        console.log("components",this.components)
         for (const component of Object.values(this.components)) {
             component[0].updateSelf()
         }
@@ -57,8 +56,16 @@ export class Scene {
         this.width = width;
         this.height =height
     }
+    clearScene(){
+        this.componentRegister = {};
+        this.entities = Object.fromEntries(Object.entries(this.entities).filter(([it,val]) =>{
+            return !val.components.hasOwnProperty("DebugLine") 
+        }))
+        if(this.systems.hasOwnProperty("PhysicsSystem")){
+            this.systems.PhysicsSystem.reset()
+        }
+    }
     endGame(){
-        console.log("systems",this.systems)
         this.systems?.ScriptSystem.pause()
         this.systems?.PhysicsSystem.stop()
         document.dispatchEvent(new CustomEvent("game-end",{
@@ -67,7 +74,6 @@ export class Scene {
     }
     stop(){
         this.isRunning = false;
-        console.log("stopping scene")
         for (const system of Object.values(this.systems)) {
             system.stop();
         }
@@ -85,7 +91,6 @@ export class Scene {
         }
     }
     forceReload(){
-        console.log("componentRegister",this.componentRegister)
         for (const system of Object.values(this.systems)) {
             system.forceReload();
         }
@@ -123,7 +128,6 @@ export class Scene {
     }
     addComponent(entity, component) {
         const componentClass = component.type;
-        console.log("adding component to class",componentClass) 
         if (!entity.hasOwnProperty(componentClass)) {
             entity.components[componentClass] = [component];
         } else {
@@ -330,13 +334,10 @@ export class Transformation extends Component {
         this.updateMatrix()
     }
     setRotation(quaternion) {
-        console.log("setting rotation",quaternion)
         this.quaternion = quat.fromValues(quaternion.x,quaternion.y,quaternion.z,quaternion.w)
         const rotationMatrix = mat4.create()
         mat4.fromQuat(rotationMatrix,this.quaternion)
-        console.log("rotationMatrix",rotationMatrix)
         mat4.multiply(this.matrix,this.matrix,rotationMatrix)
-        console.log("matrix",this.matrix)
     }
     spin(value){
         this.rotation.x += value.x
