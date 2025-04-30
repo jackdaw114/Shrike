@@ -114,6 +114,10 @@ export class Editor {
             this.gameScene,
             this.eventHandler
         );
+        this.scriptSystem.endGame = ()=>{
+            this.scriptSystem.endGame()
+            this.isGameRunning = false
+        }
         this.editorScriptSystem = this.engine.createSystem(
             ScriptSystem,
             this.editorScene,
@@ -314,23 +318,23 @@ export class Editor {
 
     async toggleRunGame() {
         if (this.isGameRunning) {
+            this.isGameRunning = false 
             this.scriptSystem.pause()
             this.cannonPhysicsSystem.stop()
             
             if (this.file){
+                this.gameScene.stop();
                 this.gameScene.clearScene(); 
                 await this.engine.loadEntitiesFromFile(this.file, this.gameScene);
                 this.gameScene.forceReload();
                 document.dispatchEvent(new Event("reload-scene",{bubbles:true}))
                 this.gameScene.start([this.gameRenderer,this.debugSystem,this.cannonRenderer]);
-
             }
-            
         } else {
             this.scriptSystem.start()
             this.cannonPhysicsSystem.start()
+            this.isGameRunning = true 
         }
-        this.isGameRunning = !this.isGameRunning;
     }
     ipdateActiveMaterial(diffuseColor, ambientColor, specularColor, shininess) {
         if (this.activeObjects.length === 1) {

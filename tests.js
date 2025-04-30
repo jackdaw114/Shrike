@@ -88,8 +88,23 @@ floatingContainer.style.zIndex = 99999;
 
 // Attach to the document
 document.body.appendChild(floatingContainer);
+    const pushSliding = (arr, val, maxSize) => (arr.push(val), arr.length > maxSize && arr.shift(), arr);
+
+    let hist = [];
     setInterval(()=>{
-        floatingContainer.textContent = "FPS: "+ editor.engine.framerate.toFixed(0)
+        let fps;
+        if (hist.length){
+            const mean = hist => hist.length ? hist.reduce((a, b) => a + b, 0) / hist.length : 0;
+            let mean_hist = mean(hist)
+            fps = (Number(editor.engine.framerate) + mean_hist)/2
+
+        }
+        else{
+            fps = editor.engine.framerate.toFixed(0)
+        }
+        fps = Number(fps).toFixed(0)
+        pushSliding(hist,Number(fps),20)  
+        floatingContainer.textContent = "FPS: "+ fps 
     },100)
 })
 

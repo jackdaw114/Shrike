@@ -45,7 +45,7 @@ export const createMenuBar = (editor,element,sgui) => {
                 break;
             case menuBar.buttons.toggleRunGame:
                 editor.toggleRunGame()
-                // Update the play/pause icon based on game state
+
                 const playIcon = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
                     <path d="M5 3l14 9-14 9V3z"/>
                 </svg>`;
